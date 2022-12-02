@@ -73,35 +73,26 @@ function calculatePoints(Shape $responseShape, Shape $oponentShape) : int
 $input = file_get_contents('02_input.txt');
 $lines = array_filter(explode(PHP_EOL, $input));
 
-// First part
-$totalSum = 0;
+$totalSum1 = 0;
+$totalSum2 = 0;
+
 foreach ($lines as $singleGameGuide) {
     [$oponent, $response] = explode(' ', $singleGameGuide);
 
     $oponentShape = Shape::decryptShape($oponent);
     $responseShape = Shape::decryptShape($response);
 
-    $totalSum += calculatePoints($responseShape, $oponentShape);
-}
-
-echo 'First part: ' . $totalSum . PHP_EOL;
-
-// Second part
-$totalSum = 0;
-foreach ($lines as $singleGameGuide) {
-    [$oponent, $response] = explode(' ', $singleGameGuide);
-
-    $oponentShape = Shape::decryptShape($oponent);
-
     if ($response === LOOSE) {
-        $responseShape = $oponentShape->getShapeThatIDefeat();
+        $responseShape2 = $oponentShape->getShapeThatIDefeat();
     } elseif($response === WIN) {
-        $responseShape = $oponentShape->getShapeThatDefeatsMe();
+        $responseShape2 = $oponentShape->getShapeThatDefeatsMe();
     } else {
-        $responseShape = $oponentShape;
+        $responseShape2 = $oponentShape;
     }
 
-    $totalSum += calculatePoints($responseShape, $oponentShape);
+    $totalSum1 += calculatePoints($responseShape, $oponentShape);
+    $totalSum2 += calculatePoints($responseShape2, $oponentShape);
 }
 
-echo 'Second part: ' . $totalSum . PHP_EOL;
+echo 'First part: ' . $totalSum1 . PHP_EOL;
+echo 'Second part: ' . $totalSum2 . PHP_EOL;
