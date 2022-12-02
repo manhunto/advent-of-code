@@ -2,6 +2,9 @@
 
 // https://adventofcode.com/2022/day/2
 
+const LOOSE = 'X';
+const WIN = 'Z';
+
 enum Shape
 {
     case Rock;
@@ -19,19 +22,27 @@ enum Shape
 
     public function wins(Shape $other): bool
     {
-        if ($this === self::Rock && $other === self::Scissors) {
-            return true;
-        }
+        $toDefeat = $this->getShapeThatIDefeat();
 
-        if ($this === self::Paper && $other === self::Rock) {
-            return true;
-        }
+        return $other === $toDefeat;
+    }
 
-        if ($this === self::Scissors && $other === self::Paper) {
-            return true;
-        }
+    public function getShapeThatDefeatsMe(): Shape
+    {
+        return match ($this) {
+            self::Rock => self::Paper,
+            self::Paper => self::Scissors,
+            self::Scissors => self::Rock
+        };
+    }
 
-        return false;
+    public function getShapeThatIDefeat(): Shape
+    {
+        return match ($this) {
+            self::Rock => self::Scissors,
+            self::Paper => self::Rock,
+            self::Scissors => self::Paper
+        };
     }
 
     public function equals(Shape $other): bool
@@ -48,7 +59,19 @@ foreach ($lines as $singleGameGuide) {
     [$oponent, $response] = explode(' ', $singleGameGuide);
 
     $oponentShape = Shape::decryptShape($oponent);
+    // >> first half
     $responseShape = Shape::decryptShape($response);
+    // << first half
+
+    // >> second half
+    if ($response === LOOSE) {
+        $responseShape = $oponentShape->getShapeThatIDefeat();
+    } elseif($response === WIN) {
+        $responseShape = $oponentShape->getShapeThatDefeatsMe();
+    } else {
+        $responseShape = $oponentShape;
+    }
+    // << second half
 
     if ($responseShape->wins($oponentShape)) {
         $totalSum += 6;
