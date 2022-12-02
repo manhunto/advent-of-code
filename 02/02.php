@@ -51,19 +51,48 @@ enum Shape
     }
 }
 
+function calculatePoints(Shape $responseShape, Shape $oponentShape) : int
+{
+    $points = 0;
+
+    if ($responseShape->wins($oponentShape)) {
+        $points += 6;
+    } elseif($responseShape->equals($oponentShape)) {
+        $points += 3;
+    }
+
+    $points += match ($responseShape) {
+        Shape::Rock => 1,
+        Shape::Paper => 2,
+        Shape::Scissors => 3
+    };
+
+    return $points;
+}
+
 $input = file_get_contents('02_input.txt');
 $lines = array_filter(explode(PHP_EOL, $input));
+
+// First part
 $totalSum = 0;
 
 foreach ($lines as $singleGameGuide) {
     [$oponent, $response] = explode(' ', $singleGameGuide);
 
     $oponentShape = Shape::decryptShape($oponent);
-    // >> first half
     $responseShape = Shape::decryptShape($response);
-    // << first half
 
-    // >> second half
+    $totalSum += calculatePoints($responseShape, $oponentShape);
+}
+
+echo 'First part: ' . $totalSum . PHP_EOL;
+
+$totalSum = 0;
+foreach ($lines as $singleGameGuide) {
+    [$oponent, $response] = explode(' ', $singleGameGuide);
+
+    $oponentShape = Shape::decryptShape($oponent);
+
     if ($response === LOOSE) {
         $responseShape = $oponentShape->getShapeThatIDefeat();
     } elseif($response === WIN) {
@@ -71,21 +100,8 @@ foreach ($lines as $singleGameGuide) {
     } else {
         $responseShape = $oponentShape;
     }
-    // << second half
 
-    if ($responseShape->wins($oponentShape)) {
-        $totalSum += 6;
-    } elseif($responseShape->equals($oponentShape)) {
-        $totalSum += 3;
-    }
-
-    $pointsForShape = match ($responseShape) {
-        Shape::Rock => 1,
-        Shape::Paper => 2,
-        Shape::Scissors => 3
-    };
-
-    $totalSum += $pointsForShape;
+    $totalSum += calculatePoints($responseShape, $oponentShape);
 }
 
-var_dump($totalSum);
+echo 'Second part: ' . $totalSum . PHP_EOL;
