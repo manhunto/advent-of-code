@@ -1,0 +1,21 @@
+{
+    "name": "manhunto/advent-of-code",
+    "description": "Advent of Code solutions in PHP",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Kuba Sladek",
+            "email": "jakub.sladek@zoho.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/",
+            "AdventOfCode2022\\": "2022/"
+        }
+    },
+    "require": {
+        "php": "^8.1",
+        "symfony/console": "^6.2"
+    }
+}

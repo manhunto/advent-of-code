@@ -1,3 +1,9 @@
-# Advent of Code 2022
+# Advent of Code
 
-This repository contains my [Advent of Code 2022](https://adventofcode.com/2022) solutions in PHP.
+This repository contains my [Advent of Code](https://adventofcode.com/) solutions in PHP.
+
+## How to use
+
+```bash
+php app.php execute [--year=2022] [--day=1] [--puzzle]
+```
