@@ -7,8 +7,8 @@ namespace App;
 final class Result implements \Stringable
 {
     public function __construct(
-        private readonly mixed $partOne,
-        private readonly mixed $partTwo = null,
+        public readonly mixed $partOne,
+        public readonly mixed $partTwo = null,
     ) {
     }
 
@@ -27,7 +27,7 @@ final class Result implements \Stringable
         $output = 'Part one: ' . $this->partOne;
 
         if ($this->partTwo) {
-            $output .= PHP_EOL . 'Part two: ' . $this->partTwo;
+            $output .= ' Part two: ' . $this->partTwo;
         }
 
         return $output;

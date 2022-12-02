@@ -5,5 +5,5 @@ This repository contains my [Advent of Code](https://adventofcode.com/) solution
 ## How to use
 
 ```bash
-php app.php execute [--year=2022] [--day=1] [--puzzle]
+php app.php solve [--year=2022] [--day=1] [--puzzle]
 ```

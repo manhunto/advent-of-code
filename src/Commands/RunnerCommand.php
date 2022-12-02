@@ -6,20 +6,22 @@ namespace App\Commands;
 
 use App\Date;
 use App\Exceptions;
+use App\Input;
 use App\InputType;
 use App\Result;
 use App\Services\FileLoader;
 use App\Services\SolutionFactory;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'execute',
-    description: 'It executes task for given day'
+    name: 'solve',
+    description: 'It solves task for given day. Default day: today'
 )]
 final class RunnerCommand extends Command
 {
@@ -38,8 +40,7 @@ final class RunnerCommand extends Command
     {
         $this->addOption(self::OPTION_YEAR, 'y', InputOption::VALUE_REQUIRED)
             ->addOption(self::OPTION_DAY, 'd', InputOption::VALUE_REQUIRED)
-            ->addOption(self::OPTION_PUZZLE, 'p', InputOption::VALUE_NONE)
-        ;
+            ->addOption(self::OPTION_PUZZLE, 'p', InputOption::VALUE_NONE);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -58,7 +59,7 @@ final class RunnerCommand extends Command
         }
 
         try {
-            $inputFile = $this->fileLoader->loadInput($date, $inputType);
+            $inputFileContent = $this->fileLoader->loadInput($date, $inputType);
             $expectedResultFileContent = $this->fileLoader->loadExpectedOutput($date, $inputType);
         } catch (Exceptions\FileNotFound $e) {
             $style->error($e->getMessage());
@@ -66,19 +67,19 @@ final class RunnerCommand extends Command
             return Command::FAILURE;
         }
 
-        $expectedResult = Result::fromArray($expectedResultFileContent->asArray());
+        $expectedResult = Result::fromArray($expectedResultFileContent);
+        $inputFile = Input::fromArray($inputFileContent);
 
         $result = $solution->solve($inputFile);
-        $style->info((string) $result);
 
         if ($result->equals($expectedResult)) {
-            $style->success('Result is OK');
+            $style->success((string) $result);
 
             return Command::SUCCESS;
         }
 
-        $style->error('Unexpected result. Expected was...');
-        $style->error((string) $expectedResult);
+        $style->error('Unexpected result.');
+        $this->renderExpectedResult($style, $result, $expectedResult);
 
         return Command::FAILURE;
     }
@@ -101,5 +102,16 @@ final class RunnerCommand extends Command
     private function prepareInputType(InputInterface $input): InputType
     {
         return $input->getOption(self::OPTION_PUZZLE) ? InputType::Puzzle : InputType::Example;
+    }
+
+    private function renderExpectedResult(SymfonyStyle $style, Result $result, Result $expectedResult): void
+    {
+        $row = ['My result', $result->partOne, $result->partTwo ?: '---'];
+        $secondRow = ['Expected result', $expectedResult->partOne, $expectedResult->partTwo ?: '---'];
+
+        $style->createTable()
+            ->addRows([$row, new TableSeparator(), $secondRow])
+            ->setHeaders(['', 'Part one', 'Part two'])
+            ->render();
     }
 }
