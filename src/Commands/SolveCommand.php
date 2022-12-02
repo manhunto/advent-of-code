@@ -23,7 +23,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
     name: 'solve',
     description: 'It solves task for given day. Default day: today'
 )]
-final class RunnerCommand extends Command
+final class SolveCommand extends Command
 {
     private const OPTION_DAY = 'day';
     private const OPTION_YEAR = 'year';
@@ -72,16 +72,16 @@ final class RunnerCommand extends Command
 
         $result = $solution->solve($inputFile);
 
-        if ($result->equals($expectedResult)) {
-            $style->success((string) $result);
+        if (!$result->equals($expectedResult)) {
+            $style->error('Unexpected result.');
+            $this->renderExpectedResult($style, $result, $expectedResult);
 
-            return Command::SUCCESS;
+            return Command::FAILURE;
         }
 
-        $style->error('Unexpected result.');
-        $this->renderExpectedResult($style, $result, $expectedResult);
+        $style->success((string) $result);
 
-        return Command::FAILURE;
+        return Command::SUCCESS;
     }
 
     private function prepareDate(InputInterface $input): Date
