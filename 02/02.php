@@ -5,11 +5,11 @@
 const LOOSE = 'X';
 const WIN = 'Z';
 
-enum Shape
+enum Shape: int
 {
-    case Rock;
-    case Paper;
-    case Scissors;
+    case Rock = 1;
+    case Paper = 2;
+    case Scissors = 3;
 
     public static function decryptShape(string $encryptedShape): self
     {
@@ -29,25 +29,25 @@ enum Shape
 
     public function getShapeThatDefeatsMe(): Shape
     {
-        return match ($this) {
-            self::Rock => self::Paper,
-            self::Paper => self::Scissors,
-            self::Scissors => self::Rock
-        };
+        $loosingValue = array_flip($this->winingMatrix())[$this->value];
+
+        return self::from($loosingValue);
     }
 
     public function getShapeThatIDefeat(): Shape
     {
-        return match ($this) {
-            self::Rock => self::Scissors,
-            self::Paper => self::Rock,
-            self::Scissors => self::Paper
-        };
+        $winningValue = $this->winingMatrix()[$this->value];
+
+        return self::from($winningValue);
     }
 
-    public function equals(Shape $other): bool
+    private function winingMatrix(): array
     {
-        return $this === $other;
+        return [
+            self::Rock->value => self::Scissors->value,
+            self::Paper->value => self::Rock->value,
+            self::Scissors->value => self::Paper->value
+        ];
     }
 }
 
@@ -57,15 +57,11 @@ function calculatePoints(Shape $responseShape, Shape $oponentShape) : int
 
     if ($responseShape->wins($oponentShape)) {
         $points += 6;
-    } elseif($responseShape->equals($oponentShape)) {
+    } elseif($responseShape === $oponentShape) {
         $points += 3;
     }
 
-    $points += match ($responseShape) {
-        Shape::Rock => 1,
-        Shape::Paper => 2,
-        Shape::Scissors => 3
-    };
+    $points += $responseShape->value;
 
     return $points;
 }
