@@ -75,7 +75,6 @@ $lines = array_filter(explode(PHP_EOL, $input));
 
 // First part
 $totalSum = 0;
-
 foreach ($lines as $singleGameGuide) {
     [$oponent, $response] = explode(' ', $singleGameGuide);
 
@@ -87,6 +86,7 @@ foreach ($lines as $singleGameGuide) {
 
 echo 'First part: ' . $totalSum . PHP_EOL;
 
+// Second part
 $totalSum = 0;
 foreach ($lines as $singleGameGuide) {
     [$oponent, $response] = explode(' ', $singleGameGuide);
