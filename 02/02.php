@@ -51,7 +51,7 @@ enum Shape: int
     }
 }
 
-function calculatePoints(Shape $responseShape, Shape $oponentShape) : int
+function calculatePoints(Shape $responseShape, Shape $oponentShape): int
 {
     $points = $responseShape->value;
 
@@ -64,8 +64,7 @@ function calculatePoints(Shape $responseShape, Shape $oponentShape) : int
     return $points;
 }
 
-$input = file_get_contents('02_input.txt');
-$lines = array_filter(explode(PHP_EOL, $input));
+$lines = file('02_input.txt', FILE_IGNORE_NEW_LINES);
 
 $totalSum1 = 0;
 $totalSum2 = 0;

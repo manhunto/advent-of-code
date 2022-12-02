@@ -2,14 +2,12 @@
 
 // https://adventofcode.com/2022/day/1
 
-$input = file_get_contents('01_input.txt');
-
-$food = explode(PHP_EOL, $input);
+$input = file('01_input.txt', FILE_IGNORE_NEW_LINES);
 
 $calories = [];
 $caloriesForOneElf = 0;
 
-foreach ($food as $foodItem) {
+foreach ($input as $foodItem) {
     if (empty($foodItem)) {
         $calories[] = $caloriesForOneElf;
         $caloriesForOneElf = 0;
@@ -23,12 +21,11 @@ foreach ($food as $foodItem) {
 // first part
 $max = max($calories);
 
-var_dump($max);
+echo 'First part: ' . $max . PHP_EOL;
 
 // second part
 rsort($calories);
-
 $topThreeElves = array_slice($calories, 0, 3);
 $sumOfThree = array_sum($topThreeElves);
 
-var_dump($sumOfThree);
+echo 'Second part: ' . $sumOfThree . PHP_EOL;
