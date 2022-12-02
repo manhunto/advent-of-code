@@ -53,15 +53,13 @@ enum Shape: int
 
 function calculatePoints(Shape $responseShape, Shape $oponentShape) : int
 {
-    $points = 0;
+    $points = $responseShape->value;
 
     if ($responseShape->wins($oponentShape)) {
         $points += 6;
     } elseif($responseShape === $oponentShape) {
         $points += 3;
     }
-
-    $points += $responseShape->value;
 
     return $points;
 }
