@@ -54,7 +54,7 @@ final class Solution implements Solver
             $badge = array_unique(array_intersect(...$chunkLetters));
             $sum += $this->getPriority(reset($badge));
         }
-        
+
         return $sum;
     }
 

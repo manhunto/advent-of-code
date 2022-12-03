@@ -6,6 +6,7 @@ namespace App\Commands;
 
 use App\Date;
 use App\Exceptions;
+use App\Exceptions\ClassNotFound;
 use App\Input;
 use App\InputType;
 use App\Result;
@@ -21,7 +22,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'solve',
-    description: 'It solves task for given day. Default day: today'
+    description: 'It solves puzzle for given day. Default day: today'
 )]
 final class SolveCommand extends Command
 {
@@ -52,7 +53,7 @@ final class SolveCommand extends Command
 
         try {
             $solution = $this->solutionFactory->create($date);
-        } catch (\Exception $e) {
+        } catch (ClassNotFound $e) {
             $style->error($e->getMessage());
 
             return Command::FAILURE;
