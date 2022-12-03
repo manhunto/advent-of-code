@@ -21,7 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'solve',
+    name: 'app:solve',
     description: 'It solves puzzle for given day. Default day: today'
 )]
 final class SolveCommand extends Command

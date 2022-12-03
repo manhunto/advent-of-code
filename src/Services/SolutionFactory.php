@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Date;
 use App\Exceptions\ClassNotFound;
 use App\Solver;
+use App\SolverFullyQualifiedClassname;
 
 final class SolutionFactory
 {
@@ -29,12 +30,20 @@ final class SolutionFactory
      */
     public function create(Date $date): Solver
     {
-        $className = sprintf("AdventOfCode%s\Day%s\Solution", $date->year, $date->day);
+        $solverNamespace = SolverFullyQualifiedClassname::fromDate($date);
 
         if (!array_key_exists($className, $this->solutions)) {
             throw ClassNotFound::default($date, $className);
         }
 
         return new $className;
+    }
+
+    /**
+     * @return Solver[]
+     */
+    public function iterate(): iterable
+    {
+        yield from $this->solutions;
     }
 }

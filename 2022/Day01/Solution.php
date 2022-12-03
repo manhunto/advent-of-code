@@ -6,13 +6,13 @@ namespace AdventOfCode2022\Day01;
 
 use App\Input;
 use App\Result;
+use App\SolutionAttribute;
 use App\Solver;
 
-/**
- * Calorie Counting
- *
- * @see https://adventofcode.com/2022/day/1
- */
+#[SolutionAttribute(
+    name: 'Calorie Counting',
+    href: 'https://adventofcode.com/2022/day/1'
+)]
 final class Solution implements Solver
 {
     public function solve(Input $input): Result

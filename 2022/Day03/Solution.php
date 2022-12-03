@@ -6,13 +6,13 @@ namespace AdventOfCode2022\Day03;
 
 use App\Input;
 use App\Result;
+use App\SolutionAttribute;
 use App\Solver;
 
-/**
- * Rucksack Reorganization
- *
- * @see https://adventofcode.com/2022/day/3
- */
+#[SolutionAttribute(
+    name: 'Rucksack Reorganization',
+    href: 'https://adventofcode.com/2022/day/3'
+)]
 final class Solution implements Solver
 {
     private const ELVES_IN_GROUP = 3;
