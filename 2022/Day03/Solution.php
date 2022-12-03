@@ -12,6 +12,14 @@ final class Solution implements Solver
 {
     public function solve(Input $input): Result
     {
+        $partOne = $this->partOne($input);
+        $partTwo = $this->partTwo($input);
+
+        return new Result($partOne, $partTwo);
+    }
+
+    private function partOne(Input $input): int
+    {
         $sum = 0;
 
         foreach ($input->asArray() as $rucksack) {
@@ -20,11 +28,24 @@ final class Solution implements Solver
             $secondCompartment = array_splice($items, $itemsCount, $itemsCount);
 
             $sharedItems = array_unique(array_intersect($items, $secondCompartment));
-            $priority = $this->getPriority(reset($sharedItems));
-            $sum += $priority;
+            $sum += $this->getPriority(reset($sharedItems));
         }
 
-        return new Result($sum);
+        return $sum;
+    }
+
+    private function partTwo(Input $input): int
+    {
+        $sum = 0;
+        $chunks = array_chunk($input->asArray(), 3);
+
+        foreach ($chunks as $chunk) {
+            $chunkLetters = array_map('str_split', $chunk);
+            $badge = array_unique(array_intersect(...$chunkLetters));
+            $sum += $this->getPriority(reset($badge));
+        }
+        
+        return $sum;
     }
 
     private function getPriority(string $character): int
