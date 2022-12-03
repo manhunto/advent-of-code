@@ -8,6 +8,11 @@ use App\Input;
 use App\Result;
 use App\Solver;
 
+/**
+ * Rucksack Reorganization
+ *
+ * @see https://adventofcode.com/2022/day/3
+ */
 final class Solution implements Solver
 {
     public function solve(Input $input): Result

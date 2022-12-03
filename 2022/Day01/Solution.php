@@ -9,6 +9,8 @@ use App\Result;
 use App\Solver;
 
 /**
+ * Calorie Counting
+ *
  * @see https://adventofcode.com/2022/day/1
  */
 final class Solution implements Solver

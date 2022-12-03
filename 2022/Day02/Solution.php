@@ -2,16 +2,17 @@
 
 declare(strict_types=1);
 
-/**
- * @see https://adventofcode.com/2022/day/2
- */
-
 namespace AdventOfCode2022\Day02;
 
 use App\Input;
 use App\Result;
 use App\Solver;
 
+/**
+ * Rock Paper Scissors
+ *
+ * @see https://adventofcode.com/2022/day/2
+ */
 final class Solution implements Solver
 {
     private const LOOSE = 'X';
