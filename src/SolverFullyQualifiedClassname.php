@@ -33,6 +33,11 @@ class SolverFullyQualifiedClassname
     {
         preg_match(self::REGEX, $this->fqn, $matches);
 
-        return new Date($matches[1], $matches[2]);
+        return new Date($matches[2], $matches[1]);
+    }
+
+    public function getAsString(): string
+    {
+        return $this->fqn;
     }
 }

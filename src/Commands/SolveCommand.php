@@ -10,8 +10,10 @@ use App\Exceptions\ClassNotFound;
 use App\Input;
 use App\InputType;
 use App\Result;
+use App\ResultPair;
 use App\Services\FileLoader;
 use App\Services\SolutionFactory;
+use App\Services\SolutionRunner;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\TableSeparator;
@@ -31,8 +33,8 @@ final class SolveCommand extends Command
     private const OPTION_PUZZLE = 'puzzle';
 
     public function __construct(
-        private readonly SolutionFactory $solutionFactory,
-        private readonly FileLoader $fileLoader,
+        private readonly SolutionFactory $factory,
+        private readonly SolutionRunner $runner,
     ) {
         parent::__construct();
     }
@@ -52,7 +54,7 @@ final class SolveCommand extends Command
         $style = new SymfonyStyle($input, $output);
 
         try {
-            $solution = $this->solutionFactory->create($date);
+            $solution = $this->factory->create($date);
         } catch (ClassNotFound $e) {
             $style->error($e->getMessage());
 
@@ -60,27 +62,21 @@ final class SolveCommand extends Command
         }
 
         try {
-            $inputFileContent = $this->fileLoader->loadInput($date, $inputType);
-            $expectedResultFileContent = $this->fileLoader->loadExpectedOutput($date, $inputType);
+            $resultPair = $this->runner->run($solution, $inputType);
         } catch (Exceptions\FileNotFound $e) {
             $style->error($e->getMessage());
 
             return Command::FAILURE;
         }
 
-        $expectedResult = Result::fromArray($expectedResultFileContent);
-        $inputFile = Input::fromArray($inputFileContent);
-
-        $result = $solution->solve($inputFile);
-
-        if (!$result->equals($expectedResult)) {
+        if (!$resultPair->isResolvedCorrectly()) {
             $style->error('Unexpected result.');
-            $this->renderExpectedResult($style, $result, $expectedResult);
+            $this->renderResultPair($style, $resultPair);
 
             return Command::FAILURE;
         }
 
-        $style->success((string) $result);
+        $style->success((string) $resultPair->getCurrentResult());
 
         return Command::SUCCESS;
     }
@@ -105,9 +101,11 @@ final class SolveCommand extends Command
         return $input->getOption(self::OPTION_PUZZLE) ? InputType::Puzzle : InputType::Example;
     }
 
-    private function renderExpectedResult(SymfonyStyle $style, Result $result, Result $expectedResult): void
+    private function renderResultPair(SymfonyStyle $style, ResultPair $resultPair): void
     {
-        $row = ['My result', $result->partOne, $result->partTwo ?: '---'];
+        $currentResult = $resultPair->getCurrentResult();
+        $expectedResult = $resultPair->getExpectedResult();
+        $row = ['My result', $currentResult->partOne, $currentResult->partTwo ?: '---'];
         $secondRow = ['Expected result', $expectedResult->partOne, $expectedResult->partTwo ?: '---'];
 
         $style->createTable()

@@ -32,11 +32,11 @@ final class SolutionFactory
     {
         $solverNamespace = SolverFullyQualifiedClassname::fromDate($date);
 
-        if (!array_key_exists($className, $this->solutions)) {
-            throw ClassNotFound::default($date, $className);
+        if (!array_key_exists($solverNamespace->getAsString(), $this->solutions)) {
+            throw ClassNotFound::default($date, $solverNamespace->getAsString());
         }
 
-        return new $className;
+        return $this->solutions[$solverNamespace->getAsString()];
     }
 
     /**
