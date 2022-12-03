@@ -3,6 +3,13 @@
 This repository contains my [Advent of Code](https://adventofcode.com/) solutions in PHP.
 
 ## How to use
+### Create solution template
+
+It is useful to immediately start solving puzzle. It creates all required files for today's puzzle.
+
+```bash
+php bin/create-solution-template.php
+```
 
 ### Solve puzzle
 

@@ -106,7 +106,7 @@ final class SolveCommand extends Command
         $currentResult = $resultPair->getCurrentResult();
         $expectedResult = $resultPair->getExpectedResult();
         $row = ['My result', $currentResult->partOne, $currentResult->partTwo ?: '---'];
-        $secondRow = ['Expected result', $expectedResult->partOne, $expectedResult->partTwo ?: '---'];
+        $secondRow = ['Expected result', $expectedResult->partOne ?: '---', $expectedResult->partTwo ?: '---'];
 
         $style->createTable()
             ->addRows([$row, new TableSeparator(), $secondRow])
