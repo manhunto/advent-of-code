@@ -15,6 +15,12 @@ use App\Solver;
  */
 final class Solution implements Solver
 {
+    private const ELVES_IN_GROUP = 3;
+    private const SMALL_A_DEC = 97;
+    private const SMALl_A_PRIORITY = 1;
+    private const BIG_A_DEC = 65;
+    private const BIG_A_PRIORITY = 27;
+
     public function solve(Input $input): Result
     {
         $partOne = $this->partOne($input);
@@ -29,10 +35,9 @@ final class Solution implements Solver
 
         foreach ($input->asArray() as $rucksack) {
             $items = str_split($rucksack);
-            $itemsCount = count($items) / 2;
-            $secondCompartment = array_splice($items, $itemsCount, $itemsCount);
-
-            $sharedItems = array_unique(array_intersect($items, $secondCompartment));
+            $itemsCountInCompartment = count($items) / 2;
+            $compartments = array_chunk($items, $itemsCountInCompartment);
+            $sharedItems = array_unique(array_intersect(...$compartments));
             $sum += $this->getPriority(reset($sharedItems));
         }
 
@@ -42,7 +47,7 @@ final class Solution implements Solver
     private function partTwo(Input $input): int
     {
         $sum = 0;
-        $chunks = array_chunk($input->asArray(), 3);
+        $chunks = array_chunk($input->asArray(), self::ELVES_IN_GROUP);
 
         foreach ($chunks as $chunk) {
             $chunkLetters = array_map('str_split', $chunk);
@@ -57,10 +62,10 @@ final class Solution implements Solver
     {
         $ord = ord($character);
 
-        if ($ord >= 97) {
-            return $ord - 96;
+        if ($ord >= self::SMALL_A_DEC) {
+            return $ord - self::SMALL_A_DEC + self::SMALl_A_PRIORITY;
         }
 
-        return $ord - 38;
+        return $ord - self::BIG_A_DEC + self::BIG_A_PRIORITY;
     }
 }
