@@ -48,7 +48,7 @@ final class Solution implements Solver
         foreach (explode(PHP_EOL, $plan) as $row) {
             foreach (str_split($row) as $key => $item) {
                 if (in_array($item, $characters, true)) {
-                    $column = ceil($key / 4);
+                    $column = (($key - 1) / 4) + 1;
                     $crates[$column][] = $item;
                 }
             }
