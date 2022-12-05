@@ -5,10 +5,10 @@ This repository contains my [Advent of Code](https://adventofcode.com/) solution
 ## How to use
 ### Generate solution template
 
-It is useful to immediately start solving puzzle. It creates all required files for today's puzzle.
+It is useful to immediately start solving puzzle. It creates all required files for puzzle. Default day: today.
 
 ```bash
-php app.php app:generate-template
+php app.php app:generate-template [--year=2022] [--day=1]
 ```
 
 ### Solve puzzle
