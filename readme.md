@@ -8,7 +8,7 @@ This repository contains my [Advent of Code](https://adventofcode.com/) solution
 It is useful to immediately start solving puzzle. It creates all required files for today's puzzle.
 
 ```bash
-php bin/create-solution-template.php
+php app.php app:create-template
 ```
 
 ### Solve puzzle

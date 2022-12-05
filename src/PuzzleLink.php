@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App;
 
-class PuzzleLink implements \Stringable
+final class PuzzleLink implements \Stringable
 {
     public function __construct(
         private readonly string $url,
