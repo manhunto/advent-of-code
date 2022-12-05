@@ -19,7 +19,11 @@ final class Date
         $dayAsInt = $this->getDayAsInt();
 
         if ($dayAsInt < 1 || $dayAsInt > 25) {
-            throw new \LogicException('Invalid day. Advent of Code span only from 1 to 25 day. Given: ' . $day);
+            throw new \LogicException('Invalid day. Advent of Code span only from 1 to 25 day of december. Given: ' . $day);
+        }
+
+        if (!is_numeric($year) || strlen($year) !== 4) {
+            throw new \LogicException('Invalid year. Given: ' . $year);
         }
     }
 

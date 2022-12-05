@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Commands;
 
+use App\Commands\Helpers\DateInputHelper;
 use App\Date;
 use App\Exceptions;
-use App\Exceptions\ClassNotFound;
 use App\InputType;
 use App\ResultPair;
-use App\Services\DateFactory;
 use App\Services\SolutionFactory;
 use App\Services\SolutionRunner;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -26,35 +25,40 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 final class SolveCommand extends Command
 {
-    private const OPTION_DAY = 'day';
-    private const OPTION_YEAR = 'year';
     private const OPTION_PUZZLE = 'puzzle';
 
     public function __construct(
         private readonly SolutionFactory $factory,
         private readonly SolutionRunner $runner,
-        private readonly DateFactory $dateFactory,
+        private readonly DateInputHelper $dateInputHelper,
     ) {
         parent::__construct();
     }
 
     protected function configure(): void
     {
-        $this->addOption(self::OPTION_YEAR, 'y', InputOption::VALUE_REQUIRED)
-            ->addOption(self::OPTION_DAY, 'd', InputOption::VALUE_REQUIRED)
+        $this->addOption(DateInputHelper::OPTION_YEAR, 'y', InputOption::VALUE_REQUIRED)
+            ->addOption(DateInputHelper::OPTION_DAY, 'd', InputOption::VALUE_REQUIRED)
             ->addOption(self::OPTION_PUZZLE, 'p', InputOption::VALUE_NONE);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $date = $this->prepareDate($input);
-        $inputType = $this->prepareInputType($input);
-
         $style = new SymfonyStyle($input, $output);
 
         try {
+            $date = $this->dateInputHelper->prepareDate($input);
+        } catch (Exceptions\DateCannotBeGeneratedForToday) {
+            $style->error('Today\'s date is out of advent of code so you have to provide --day or/and --year options.');
+
+            return Command::FAILURE;
+        }
+
+        $inputType = $this->prepareInputType($input);
+
+        try {
             $solution = $this->factory->create($date);
-        } catch (ClassNotFound $e) {
+        } catch (Exceptions\ClassNotFound $e) {
             $style->error($e->getMessage());
 
             return Command::FAILURE;
@@ -78,21 +82,6 @@ final class SolveCommand extends Command
         $style->success((string) $resultPair->getCurrentResult());
 
         return Command::SUCCESS;
-    }
-
-    private function prepareDate(InputInterface $input): Date
-    {
-        $date = $this->dateFactory->createForToday();
-
-        if ($dayInput = $input->getOption(self::OPTION_DAY)) {
-            $date = $date->withDay($dayInput);
-        }
-
-        if ($yearInput = $input->getOption(self::OPTION_YEAR)) {
-            $date = $date->withYear($yearInput);
-        }
-
-        return $date;
     }
 
     private function prepareInputType(InputInterface $input): InputType

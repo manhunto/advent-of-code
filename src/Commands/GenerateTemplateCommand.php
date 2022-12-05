@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Commands;
 
+use App\Commands\Helpers\DateInputHelper;
 use App\Date;
-use App\Services\DateFactory;
+use App\Exceptions\DateCannotBeGeneratedForToday;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -16,17 +18,31 @@ use Symfony\Component\Console\Style\SymfonyStyle;
     name: 'app:generate-template',
     description: 'Generate all required files for puzzle.'
 )]
-final class GenerateTemplate extends Command
+final class GenerateTemplateCommand extends Command
 {
     public function __construct(
-        private readonly DateFactory $dateFactory
+        private readonly DateInputHelper $dateInputHelper,
     ) {
         parent::__construct();
     }
 
+    protected function configure(): void
+    {
+        $this->addOption(DateInputHelper::OPTION_YEAR, 'y', InputOption::VALUE_REQUIRED)
+            ->addOption(DateInputHelper::OPTION_DAY, 'd', InputOption::VALUE_REQUIRED);
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $date = $this->dateFactory->createForToday();
+        $style = new SymfonyStyle($input, $output);
+
+        try {
+            $date = $this->dateInputHelper->prepareDate($input);
+        } catch (DateCannotBeGeneratedForToday) {
+            $style->error('Today\'s date is out of advent of code so you have to provide --day or/and --year options.');
+
+            return Command::FAILURE;
+        }
 
         $dir = sprintf(__DIR__ . '/../../%s/Day%s', $date->year, $date->day);
 
@@ -47,7 +63,7 @@ final class GenerateTemplate extends Command
 
     private function createDir(string $path): void
     {
-        if (!is_dir($path) && !mkdir($path) && !is_dir($path)) {
+        if (!is_dir($path) && !mkdir($path, recursive: true) && !is_dir($path)) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $path));
         }
     }
@@ -78,7 +94,7 @@ use App\SolutionAttribute;
 use App\Solver;
 
 #[SolutionAttribute(
-    name: '',
+    name: 'TODO Change me',
 )]
 final class Solution implements Solver
 {
