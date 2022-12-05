@@ -9,6 +9,7 @@ use App\InputType;
 use App\Services\SolutionFactory;
 use App\Services\SolutionRunner;
 use App\Services\SolutionsDescriptor;
+use App\Year;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\TableCell;
@@ -53,7 +54,7 @@ final class SolutionListCommand extends Command
         $availableYears = $this->factory->getAvailableYears();
         $year = $this->getYear($input);
 
-        if (!in_array($year, $availableYears, true)) {
+        if (!in_array($year, $availableYears)) {
             $style->error('There is no puzzles for given year. Use --year option to list puzzles for different year. Given: ' . $year);
             $style->info('Available years: ' . implode(', ', $availableYears));
 
@@ -77,7 +78,7 @@ final class SolutionListCommand extends Command
         }
 
         $style->createTable()
-            ->setHeaderTitle($year)
+            ->setHeaderTitle((string) $year)
             ->setHeaders(['Day', 'Name', new TableSeparator(), 'Example', 'Puzzle'])
             ->setRows($rows)
             ->render();
@@ -93,12 +94,12 @@ final class SolutionListCommand extends Command
         );
     }
 
-    private function getYear(InputInterface $input): string
+    private function getYear(InputInterface $input): Year
     {
         if ($year = $input->getOption(self::OPTION_YEAR)) {
-            return (string) $year;
+            return Year::fromString($year);
         }
 
-        return (new \DateTimeImmutable())->format('Y');
+        return Year::fromDateTime(new \DateTimeImmutable());
     }
 }

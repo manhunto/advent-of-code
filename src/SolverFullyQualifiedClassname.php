@@ -26,14 +26,14 @@ final class SolverFullyQualifiedClassname
 
     public static function fromDate(Date $date): self
     {
-        return new self(sprintf("AdventOfCode%s\Day%s\Solution", $date->year, $date->day));
+        return new self(sprintf("AdventOfCode%s\Day%s\Solution", $date->getYearAsString(), $date->day));
     }
 
     public function getDate(): Date
     {
         preg_match(self::REGEX, $this->fqn, $matches);
 
-        return new Date($matches[2], $matches[1]);
+        return Date::fromStrings($matches[2], $matches[1]);
     }
 
     public function getAsString(): string

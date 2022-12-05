@@ -10,6 +10,11 @@ class ClassNotFound extends \Exception
 {
     public static function default(Date $date, string $className): self
     {
-        return new self(sprintf('There is no solution for day %s in %s year. Class %s does not exist.', $date->day, $date->year, $className));
+        return new self(
+            sprintf(
+                'There is no solution for day %s in %s year. Class %s does not exist.',
+                $date->day, $date->getYearAsString(), $className
+            )
+        );
     }
 }

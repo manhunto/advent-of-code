@@ -8,6 +8,7 @@ use App\Date;
 use App\Exceptions\ClassNotFound;
 use App\Solver;
 use App\SolverFullyQualifiedClassname;
+use App\Year;
 
 final class SolutionFactory
 {
@@ -42,19 +43,19 @@ final class SolutionFactory
     /**
      * @return Solver[]
      */
-    public function iterateForYear(string $year): iterable
+    public function iterateForYear(Year $year): iterable
     {
         foreach ($this->iterate() as $solver) {
             $solverNamespace = SolverFullyQualifiedClassname::fromObject($solver);
 
-            if ($solverNamespace->getDate()->year === $year) {
+            if ($solverNamespace->getDate()->isYearEquals($year)) {
                 yield $solver;
             }
         }
     }
 
     /**
-     * @return string[]
+     * @return Year[]
      */
     public function getAvailableYears(): array
     {

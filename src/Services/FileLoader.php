@@ -10,12 +10,15 @@ use App\InputType;
 
 final class FileLoader
 {
+    private const EXTENSION_IN = 'in';
+    private const EXTENSION_OUT = 'out';
+
     /**
      * @throws FileNotFound
      */
     public function loadInput(Date $date, InputType $inputType): array
     {
-        $inputFileLocation = sprintf('%s/Day%s/%s.in', $date->year, $date->day, $inputType->value);
+        $inputFileLocation = $this->buildFilePath($date, $inputType, self::EXTENSION_IN);
 
         return $this->loadFile($inputFileLocation);
     }
@@ -25,7 +28,7 @@ final class FileLoader
      */
     public function loadExpectedOutput(Date $date, InputType $inputType): array
     {
-        $outputFileLocation = sprintf('%s/Day%s/%s.out', $date->year, $date->day, $inputType->value);
+        $outputFileLocation = $this->buildFilePath($date, $inputType, self::EXTENSION_OUT);
 
         return $this->loadFile($outputFileLocation);
     }
@@ -40,5 +43,10 @@ final class FileLoader
         }
 
         return file($location, FILE_IGNORE_NEW_LINES);
+    }
+
+    private function buildFilePath(Date $date, InputType $inputType, string $extension): string
+    {
+        return sprintf('%s/Day%s/%s.%s', $date->getYearAsString(), $date->day, $inputType->value, $extension);
     }
 }

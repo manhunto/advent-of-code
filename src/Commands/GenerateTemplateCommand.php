@@ -44,7 +44,7 @@ final class GenerateTemplateCommand extends Command
             return Command::FAILURE;
         }
 
-        $dir = sprintf(__DIR__ . '/../../%s/Day%s', $date->year, $date->day);
+        $dir = sprintf(__DIR__ . '/../../%s/Day%s', $date->getYearAsString(), $date->day);
 
         $solutionContent = $this->getSolutionClassContent($date);
 
@@ -105,6 +105,6 @@ final class Solution implements Solver
 }
 TXT;
 
-        return strtr($solutionTemplate, ['{year}' => $date->year, '{day}' => $date->day]);
+        return strtr($solutionTemplate, ['{year}' => $date->getYearAsString(), '{day}' => $date->day]);
     }
 }

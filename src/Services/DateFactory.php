@@ -20,7 +20,7 @@ final class DateFactory
             throw new DateCannotBeGeneratedForToday('Generating date for today is only available during the advent of code.');
         }
 
-        return Date::createForDateTime($today);
+        return Date::fromDateTime($today);
     }
 
     private function isDateDuringAOC(\DateTimeImmutable $date): bool

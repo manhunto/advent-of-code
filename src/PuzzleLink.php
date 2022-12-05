@@ -13,7 +13,7 @@ final class PuzzleLink implements \Stringable
 
     public static function fromDate(Date $date): PuzzleLink
     {
-        $url = sprintf('https://adventofcode.com/%d/day/%d', $date->year, $date->getDayAsInt());
+        $url = sprintf('https://adventofcode.com/%d/day/%d', $date->getYearAsString(), $date->getDayAsInt());
 
         return new self($url);
     }
