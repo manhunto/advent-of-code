@@ -17,11 +17,12 @@ final class Solution implements Solver
 {
     public function solve(Input $input): Result
     {
-        $count = 0;
+        $commonPairs = 0;
+        $overlapPair = 0;
 
         foreach ($input->asArray() as $row) {
             $pairsRange = explode(',', $row);
-            $pairs = array_map(function (string $pair) {
+            $pairs = array_map(static function (string $pair): array {
                 [$from, $to] = explode('-', $pair);
 
 
@@ -31,10 +32,14 @@ final class Solution implements Solver
             $common = array_values(array_intersect(...$pairs));
 
             if ($common === $pairs[0] || $common === $pairs[1]) {
-                ++$count;
+                ++$commonPairs;
+            }
+
+            if (count($common) > 0) {
+                ++$overlapPair;
             }
         }
 
-        return new Result($count);
+        return new Result($commonPairs, $overlapPair);
     }
 }
