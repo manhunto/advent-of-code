@@ -6,9 +6,14 @@ use App\Services\SolutionFactory;
 use App\Solver;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 
 return static function (ContainerConfigurator $configurator) {
+    $configurator->parameters()
+        ->set('app.name', 'Advent of code')
+        ->set('app.version', '1.0');
+
     $services = $configurator->services()
         ->defaults()
         ->autowire()      // Automatically injects dependencies in your services.
@@ -27,7 +32,7 @@ return static function (ContainerConfigurator $configurator) {
     $services->set(App::class)
         ->class(App::class)
         ->public()
-        ->args([tagged_iterator('app.command'), 'Advent of code', '1.0']);
+        ->args([tagged_iterator('app.command'), param('app.name'), param('app.version')]);
 
     $services->set(SolutionFactory::class)
         ->class(SolutionFactory::class)

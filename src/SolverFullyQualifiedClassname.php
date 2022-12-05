@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App;
 
-class SolverFullyQualifiedClassname
+final class SolverFullyQualifiedClassname
 {
     private const REGEX = '/AdventOfCode(\d{4})\\\Day(\d{2})\\\Solution/';
     private string $fqn;
