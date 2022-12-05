@@ -16,30 +16,18 @@ final class Solution implements Solver
 {
     public function solve(Input $input): Result
     {
-        $calories = [];
-        $caloriesForOneElf = 0;
+        $foodItems = explode(PHP_EOL . PHP_EOL, $input->asString());
 
-        foreach ($input->asArray() as $foodItem) {
-            if (empty($foodItem)) {
-                $calories[] = $caloriesForOneElf;
-                $caloriesForOneElf = 0;
-
-                continue;
-            }
-
-            $caloriesForOneElf += (int) $foodItem;
-        }
-
-        if ($caloriesForOneElf) {
-            $calories[] = $caloriesForOneElf;
-        }
+        $calories = array_map(static fn (string $elfFood): int
+            => array_sum(explode(PHP_EOL, $elfFood)),
+            $foodItems);
 
         // first part
         $max = max($calories);
 
         // second part
-        rsort($calories);
-        $topThreeElves = array_slice($calories, 0, 3);
+        sort($calories);
+        $topThreeElves = array_slice($calories, -3);
         $sumOfThree = array_sum($topThreeElves);
 
         return new Result($max, $sumOfThree);
