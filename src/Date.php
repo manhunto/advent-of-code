@@ -23,11 +23,10 @@ final class Date
         }
     }
 
-    public static function createForToday(): self
+    public static function createForDateTime(\DateTimeImmutable $dateTime): Date
     {
-        $today = new \DateTimeImmutable();
-        $year = $today->format('Y');
-        $day = $today->format('d');
+        $year = $dateTime->format('Y');
+        $day = $dateTime->format('d');
 
         return new self($day, $year);
     }

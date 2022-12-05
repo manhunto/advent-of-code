@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Commands;
 
+use App\Date;
+use App\Services\DateFactory;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,17 +18,19 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 final class GenerateTemplate extends Command
 {
+    public function __construct(
+        private readonly DateFactory $dateFactory
+    ) {
+        parent::__construct();
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $today = new \DateTimeImmutable();
-        $year = $today->format('Y');
-        $day = $today->format('d');
+        $date = $this->dateFactory->createForToday();
 
-        $dir = sprintf(__DIR__ . '/../../%s/Day%s', $year, $day);
+        $dir = sprintf(__DIR__ . '/../../%s/Day%s', $date->year, $date->day);
 
-        $solutionTemplate = $this->getSolutionClassContent($year, $day);
-
-        $solutionContent = strtr($solutionTemplate, ['{year}' => $year, '{day}' => $day]);
+        $solutionContent = $this->getSolutionClassContent($date);
 
         $this->createDir($dir);
         $this->createFile($dir . '/example.in');
@@ -59,7 +63,7 @@ final class GenerateTemplate extends Command
         }
     }
 
-    private function getSolutionClassContent(string $year, string $day): string
+    private function getSolutionClassContent(Date $date): string
     {
         $solutionTemplate = <<<TXT
 <?php
@@ -85,6 +89,6 @@ final class Solution implements Solver
 }
 TXT;
 
-        return strtr($solutionTemplate, ['{year}' => $year, '{day}' => $day]);
+        return strtr($solutionTemplate, ['{year}' => $date->year, '{day}' => $date->day]);
     }
 }

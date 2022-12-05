@@ -9,6 +9,7 @@ use App\Exceptions;
 use App\Exceptions\ClassNotFound;
 use App\InputType;
 use App\ResultPair;
+use App\Services\DateFactory;
 use App\Services\SolutionFactory;
 use App\Services\SolutionRunner;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -32,6 +33,7 @@ final class SolveCommand extends Command
     public function __construct(
         private readonly SolutionFactory $factory,
         private readonly SolutionRunner $runner,
+        private readonly DateFactory $dateFactory,
     ) {
         parent::__construct();
     }
@@ -80,7 +82,7 @@ final class SolveCommand extends Command
 
     private function prepareDate(InputInterface $input): Date
     {
-        $date = Date::createForToday();
+        $date = $this->dateFactory->createForToday();
 
         if ($dayInput = $input->getOption(self::OPTION_DAY)) {
             $date = $date->withDay($dayInput);
