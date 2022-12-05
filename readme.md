@@ -18,8 +18,10 @@ php app.php app:solve [--year=2022] [--day=1] [--puzzle]
 ```
 
 ### List all puzzles and check results
+Default year: current year.
+
 ```bash
-php app.php app:list
+php app.php app:list [--year=2022]
 ```
 
 ![list-command.png](resources/list-command.png)

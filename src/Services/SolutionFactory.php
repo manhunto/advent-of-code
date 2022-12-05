@@ -42,7 +42,37 @@ final class SolutionFactory
     /**
      * @return Solver[]
      */
-    public function iterate(): iterable
+    public function iterateForYear(string $year): iterable
+    {
+        foreach ($this->iterate() as $solver) {
+            $solverNamespace = SolverFullyQualifiedClassname::fromObject($solver);
+
+            if ($solverNamespace->getDate()->year === $year) {
+                yield $solver;
+            }
+        }
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getAvailableYears(): array
+    {
+        $years = [];
+
+        foreach ($this->iterate() as $solver) {
+            $solverNamespace = SolverFullyQualifiedClassname::fromObject($solver);
+
+            $years[] = $solverNamespace->getDate()->year;
+        }
+
+        return array_unique($years);
+    }
+
+    /**
+     * @return Solver[]
+     */
+    private function iterate(): iterable
     {
         yield from $this->solutions;
     }
