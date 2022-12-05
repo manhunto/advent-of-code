@@ -16,10 +16,10 @@ final class Solution implements Solver
 {
     public function solve(Input $input): Result
     {
-        [$plan, $instructions] = explode(PHP_EOL . PHP_EOL, $input->asString());
+        [$stackSetup, $instructions] = explode(PHP_EOL . PHP_EOL, $input->asString());
 
-        $firstStacks = $this->getStacks($plan);
-        $secondStacks = $this->getStacks($plan);
+        $firstStacks = $this->populateStacks($stackSetup);
+        $secondStacks = $this->populateStacks($stackSetup);
 
         foreach (explode(PHP_EOL, $instructions) as $instruction) {
             $command = Command::fromString($instruction);
@@ -40,7 +40,7 @@ final class Solution implements Solver
     /**
      * @return Stack[]
      */
-    private function getStacks(string $plan): array
+    private function populateStacks(string $plan): array
     {
         $characters = range('A', 'Z');
         $crates = [];
