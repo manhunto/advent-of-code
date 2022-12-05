@@ -15,6 +15,12 @@ final class Date
     ) {
         $this->day = str_pad($day, 2, '0', STR_PAD_LEFT);
         $this->year = $year;
+
+        $dayAsInt = $this->getDayAsInt();
+
+        if ($dayAsInt < 1 || $dayAsInt > 25) {
+            throw new \LogicException('Invalid day. Advent of Code span only from 1 to 25 day. Given: ' . $day);
+        }
     }
 
     public static function createForToday(): self
