@@ -11,14 +11,14 @@ use App\Solver;
 
 #[SolutionAttribute(
     name: 'Camp Cleanup',
-    href: 'https://adventofcode.com/2022/day/04'
+    href: 'https://adventofcode.com/2022/day/4'
 )]
 final class Solution implements Solver
 {
     public function solve(Input $input): Result
     {
         $commonPairs = 0;
-        $overlapPair = 0;
+        $overlapPairs = 0;
 
         foreach ($input->asArray() as $row) {
             $pairsRange = explode(',', $row);
@@ -36,10 +36,10 @@ final class Solution implements Solver
             }
 
             if (count($common) > 0) {
-                ++$overlapPair;
+                ++$overlapPairs;
             }
         }
 
-        return new Result($commonPairs, $overlapPair);
+        return new Result($commonPairs, $overlapPairs);
     }
 }

@@ -11,43 +11,47 @@ use App\Solver;
 
 #[SolutionAttribute(
     name: 'Supply Stacks',
-    href: 'https://adventofcode.com/2022/day/05'
+    href: 'https://adventofcode.com/2022/day/5'
 )]
 final class Solution implements Solver
 {
     public function solve(Input $input): Result
     {
         [$plan, $instructions] = explode(PHP_EOL . PHP_EOL, $input->asString());
-        $crates = $this->getCrates($plan);
+
+        $firstStacks = $this->getStacks($plan);
+        $secondStacks = $this->getStacks($plan);
 
         foreach (explode(PHP_EOL, $instructions) as $command) {
             preg_match('/move (.*) from (.*) to (.*)/', $command, $matches);
 
             [, $quantity, $from, $to] = $matches;
 
-            $stackFrom = $crates[$from - 1];
-            $cratesToMove = $stackFrom->unshift((int) $quantity);
-            $stackTo = $crates[$to - 1];
-            $stackTo->add($cratesToMove);
+            $cratesToMove = $firstStacks[$from]->unshiftOneByOne((int) $quantity);
+            $firstStacks[$to]->add($cratesToMove);
+
+            $cratesToMove = $secondStacks[$from]->unshiftAltogether((int) $quantity);
+            $secondStacks[$to]->add($cratesToMove);
         }
 
-        $topCrates = array_map(static fn (Stack $stack): string => $stack->getTopCrate(), $crates);
-        $topCratesInRow = implode('', $topCrates);
+        $firstTopCratesInRow = $this->getTopCratesAsString($firstStacks);
+        $secondTopCratesInRow = $this->getTopCratesAsString($secondStacks);
 
-        return new Result($topCratesInRow);
+        return new Result($firstTopCratesInRow, $secondTopCratesInRow);
     }
 
     /**
      * @return Stack[]
      */
-    private function getCrates(string $plan): array
+    private function getStacks(string $plan): array
     {
+        $characters = range('A', 'Z');
         $crates = [];
 
         foreach (explode(PHP_EOL, $plan) as $row) {
             foreach (str_split($row) as $key => $item) {
-                if (in_array($item, range('A', 'Z'), true)) {
-                    $column = ($key - 1) / 4;
+                if (in_array($item, $characters, true)) {
+                    $column = ceil($key / 4);
                     $crates[$column][] = $item;
                 }
             }
@@ -56,5 +60,12 @@ final class Solution implements Solver
         ksort($crates);
 
         return array_map(static fn (array $column) => new Stack($column), $crates);
+    }
+
+    private function getTopCratesAsString(array $crates): string
+    {
+        $topCrates = array_map(static fn(Stack $stack): string => $stack->getTopCrate(), $crates);
+
+        return implode('', $topCrates);
     }
 }

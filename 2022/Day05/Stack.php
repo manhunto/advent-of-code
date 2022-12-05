@@ -11,12 +11,9 @@ final class Stack
     ) {
     }
 
-    public function unshift(int $quantity): self
+    public function unshiftOneByOne(int $quantity): self
     {
-        $oldCrates = $this->crates;
-        $this->crates = array_slice($this->crates, $quantity, count($this->crates) - $quantity);
-
-        $newCrates = array_reverse(array_slice($oldCrates, 0, $quantity));
+        $newCrates = array_reverse($this->unshiftAltogether($quantity)->crates);
 
         return new self($newCrates);
     }
@@ -29,5 +26,13 @@ final class Stack
     public function getTopCrate()
     {
         return reset($this->crates);
+    }
+
+    public function unshiftAltogether(int $quantity): Stack
+    {
+        $oldCrates = $this->crates;
+        $this->crates = array_slice($this->crates, $quantity, count($this->crates) - $quantity);
+
+        return new self(array_slice($oldCrates, 0, $quantity));
     }
 }
