@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\PuzzleLink;
 use App\SolutionDescription;
 use App\SolutionAttribute;
 use App\Solver;
@@ -26,7 +27,7 @@ final class SolutionsDescriptor
         return new SolutionDescription(
             $fqn->getDate(),
             $arguments['name'] ?? null,
-            $arguments['href'] ?? null
+            (string) PuzzleLink::fromDate($fqn->getDate())
         );
     }
 }

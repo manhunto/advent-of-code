@@ -11,7 +11,6 @@ use App\Solver;
 
 #[SolutionAttribute(
     name: 'Rucksack Reorganization',
-    href: 'https://adventofcode.com/2022/day/3'
 )]
 final class Solution implements Solver
 {

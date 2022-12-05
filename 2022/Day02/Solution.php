@@ -11,7 +11,6 @@ use App\Solver;
 
 #[SolutionAttribute(
     name: 'Rock Paper Scissors',
-    href: 'https://adventofcode.com/2022/day/2'
 )]
 final class Solution implements Solver
 {

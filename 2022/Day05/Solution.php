@@ -11,7 +11,6 @@ use App\Solver;
 
 #[SolutionAttribute(
     name: 'Supply Stacks',
-    href: 'https://adventofcode.com/2022/day/5'
 )]
 final class Solution implements Solver
 {

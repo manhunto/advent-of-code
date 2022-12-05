@@ -35,4 +35,9 @@ final class Date
     {
         return new self($this->day, $year);
     }
+
+    public function getDayAsInt(): int
+    {
+        return (int) ltrim($this->day, '0');
+    }
 }

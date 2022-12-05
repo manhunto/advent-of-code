@@ -10,8 +10,7 @@ use App\SolutionAttribute;
 use App\Solver;
 
 #[SolutionAttribute(
-    name: 'Calorie Counting',
-    href: 'https://adventofcode.com/2022/day/1'
+    name: 'Calorie Counting'
 )]
 final class Solution implements Solver
 {
