@@ -18,7 +18,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:list',
-    description: 'It lists all solutions'
+    description: 'List with all solutions'
 )]
 final class SolutionListCommand extends Command
 {

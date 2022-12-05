@@ -11,10 +11,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'app:create-template',
-    description: 'It creates all required files for puzzle.'
+    name: 'app:generate-template',
+    description: 'Generate all required files for puzzle.'
 )]
-final class CreateTemplate extends Command
+final class GenerateTemplate extends Command
 {
     protected function execute(InputInterface $input, OutputInterface $output): int
     {

@@ -7,11 +7,8 @@ namespace App\Commands;
 use App\Date;
 use App\Exceptions;
 use App\Exceptions\ClassNotFound;
-use App\Input;
 use App\InputType;
-use App\Result;
 use App\ResultPair;
-use App\Services\FileLoader;
 use App\Services\SolutionFactory;
 use App\Services\SolutionRunner;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -24,7 +21,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:solve',
-    description: 'It solves puzzle for given day. Default day: today'
+    description: 'Solves puzzle for given day. Default day: today'
 )]
 final class SolveCommand extends Command
 {
