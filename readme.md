@@ -23,5 +23,4 @@ Default year: current year.
 ```bash
 php app.php app:list [--year=2022]
 ```
-
 ![list-command.png](resources/list-command.png)
