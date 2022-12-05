@@ -11,9 +11,9 @@ final class Stack
     ) {
     }
 
-    public function unshiftOneByOne(int $quantity): self
+    public function takeFromTopOneByOne(int $quantity): self
     {
-        $newCrates = array_reverse($this->unshiftAltogether($quantity)->crates);
+        $newCrates = array_reverse($this->takeFromTopInOneMove($quantity)->crates);
 
         return new self($newCrates);
     }
@@ -28,7 +28,7 @@ final class Stack
         return reset($this->crates);
     }
 
-    public function unshiftAltogether(int $quantity): Stack
+    public function takeFromTopInOneMove(int $quantity): Stack
     {
         $oldCrates = $this->crates;
         $this->crates = array_slice($this->crates, $quantity, count($this->crates) - $quantity);

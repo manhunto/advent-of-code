@@ -21,16 +21,14 @@ final class Solution implements Solver
         $firstStacks = $this->getStacks($plan);
         $secondStacks = $this->getStacks($plan);
 
-        foreach (explode(PHP_EOL, $instructions) as $command) {
-            preg_match('/move (.*) from (.*) to (.*)/', $command, $matches);
+        foreach (explode(PHP_EOL, $instructions) as $instruction) {
+            $command = Command::fromString($instruction);
 
-            [, $quantity, $from, $to] = $matches;
+            $cratesToMove = $firstStacks[$command->fromStack]->takeFromTopOneByOne($command->quantity);
+            $firstStacks[$command->toStack]->add($cratesToMove);
 
-            $cratesToMove = $firstStacks[$from]->unshiftOneByOne((int) $quantity);
-            $firstStacks[$to]->add($cratesToMove);
-
-            $cratesToMove = $secondStacks[$from]->unshiftAltogether((int) $quantity);
-            $secondStacks[$to]->add($cratesToMove);
+            $cratesToMove = $secondStacks[$command->fromStack]->takeFromTopInOneMove($command->quantity);
+            $secondStacks[$command->toStack]->add($cratesToMove);
         }
 
         $firstTopCratesInRow = $this->getTopCratesAsString($firstStacks);
