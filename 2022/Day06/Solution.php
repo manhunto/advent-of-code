@@ -24,15 +24,14 @@ final class Solution implements Solver
 
     private function getIndexOfFirstStartOfMessageMarker(Input $input, int $markerLength): int
     {
-        $buffer = $input->asArray()[0];
+        $buffer = $input->asString();
         $bufferAsArray = str_split($buffer);
 
-        $bufferLength = count($bufferAsArray);
-        for ($i = 0 ; $i <= $bufferLength - $markerLength; $i++) {
-            $slice = array_slice($bufferAsArray, $i, $markerLength);
+        foreach ($bufferAsArray as $index => $letter) {
+            $slice = array_slice($bufferAsArray, $index, $markerLength);
 
             if (count(array_unique($slice)) === $markerLength) {
-                return $i + $markerLength;
+                return $index + $markerLength;
             }
         }
 
