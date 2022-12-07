@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AdventOfCode2022\Day07;
 
-class File
+final class File
 {
     public function __construct(
         public readonly string $name,

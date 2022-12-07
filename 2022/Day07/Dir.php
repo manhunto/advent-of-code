@@ -41,17 +41,10 @@ final class Dir
 
     public function getTotalSize(): int
     {
-        $size = 0;
+        $dirSize = array_reduce($this->files, static fn (int $sum, File $file) => $sum + $file->size, 0);
+        $fileSize = array_reduce($this->getSubDirs(), static fn (int $sum, Dir $dir) => $sum + $dir->getTotalSize(), 0);
 
-        foreach ($this->files as $file) {
-            $size += $file->size;
-        }
-
-        foreach ($this->getSubDirs() as $dir) {
-            $size += $dir->getTotalSize();
-        }
-
-        return $size;
+        return $dirSize + $fileSize;
     }
 
     public function getFullName(): string
@@ -65,19 +58,24 @@ final class Dir
 
     public function print(int $depth = 0): void
     {
-        echo str_repeat(' ', $depth * 2) . '- ' . $this->name . ' (dir)' . PHP_EOL;
+        $this->printRow($depth, $this->name, '(dir)');
 
         foreach ($this->getSubDirs() as $subDir) {
             $subDir->print($depth + 1);
         }
 
         foreach ($this->files as $file) {
-            echo str_repeat(' ', ($depth + 1) * 2) . '- ' . $file->name . ' (file, size=' . $file->size . ')' . PHP_EOL;
+            $this->printRow($depth + 1, $file->name, sprintf('(file, size=%s)', $file->size));
         }
     }
 
     private function addSubDir(Dir $subDir): void
     {
         $this->dirs[] = $subDir;
+    }
+
+    private function printRow(int $depth, string $name, string $description): void
+    {
+        echo str_repeat(' ', $depth * 2) . '- ' . $name . ' ' . $description . PHP_EOL;
     }
 }

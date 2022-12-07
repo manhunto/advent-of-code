@@ -39,6 +39,8 @@ final class Solution implements Solver
 
         $sizes = $this->getSizes($root);
 
+        $root->print();
+
         $partOne = $this->getSumOfDirsTotalSizeOfAtMost100000($sizes);
         $partTwo = $this->getSmallestDirThatWouldFreeUpEnoughSpaceToRunUpdate($sizes, $root);
 
