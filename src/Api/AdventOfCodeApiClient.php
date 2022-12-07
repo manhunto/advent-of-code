@@ -34,4 +34,14 @@ final class AdventOfCodeApiClient
 
         return (string) $response->getBody();
     }
+
+    /**
+     * @throws GuzzleException
+     */
+    public function getPuzzleDescriptionPage(Date $date): string
+    {
+        $response = $this->client->get(sprintf('%d/day/%d', $date->getYearAsString(), $date->getDayAsInt()));
+
+        return (string) $response->getBody();
+    }
 }

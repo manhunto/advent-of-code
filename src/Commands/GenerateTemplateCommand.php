@@ -8,6 +8,7 @@ use App\Commands\Helpers\DateInputHelper;
 use App\Date;
 use App\Exceptions\ApiException;
 use App\Exceptions\DateCannotBeGeneratedForToday;
+use App\PuzzleMetadata;
 use App\Services\PuzzleMetadataFetcher;
 use App\SolverFullyQualifiedClassname;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -65,12 +66,12 @@ final class GenerateTemplateCommand extends Command
 
         $dir = sprintf(__DIR__ . '/../../%s/Day%s', $date->getYearAsString(), $date->day);
 
-        $solutionContent = $this->getSolutionClassContent($date);
+        $solutionContent = $this->getSolutionClassContent($date, $puzzleMetadata);
 
         $this->createDir($dir);
         $this->createFile($dir . '/example.in');
         $this->createFile($dir . '/example.out');
-        $this->createFile($dir . '/puzzle.in', $puzzleMetadata?->getPuzzleInput());
+        $this->createFile($dir . '/puzzle.in', $puzzleMetadata?->puzzleInput);
         $this->createFile($dir . '/puzzle.out');
         $this->createFile($dir . '/Solution.php', $solutionContent);
 
@@ -104,7 +105,7 @@ final class GenerateTemplateCommand extends Command
         }
     }
 
-    private function getSolutionClassContent(Date $date): string
+    private function getSolutionClassContent(Date $date, ?PuzzleMetadata $puzzleMetadata): string
     {
         $solutionTemplate = <<<TXT
 <?php
@@ -119,7 +120,7 @@ use App\SolutionAttribute;
 use App\Solver;
 
 #[SolutionAttribute(
-    name: 'TODO Change me',
+    name: '{puzzleName}',
 )]
 final class Solution implements Solver
 {
@@ -134,6 +135,10 @@ final class Solution implements Solver
 }
 TXT;
 
-        return strtr($solutionTemplate, ['{year}' => $date->getYearAsString(), '{day}' => $date->day]);
+        return strtr($solutionTemplate, [
+            '{year}' => $date->getYearAsString(),
+            '{day}' => $date->day,
+            '{puzzleName}' => $puzzleMetadata?->puzzleName ?? "TODO Change me"
+        ]);
     }
 }

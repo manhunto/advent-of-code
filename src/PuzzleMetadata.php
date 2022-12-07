@@ -8,12 +8,8 @@ final class PuzzleMetadata
 {
 
     public function __construct(
-        private readonly string $puzzleInput,
+        public readonly string $puzzleInput,
+        public readonly string $puzzleName,
     ) {
-    }
-
-    public function getPuzzleInput(): string
-    {
-        return $this->puzzleInput;
     }
 }

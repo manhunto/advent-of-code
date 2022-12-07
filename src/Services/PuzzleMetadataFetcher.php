@@ -28,8 +28,26 @@ final class PuzzleMetadataFetcher
             throw new ApiException($e->getMessage());
         }
 
+        try {
+            $puzzleDescriptionPageContent = $this->client->getPuzzleDescriptionPage($date);
+        } catch (GuzzleException $e) {
+            throw new ApiException($e->getMessage());
+        }
+
+        $puzzleName = $this->getPuzzleName($puzzleDescriptionPageContent);
+
         return new PuzzleMetadata(
-            $puzzleInput
+            $puzzleInput,
+            $puzzleName
         );
+    }
+
+    private function getPuzzleName(string $puzzleDescriptionPageContent): string
+    {
+        if (preg_match("/--- Day \d+: (.*) ---/", $puzzleDescriptionPageContent, $matches)) {
+            return $matches[1];
+        }
+
+        throw new \RuntimeException('Unable to scrap puzzle name');
     }
 }
