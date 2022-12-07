@@ -26,11 +26,8 @@ final class SolutionRunner
     {
         $date = SolverFullyQualifiedClassname::fromObject($solution)->getDate();
 
-        $inputFileContent = $this->fileLoader->loadInput($date, $inputType);
-        $expectedResultFileContent = $this->fileLoader->loadExpectedOutput($date, $inputType);
-
-        $expectedResult = Result::fromArray($expectedResultFileContent);
-        $inputFile = Input::fromArray($inputFileContent);
+        $inputFile = $this->fileLoader->loadInput($date, $inputType);
+        $expectedResult = $this->fileLoader->loadExpectedResult($date, $inputType);
 
         $result = $solution->solve($inputFile);
 

@@ -9,6 +9,7 @@ use App\Date;
 use App\Exceptions\ApiException;
 use App\Exceptions\DateCannotBeGeneratedForToday;
 use App\Services\PuzzleMetadataFetcher;
+use App\SolverFullyQualifiedClassname;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -76,6 +77,12 @@ final class GenerateTemplateCommand extends Command
         $style = new SymfonyStyle($input, $output);
         $style->success('Files existed or were generated in ' . $dir);
 
+        $fqn = SolverFullyQualifiedClassname::fromDate($date);
+
+        if (!$fqn->classExists()) {
+            $style->caution('It looks like you generated class in not configured namespace. Add namespace to composer.json and configure this namespace in config/services.php');
+        }
+
         return self::SUCCESS;
     }
 
@@ -118,6 +125,10 @@ final class Solution implements Solver
 {
     public function solve(Input \$input): Result
     {
+        foreach (\$input->asArray() as \$row) {
+        
+        }
+    
         return new Result(123);
     }
 }

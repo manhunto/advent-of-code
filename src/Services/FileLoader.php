@@ -6,7 +6,9 @@ namespace App\Services;
 
 use App\Date;
 use App\Exceptions\FileNotFound;
+use App\Input;
 use App\InputType;
+use App\Result;
 
 final class FileLoader
 {
@@ -16,21 +18,23 @@ final class FileLoader
     /**
      * @throws FileNotFound
      */
-    public function loadInput(Date $date, InputType $inputType): array
+    public function loadInput(Date $date, InputType $inputType): Input
     {
         $inputFileLocation = $this->buildFilePath($date, $inputType, self::EXTENSION_IN);
+        $fileContent = $this->loadFile($inputFileLocation);
 
-        return $this->loadFile($inputFileLocation);
+        return Input::fromArray($fileContent);
     }
 
     /**
      * @throws FileNotFound
      */
-    public function loadExpectedOutput(Date $date, InputType $inputType): array
+    public function loadExpectedResult(Date $date, InputType $inputType): Result
     {
         $outputFileLocation = $this->buildFilePath($date, $inputType, self::EXTENSION_OUT);
+        $fileContent = $this->loadFile($outputFileLocation);
 
-        return $this->loadFile($outputFileLocation);
+        return Result::fromArray($fileContent);
     }
 
     /**

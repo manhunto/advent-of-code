@@ -40,4 +40,9 @@ final class SolverFullyQualifiedClassname
     {
         return $this->fqn;
     }
+
+    public function classExists(): bool
+    {
+        return class_exists($this->getAsString());
+    }
 }
