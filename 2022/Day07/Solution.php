@@ -10,14 +10,15 @@ use App\SolutionAttribute;
 use App\Solver;
 
 #[SolutionAttribute(
-    name: 'TODO Change me',
+    name: 'No Space Left On Device',
 )]
 final class Solution implements Solver
 {
     public function solve(Input $input): Result
     {
-        /** @var Dir|null $currentDir */
+        /** @var ?Dir $currentDir */
         $currentDir = null;
+        /** @var ?Dir $root */
         $root = null;
 
         foreach ($input->asArray() as $row) {
@@ -26,31 +27,22 @@ final class Solution implements Solver
 
                 if ($dirName === '/') {
                     $currentDir = $root = new Dir($dirName);
-                    continue;
-                }
-
-                if (preg_match('/[a-z]+/', $dirName)) {
+                } elseif (preg_match('/[a-z]+/', $dirName)) {
                     $currentDir = new Dir($dirName, $currentDir);
-                    continue;
-                }
-
-                if ($dirName === '..') {
+                } elseif ($dirName === '..') {
                     $currentDir = $currentDir->getParent();
                 }
             } else if (preg_match('/(\d+) ([a-z\.]+)/', $row, $matches)) {
-                $file = new File($matches[2], (int) $matches[1]);
-                $currentDir->addFile($file);
+                $currentDir->addFile($matches[2], (int) $matches[1]);
             }
         }
 
-        $root->print();
-
         $sizes = $this->getSizes($root);
-        var_dump($sizes);
 
-        $atMost = array_filter($sizes, fn (int $size) => $size <= 100000);
+        $partOne = $this->getSumOfDirsTotalSizeOfAtMost100000($sizes);
+        $partTwo = $this->getSmallestDirThatWouldFreeUpEnoughSpaceToRunUpdate($sizes, $root);
 
-        return new Result(array_sum($atMost));
+        return new Result($partOne, $partTwo);
     }
 
     private function getSizes(Dir $dir, array &$sizes = []): array
@@ -62,5 +54,29 @@ final class Solution implements Solver
         }
 
         return $sizes;
+    }
+
+    private function getSumOfDirsTotalSizeOfAtMost100000(array $sizes): int
+    {
+        $atMost = array_filter($sizes, static fn (int $size) => $size <= 100000);
+
+        return array_sum($atMost);
+    }
+
+    private function getSmallestDirThatWouldFreeUpEnoughSpaceToRunUpdate(array $sizes, Dir $root)
+    {
+        $totalDiscAvailable = 70_000_000;
+        $unusedSpaceToRunUpdate = 30_000_000;
+
+        sort($sizes);
+
+        $unusedSpace = $totalDiscAvailable - $root->getTotalSize();
+        $toDelete = $unusedSpaceToRunUpdate - $unusedSpace;
+
+        foreach ($sizes as $size) {
+            if ($toDelete <= $size) {
+                return $size;
+            }
+        }
     }
 }

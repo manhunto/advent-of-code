@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AdventOfCode2022\Day07;
 
-class Dir
+final class Dir
 {
     /** @var File[] */
     private array $files = [];
@@ -26,24 +26,9 @@ class Dir
         return $this->parent;
     }
 
-    public function addFile(File $file): void
+    public function addFile(string $name, int $size): void
     {
-        $this->files[] = $file;
-    }
-
-    private function addSubDir(Dir $subDir): void
-    {
-        $this->dirs[] = $subDir;
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function hasSubDirs(): bool
-    {
-        return !empty($this->dirs);
+        $this->files[] = new File($name, $size);
     }
 
     /**
@@ -54,25 +39,12 @@ class Dir
         return $this->dirs;
     }
 
-    public function hasFiles(): bool
-    {
-        return !empty($this->files);
-    }
-
-    /**
-     * @return File[]
-     */
-    public function getFiles(): array
-    {
-        return $this->files;
-    }
-
     public function getTotalSize(): int
     {
         $size = 0;
 
         foreach ($this->files as $file) {
-            $size += $file->getSize();
+            $size += $file->size;
         }
 
         foreach ($this->getSubDirs() as $dir) {
@@ -88,27 +60,24 @@ class Dir
             return '';
         }
 
-        $name = '';
-
-        if ($this->parent) {
-            $name .= $this->parent->getFullName() . '/';
-        }
-
-        $name .= $this->name;
-
-        return $name;
+        return $this->parent->getFullName() . '/' . $this->name;
     }
 
     public function print(int $depth = 0): void
     {
-        echo str_repeat(' ', $depth * 2) . '- ' . $this->getName() . ' (dir)' . PHP_EOL;
+        echo str_repeat(' ', $depth * 2) . '- ' . $this->name . ' (dir)' . PHP_EOL;
 
         foreach ($this->getSubDirs() as $subDir) {
             $subDir->print($depth + 1);
         }
 
-        foreach ($this->getFiles() as $file) {
-            echo str_repeat(' ', ($depth + 1) * 2) . '- ' . $file->getName() . ' (file, size=' . $file->getSize() . ')' . PHP_EOL;
+        foreach ($this->files as $file) {
+            echo str_repeat(' ', ($depth + 1) * 2) . '- ' . $file->name . ' (file, size=' . $file->size . ')' . PHP_EOL;
         }
+    }
+
+    private function addSubDir(Dir $subDir): void
+    {
+        $this->dirs[] = $subDir;
     }
 }
