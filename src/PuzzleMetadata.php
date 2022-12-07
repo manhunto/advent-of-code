@@ -6,10 +6,10 @@ namespace App;
 
 final class PuzzleMetadata
 {
-
     public function __construct(
         public readonly string $puzzleInput,
-        public readonly string $puzzleName,
+        public readonly ?string $puzzleName,
+        public readonly ?string $exampleInput,
     ) {
     }
 }

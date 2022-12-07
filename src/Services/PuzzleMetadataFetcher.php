@@ -35,19 +35,32 @@ final class PuzzleMetadataFetcher
         }
 
         $puzzleName = $this->getPuzzleName($puzzleDescriptionPageContent);
+        $exampleInput = $this->getExampleInput($puzzleDescriptionPageContent);
 
         return new PuzzleMetadata(
             $puzzleInput,
-            $puzzleName
+            $puzzleName,
+            $exampleInput
         );
     }
 
-    private function getPuzzleName(string $puzzleDescriptionPageContent): string
+    private function getPuzzleName(string $puzzleDescriptionPageContent): ?string
     {
         if (preg_match("/--- Day \d+: (.*) ---/", $puzzleDescriptionPageContent, $matches)) {
             return $matches[1];
         }
 
-        throw new \RuntimeException('Unable to scrap puzzle name');
+        return null;
+    }
+
+    private function getExampleInput(string $puzzleDescriptionPageContent): ?string
+    {
+        $pattern = "/.*?for example.*?\<code\>(.*?)\<\/code\>/is";
+
+        if (preg_match($pattern, $puzzleDescriptionPageContent, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 }

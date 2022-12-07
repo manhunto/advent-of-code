@@ -69,7 +69,7 @@ final class GenerateTemplateCommand extends Command
         $solutionContent = $this->getSolutionClassContent($date, $puzzleMetadata);
 
         $this->createDir($dir);
-        $this->createFile($dir . '/example.in');
+        $this->createFile($dir . '/example.in', $puzzleMetadata?->exampleInput);
         $this->createFile($dir . '/example.out');
         $this->createFile($dir . '/puzzle.in', $puzzleMetadata?->puzzleInput);
         $this->createFile($dir . '/puzzle.out');
