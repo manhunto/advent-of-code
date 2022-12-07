@@ -6,7 +6,9 @@ namespace App\Commands;
 
 use App\Commands\Helpers\DateInputHelper;
 use App\Date;
+use App\Exceptions\ApiException;
 use App\Exceptions\DateCannotBeGeneratedForToday;
+use App\Services\PuzzleMetadataFetcher;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,8 +22,11 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 final class GenerateTemplateCommand extends Command
 {
+    private const WITHOUT_FETCH = 'without-fetch';
+
     public function __construct(
         private readonly DateInputHelper $dateInputHelper,
+        private readonly PuzzleMetadataFetcher $puzzleMetadataFetcher,
     ) {
         parent::__construct();
     }
@@ -29,7 +34,8 @@ final class GenerateTemplateCommand extends Command
     protected function configure(): void
     {
         $this->addOption(DateInputHelper::OPTION_YEAR, 'y', InputOption::VALUE_REQUIRED)
-            ->addOption(DateInputHelper::OPTION_DAY, 'd', InputOption::VALUE_REQUIRED);
+            ->addOption(DateInputHelper::OPTION_DAY, 'd', InputOption::VALUE_REQUIRED)
+            ->addOption(self::WITHOUT_FETCH, 'f', InputOption::VALUE_NONE);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -44,6 +50,18 @@ final class GenerateTemplateCommand extends Command
             return Command::FAILURE;
         }
 
+        $puzzleMetadata = null;
+        if (!$input->getOption(self::WITHOUT_FETCH)) {
+            try {
+                $puzzleMetadata = $this->puzzleMetadataFetcher->fetch($date);
+            } catch (ApiException $e) {
+                $style->error('There is some error occurred during fetching puzzle metadata. Use --' . self::WITHOUT_FETCH . ' option to skip fetching.');
+                $style->error($e->getMessage());
+
+                return Command::FAILURE;
+            }
+        }
+
         $dir = sprintf(__DIR__ . '/../../%s/Day%s', $date->getYearAsString(), $date->day);
 
         $solutionContent = $this->getSolutionClassContent($date);
@@ -51,7 +69,7 @@ final class GenerateTemplateCommand extends Command
         $this->createDir($dir);
         $this->createFile($dir . '/example.in');
         $this->createFile($dir . '/example.out');
-        $this->createFile($dir . '/puzzle.in');
+        $this->createFile($dir . '/puzzle.in', $puzzleMetadata?->getPuzzleInput());
         $this->createFile($dir . '/puzzle.out');
         $this->createFile($dir . '/Solution.php', $solutionContent);
 

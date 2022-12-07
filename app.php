@@ -8,6 +8,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Application;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\Dotenv\Dotenv;
 
 class App extends Application
 {
@@ -23,8 +24,11 @@ class App extends Application
     }
 }
 
+$dotenv = new Dotenv();
+$dotenv->load(__DIR__.'/.env');
+
 $container = new ContainerBuilder();
 $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/config'));
 $loader->load('services.php');
-$container->compile();
+$container->compile(true);
 $container->get(App::class)->run();
