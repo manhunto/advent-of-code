@@ -39,8 +39,6 @@ final class Solution implements Solver
 
         $sizes = $this->getSizes($root);
 
-        $root->print();
-
         $partOne = $this->getSumOfDirsTotalSizeOfAtMost100000($sizes);
         $partTwo = $this->getSmallestDirThatWouldFreeUpEnoughSpaceToRunUpdate($sizes, $root);
 
@@ -65,7 +63,7 @@ final class Solution implements Solver
         return array_sum($atMost);
     }
 
-    private function getSmallestDirThatWouldFreeUpEnoughSpaceToRunUpdate(array $sizes, Dir $root)
+    private function getSmallestDirThatWouldFreeUpEnoughSpaceToRunUpdate(array $sizes, Dir $root): int
     {
         $totalDiscAvailable = 70_000_000;
         $unusedSpaceToRunUpdate = 30_000_000;
