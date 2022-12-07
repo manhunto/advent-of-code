@@ -22,6 +22,21 @@ final class Result implements \Stringable
         return (string) $this->partOne === (string) $other->partOne && (string) $this->partTwo === (string) $other->partTwo;
     }
 
+    public function hasAtLeasOneAnswer(): bool
+    {
+        return $this->isPartOneSolved() || $this->isPartTwoSolved();
+    }
+
+    public function isPartOneSolved(): bool
+    {
+        return $this->partOne !== null;
+    }
+
+    public function isPartTwoSolved(): bool
+    {
+        return $this->partTwo !== null;
+    }
+
     public function __toString(): string
     {
         $output = '';
@@ -35,5 +50,19 @@ final class Result implements \Stringable
         }
 
         return $output;
+    }
+
+    public function getAnswerForLevel(int $level): mixed
+    {
+        return match ($level) {
+            1 => $this->partOne,
+            2 => $this->partTwo,
+            default => throw new \LogicException('Answer for level ' . $level . ' is not available')
+        };
+    }
+
+    public function getAsArray(): array
+    {
+        return array_filter([$this->partOne, $this->partTwo]);
     }
 }

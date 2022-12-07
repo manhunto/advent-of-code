@@ -44,4 +44,22 @@ final class AdventOfCodeApiClient
 
         return (string) $response->getBody();
     }
+
+    /**
+     * @throws GuzzleException
+     */
+    public function sendAnswer(Date $date, mixed $answer, int $part): string
+    {
+        $response = $this->client->post(
+            sprintf('%d/day/%d/answer', $date->getYearAsString(), $date->getDayAsInt()),
+            [
+                'form_params' => [
+                    'level' => $part,
+                    'answer' => $answer,
+                ]
+            ]
+        );
+
+        return (string) $response->getBody();
+    }
 }
