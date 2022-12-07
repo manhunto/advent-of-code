@@ -65,16 +65,14 @@ final class Solution implements Solver
 
     private function getSmallestDirThatWouldFreeUpEnoughSpaceToRunUpdate(array $sizes, Dir $root): int
     {
-        $totalDiscAvailable = 70_000_000;
-        $unusedSpaceToRunUpdate = 30_000_000;
+        $used = $root->getTotalSize();
+        $free = 70_000_000 - $used;
+        $need = 30_000_000 - $free;
 
         sort($sizes);
 
-        $unusedSpace = $totalDiscAvailable - $root->getTotalSize();
-        $toDelete = $unusedSpaceToRunUpdate - $unusedSpace;
-
         foreach ($sizes as $size) {
-            if ($toDelete <= $size) {
+            if ($need <= $size) {
                 return $size;
             }
         }
