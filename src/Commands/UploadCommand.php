@@ -77,13 +77,13 @@ class UploadCommand extends Command
         if ($this->isPartOneNotUploadedButSolved($aocResult, $myResult)) {
             $io->note('Uploading first part');
 
-            return $this->upload($date, $myResult->partOne, 1, $io);
+            return $this->upload($date, $myResult, 1, $io);
         }
 
         if ($aocResult->isPartOneSolved() && $this->isPartTwoNotUploadedButResolved($aocResult, $myResult)) {
             $io->note('Uploading second part');
 
-            return $this->upload($date, $myResult->partTwo, 2, $io);
+            return $this->upload($date, $myResult, 2, $io);
         }
 
         return Command::SUCCESS;
@@ -113,6 +113,8 @@ class UploadCommand extends Command
             }
 
             $this->answerPersister->saveAnswer($date, $myResult);
+
+            $io->success('Answer for level ' . $level . ' has been uploaded and saved to file.');
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
