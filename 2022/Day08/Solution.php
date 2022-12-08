@@ -20,25 +20,17 @@ final class Solution implements Solver
         $isVisible = 0;
         $scenicScores = [];
 
-        $width = count($grid);
         foreach ($grid as $y => $row) {
-            $height = count($row);
             foreach ($row as $x => $tree) {
                 $tree = (int) $tree;
 
-                // edge
-                if ($y === $height - 1 || $x === $width - 1 || $y === 0 || $x === 0) {
+                $treesOnSides = $this->getTreesOnSides($row, $x, $grid, $y);
+
+                if ($this->isTreeVisibleFromOutsideTheGrid($tree, $treesOnSides)) {
                     $isVisible++;
-                } else {
-
-                    $treesOnSides = $this->getTreesOnSides($row, $x, $grid, $y);
-
-                    if ($this->isTreeVisibleFromOutsideTheGrid($tree, $treesOnSides)) {
-                        $isVisible++;
-                    }
-
-                    $scenicScores[] = $this->calculateScenicScore($tree, $treesOnSides);
                 }
+
+                $scenicScores[] = $this->calculateScenicScore($tree, $treesOnSides);
             }
         }
 
@@ -47,16 +39,20 @@ final class Solution implements Solver
 
     private function calculateScenicScore(int $tree, array $treesOnSides): int
     {
-        $scenicScoresOnSides = array_map(fn (array $row) => $this->calculateScenicScoreForRow($row, $tree), $treesOnSides);
+        $scenicScoresOnSides = array_map(fn(array $row) => $this->calculateScenicScoreForRow($row, $tree), $treesOnSides);
 
-        return array_reduce($scenicScoresOnSides, static fn (int $result, int $score) => $result * $score, 1);
+        return array_reduce(
+            $scenicScoresOnSides,
+            static fn(int $result, int $score) => $result * $score,
+            initial: 1
+        );
     }
 
-    private function calculateScenicScoreForRow(array $treesOnSide, int $tree): int
+    private function calculateScenicScoreForRow(array $treesOnSide, int $treeToExamine): int
     {
-        foreach ($treesOnSide as $index => $item) {
-            if ($item >= $tree) {
-                return $index + 1;
+        foreach ($treesOnSide as $distance => $treeOnSide) {
+            if ($treeOnSide >= $treeToExamine) {
+                return $distance + 1;
             }
         }
 
@@ -66,6 +62,10 @@ final class Solution implements Solver
     private function isTreeVisibleFromOutsideTheGrid(int $tree, array $treesOnSides): bool
     {
         foreach ($treesOnSides as $treesOnSide) {
+            if (empty($treesOnSide)) { // edge
+                return true;
+            }
+
             if (max($treesOnSide) < $tree) {
                 return true;
             }
