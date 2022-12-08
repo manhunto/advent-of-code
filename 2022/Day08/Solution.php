@@ -24,7 +24,7 @@ final class Solution implements Solver
             foreach ($row as $x => $tree) {
                 $tree = (int) $tree;
 
-                $treesOnSides = $this->getTreesOnSides($row, $x, $grid, $y);
+                $treesOnSides = $this->getTreesOnSides($grid, $x, $y);
 
                 if ($this->isTreeVisibleFromOutsideTheGrid($tree, $treesOnSides)) {
                     $isVisible++;
@@ -74,10 +74,12 @@ final class Solution implements Solver
         return false;
     }
 
-    private function getTreesOnSides(array $row, int $x, array $grid, int $y): array
+    private function getTreesOnSides(array $grid, int $x, int $y): array
     {
+        $row = $grid[$y];
         $treesOnWest = array_reverse(array_slice($row, 0, $x));
         $treesOnEast = array_slice($row, $x + 1);
+
         $column = array_column($grid, $x);
         $treesOnNorth = array_reverse(array_slice($column, 0, $y));
         $treesOnSouth = array_slice($column, $y + 1);
