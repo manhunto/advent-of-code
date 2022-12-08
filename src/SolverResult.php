@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App;
 
-final class ResultPair
+final class SolverResult
 {
     public function __construct(
         private readonly Result $currentResult,
-        private readonly Result $expectedResult
+        private readonly Result $expectedResult,
+        private readonly ExecutionTime $executionTime,
     ) {
     }
 
@@ -25,5 +26,10 @@ final class ResultPair
     public function getExpectedResult(): Result
     {
         return $this->expectedResult;
+    }
+
+    public function getExecutionTimeInMiliSeconds(): string
+    {
+        return $this->executionTime->getFormattedInMiliSeconds();
     }
 }

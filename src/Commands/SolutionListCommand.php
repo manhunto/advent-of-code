@@ -9,11 +9,10 @@ use App\InputType;
 use App\Services\SolutionFactory;
 use App\Services\SolutionRunner;
 use App\Services\SolutionsDescriptor;
+use App\SolverResult;
 use App\Year;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\TableCell;
-use Symfony\Component\Console\Helper\TableCellStyle;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -65,15 +64,15 @@ final class SolutionListCommand extends Command
         foreach ($this->factory->iterateForYear($year) as $solution) {
             $description = $this->descriptor->getDescription($solution);
 
-            $isExampleResolvedCorrectly = $this->runner->run($solution, InputType::Example)->isResolvedCorrectly();
-            $isPuzzleResolvedCorrectly = $this->runner->run($solution, InputType::Puzzle)->isResolvedCorrectly();
+            $exampleResult = $this->runner->run($solution, InputType::Example);
+            $puzzleResult = $this->runner->run($solution, InputType::Puzzle);
 
             $rows[] = [
                 $description->date->day,
                 $description->name ? sprintf('<href=%s>%s</>', $description->href, $description->name) : '---',
                 new TableSeparator(),
-                $this->renderIcon($isExampleResolvedCorrectly),
-                $this->renderIcon($isPuzzleResolvedCorrectly),
+                $this->renderSolutionResult($exampleResult),
+                $this->renderSolutionResult($puzzleResult),
             ];
         }
 
@@ -86,12 +85,12 @@ final class SolutionListCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function renderIcon(bool $isResolvedCorrectly): TableCell
+    private function renderSolutionResult(SolverResult $solverResult): string
     {
-        return new TableCell(
-            $isResolvedCorrectly ? self::RESOLVED_ICON : self::RESOLVED_INCORRECTLY_ICON,
-            ['style' => new TableCellStyle(['align' => 'center'])]
-        );
+        $icon = $solverResult->isResolvedCorrectly() ? self::RESOLVED_ICON : self::RESOLVED_INCORRECTLY_ICON;
+        $executionTime = $solverResult->isResolvedCorrectly() ? $solverResult->getExecutionTimeInMiliSeconds() : "---";
+
+        return sprintf('%s (%s)', $icon, $executionTime);
     }
 
     private function getYear(InputInterface $input): Year

@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Commands;
 
 use App\Commands\Helpers\DateInputHelper;
-use App\Date;
 use App\Exceptions;
 use App\InputType;
-use App\ResultPair;
+use App\SolverResult;
 use App\Services\SolutionFactory;
 use App\Services\SolutionRunner;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -74,7 +73,7 @@ final class SolveCommand extends Command
 
         if (!$resultPair->isResolvedCorrectly()) {
             $style->error('Unexpected result.');
-            $this->renderResultPair($style, $resultPair);
+            $this->renderSolverResult($style, $resultPair);
 
             return Command::FAILURE;
         }
@@ -89,7 +88,7 @@ final class SolveCommand extends Command
         return $input->getOption(self::OPTION_PUZZLE) ? InputType::Puzzle : InputType::Example;
     }
 
-    private function renderResultPair(SymfonyStyle $style, ResultPair $resultPair): void
+    private function renderSolverResult(SymfonyStyle $style, SolverResult $resultPair): void
     {
         $currentResult = $resultPair->getCurrentResult();
         $expectedResult = $resultPair->getExpectedResult();
