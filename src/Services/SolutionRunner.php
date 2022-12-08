@@ -16,7 +16,7 @@ use App\Stopwatch;
 final class SolutionRunner
 {
     public function __construct(
-        private readonly FileLoader $fileLoader,
+        private readonly FileSystem $fileLoader,
     ) {
     }
 

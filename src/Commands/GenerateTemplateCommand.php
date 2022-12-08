@@ -9,6 +9,7 @@ use App\Date;
 use App\Exceptions\ApiException;
 use App\Exceptions\DateCannotBeGeneratedForToday;
 use App\PuzzleMetadata;
+use App\Services\FileSystem;
 use App\Services\PuzzleMetadataFetcher;
 use App\SolverFullyQualifiedClassname;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -29,6 +30,7 @@ final class GenerateTemplateCommand extends Command
     public function __construct(
         private readonly DateInputHelper $dateInputHelper,
         private readonly PuzzleMetadataFetcher $puzzleMetadataFetcher,
+        private readonly FileSystem $fileSystem,
     ) {
         parent::__construct();
     }
@@ -64,45 +66,23 @@ final class GenerateTemplateCommand extends Command
             }
         }
 
-        $dir = sprintf(__DIR__ . '/../../%s/Day%s', $date->getYearAsString(), $date->day);
-
-        $solutionContent = $this->getSolutionClassContent($date, $puzzleMetadata);
-
-        $this->createDir($dir);
-        $this->createFile($dir . '/example.in', $puzzleMetadata?->exampleInput);
-        $this->createFile($dir . '/example.out');
-        $this->createFile($dir . '/puzzle.in', $puzzleMetadata?->puzzleInput);
-        $this->createFile($dir . '/puzzle.out');
-        $this->createFile($dir . '/Solution.php', $solutionContent);
+        $this->fileSystem->createSolutionDir($date);
+        $this->fileSystem->createFile($date, 'Solution.php', $this->getSolutionClassContent($date, $puzzleMetadata));
+        $this->fileSystem->createFile($date, 'example.in', $puzzleMetadata?->exampleInput);
+        $this->fileSystem->createFile($date, 'example.out');
+        $this->fileSystem->createFile($date, 'puzzle.in', $puzzleMetadata?->puzzleInput);
+        $this->fileSystem->createFile($date, 'puzzle.out');
 
         $style = new SymfonyStyle($input, $output);
-        $style->success('Files existed or were generated in ' . $dir);
+        $style->success('Files exists or has been generated');
 
         $fqn = SolverFullyQualifiedClassname::fromDate($date);
 
         if (!$fqn->classExists()) {
-            $style->caution('It looks like you generated class in not configured namespace. Add namespace to composer.json and configure this namespace in config/services.php');
+            $style->caution('It looks like you have generated class that isn\'t in configured namespace. Add namespace to composer.json and configure this namespace in config/services.php');
         }
 
         return self::SUCCESS;
-    }
-
-    private function createDir(string $path): void
-    {
-        if (!is_dir($path) && !mkdir($path, recursive: true) && !is_dir($path)) {
-            throw new \RuntimeException(sprintf('Directory "%s" was not created', $path));
-        }
-    }
-
-    private function createFile(string $fileName, ?string $content = null): void
-    {
-        if (!file_exists($fileName)) {
-            touch($fileName);
-
-            if ($content) {
-                file_put_contents($fileName, $content);
-            }
-        }
     }
 
     private function getSolutionClassContent(Date $date, ?PuzzleMetadata $puzzleMetadata): string
