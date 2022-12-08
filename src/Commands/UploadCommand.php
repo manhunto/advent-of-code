@@ -9,8 +9,8 @@ use App\Date;
 use App\Exceptions\ApiException;
 use App\InputType;
 use App\Result;
-use App\Services\AnswerPersister;
 use App\Services\AnswersService;
+use App\Services\FileSystem;
 use App\Services\SolutionFactory;
 use App\Services\SolutionRunner;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -31,7 +31,7 @@ class UploadCommand extends Command
         private readonly SolutionFactory $factory,
         private readonly SolutionRunner $runner,
         private readonly DateInputHelper $dateInputHelper,
-        private readonly AnswerPersister $answerPersister,
+        private readonly FileSystem $fileSystem,
     ) {
         parent::__construct();
     }
@@ -112,7 +112,7 @@ class UploadCommand extends Command
                 return Command::FAILURE;
             }
 
-            $this->answerPersister->saveAnswer($date, $myResult);
+            $this->fileSystem->savePuzzleAnswers($date, $myResult);
 
             $io->success('Answer for level ' . $level . ' has been uploaded and saved to file.');
 

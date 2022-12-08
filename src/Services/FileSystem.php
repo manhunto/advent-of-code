@@ -59,6 +59,19 @@ final class FileSystem
         }
     }
 
+    public function savePuzzleAnswers(Date $date, Result $result): void
+    {
+        if ($result->hasAtLeasOneAnswer()) {
+            $fileName = $this->buildFileName(InputType::Puzzle, self::EXTENSION_OUT);
+            $filePath = $this->buildFilePath($date, $fileName);
+
+            file_put_contents(
+                $filePath,
+                implode(PHP_EOL, $result->getAsArray()) . PHP_EOL,
+            );
+        }
+    }
+
     /**
      * @throws FileNotFound
      */
