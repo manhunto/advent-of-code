@@ -1,8 +1,23 @@
 # Advent of Code
 
-This repository contains my [Advent of Code](https://adventofcode.com/) solutions in PHP.
+This repository contains my [Advent of Code](https://adventofcode.com/) solutions in PHP and a library built on Symfony that helps me work on puzzle-solving more conveniently.
 
 ## How to use
+
+### Configure
+
+Create `.env` file based on `.env.example`.
+
+```bash
+cp .env.example .env
+```
+
+#### How to get value for `SESSION_ID`? 
+
+Login into your account on Advent of Code website, open **Network tab** in your browser and copy and find session in cookie.
+
+![session-id-cookie.png](resources/session-id-cookie.png)
+
 ### Generate solution template
 
 It is helpful in immediately starting to solve puzzles. It creates all the required files for a puzzle. The default day is **today**.

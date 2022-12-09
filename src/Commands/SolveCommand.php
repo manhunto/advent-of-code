@@ -6,6 +6,8 @@ namespace App\Commands;
 
 use App\Commands\Helpers\DateInputHelper;
 use App\Exceptions;
+use App\Exceptions\ClassNotFound;
+use App\Exceptions\FileNotFound;
 use App\InputType;
 use App\SolverResult;
 use App\Services\SolutionFactory;
@@ -61,15 +63,8 @@ final class SolveCommand extends Command
 
         try {
             $solution = $this->factory->create($date);
-        } catch (Exceptions\ClassNotFound $e) {
-            $style->error($e->getMessage());
-
-            return Command::FAILURE;
-        }
-
-        try {
             $resultPair = $this->runner->run($solution, $inputType);
-        } catch (Exceptions\FileNotFound $e) {
+        } catch (ClassNotFound|FileNotFound $e) {
             $style->error($e->getMessage());
 
             return Command::FAILURE;
