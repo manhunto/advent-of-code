@@ -39,44 +39,11 @@ final class Solution implements Solver
 
         $head = reset($knots);
         $lastKnot = end($knots);
-    
+
         return new Result(
             $head->countPositionsVisitedAtLeastOnce(),
             $lastKnot->countPositionsVisitedAtLeastOnce()
         );
-    }
-
-    private function print(Knot $head, Knot ...$tails): void
-    {
-        $grid = [];
-        $gridSize = 10;
-        for ($i = 0; $i < $gridSize; $i++) {
-            $grid[] = array_fill(0, $gridSize, '.');
-        }
-
-        $invertY = static fn (int $point): int => $gridSize - 1 - $point;
-
-        $grid[$invertY(0)][0] = 's';
-        $grid[$invertY($head->y)][$head->x] = 'H';
-
-        foreach ($tails as $index => $tail) {
-            $grid[$invertY($tail->y)][$tail->x] = $index + 1;
-        }
-
-        foreach ($grid as $row) {
-            foreach ($row as $point) {
-                echo $point;
-            }
-            echo PHP_EOL;
-        }
-
-        echo 'Head: ' . $head->x . ',' . $head->y . PHP_EOL;
-
-        foreach ($tails as $index => $tail) {
-            echo $index . ': ' . $tail->x . ',' . $tail->y . PHP_EOL;
-        }
-
-        echo PHP_EOL;
     }
 
     /**
