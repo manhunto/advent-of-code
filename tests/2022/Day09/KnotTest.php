@@ -7,15 +7,10 @@ namespace Tests\AdventOfCode2022\Day09;
 use AdventOfCode2022\Day09\Knot;
 use PHPUnit\Framework\TestCase;
 
-class MovingPointTest extends TestCase
+class KnotTest extends TestCase
 {
     /**
      * @dataProvider moveTowardsData
-     *
-     * @param array $head
-     * @param array $tail
-     * @param array $expected
-     * @return void
      */
     public function testMoveTowards(array $head, array $tail, array $expected): void
     {
@@ -63,5 +58,4 @@ class MovingPointTest extends TestCase
         yield 'R2 1' => [[2,2], [2,2], [2,2]];
         yield 'R2 2' => [[3,2], [2,2], [2,2]];
     }
-
 }

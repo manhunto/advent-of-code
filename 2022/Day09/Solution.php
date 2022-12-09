@@ -17,7 +17,7 @@ final class Solution implements Solver
     public function solve(Input $input): Result
     {
         $head = new Knot();
-        $tails = $this->fillArrayWithTails(9);
+        $knots = $this->fillArrayWithKnots(9);
 
         foreach ($input->asArray() as $row) {
             [$direction, $steps] = explode(' ', $row);
@@ -26,7 +26,7 @@ final class Solution implements Solver
                 $head->moveInDirection($direction);
 
                 /** @var Knot[] $allKnots */
-                $allKnots = [$head, ...$tails];
+                $allKnots = [$head, ...$knots];
                 foreach ($allKnots as $index => $knot) {
                     $knotBefore = $allKnots[$index - 1] ?? null;
 
@@ -37,11 +37,11 @@ final class Solution implements Solver
             }
         }
 
-        $firstTail = reset($tails);
-        $lastKnot = end($tails);
+        $head = reset($knots);
+        $lastKnot = end($knots);
     
         return new Result(
-            $firstTail->countPositionsVisitedAtLeastOnce(),
+            $head->countPositionsVisitedAtLeastOnce(),
             $lastKnot->countPositionsVisitedAtLeastOnce()
         );
     }
@@ -82,13 +82,13 @@ final class Solution implements Solver
     /**
      * @return Knot[]
      */
-    private function fillArrayWithTails(int $tailsCount): array
+    private function fillArrayWithKnots(int $ropeLength): array
     {
-        $tails = [];
-        for ($i = 0; $i < $tailsCount; $i++) {
-            $tails[] = new Knot();
+        $knots = [];
+        for ($i = 0; $i < $ropeLength; $i++) {
+            $knots[] = new Knot();
         }
 
-        return $tails;
+        return $knots;
     }
 }
