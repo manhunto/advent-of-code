@@ -22,8 +22,10 @@ php app.php app:generate-template [--year=2022] [--day=1]
 
 It runs a puzzle solver for a given day and compares it with expected results.
 
+- you can pass example number to solve not default example input. There is five examples available.
+
 ```bash
-php app.php app:solve [--year=2022] [--day=1] [--puzzle]
+php app.php app:solve [--year=2022] [--day=1] [--puzzle] [--example=3]
 ```
 
 #### Good result

@@ -25,6 +25,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class SolveCommand extends Command
 {
     private const OPTION_PUZZLE = 'puzzle';
+    private const OPTION_EXAMPLE = 'example';
 
     public function __construct(
         private readonly SolutionFactory $factory,
@@ -38,7 +39,8 @@ final class SolveCommand extends Command
     {
         $this->addOption(DateInputHelper::OPTION_YEAR, 'y', InputOption::VALUE_REQUIRED)
             ->addOption(DateInputHelper::OPTION_DAY, 'd', InputOption::VALUE_REQUIRED)
-            ->addOption(self::OPTION_PUZZLE, 'p', InputOption::VALUE_NONE);
+            ->addOption(self::OPTION_PUZZLE, 'p', InputOption::VALUE_NONE)
+            ->addOption(self::OPTION_EXAMPLE, 'e', InputOption::VALUE_REQUIRED, 'Solve puzzle for given example number. Available [2-5]');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -54,6 +56,8 @@ final class SolveCommand extends Command
         }
 
         $inputType = $this->prepareInputType($input);
+
+        $style->block($inputType->name, 'Input type');
 
         try {
             $solution = $this->factory->create($date);
@@ -85,7 +89,17 @@ final class SolveCommand extends Command
 
     private function prepareInputType(InputInterface $input): InputType
     {
-        return $input->getOption(self::OPTION_PUZZLE) ? InputType::Puzzle : InputType::Example;
+        if ($input->getOption(self::OPTION_PUZZLE)) {
+            return InputType::Puzzle;
+        }
+
+        $exampleNumber = $input->getOption(self::OPTION_EXAMPLE);
+
+        if (is_numeric($exampleNumber) && $exampleNumber > 1) {
+            return InputType::tryForExampleNumber((int) $exampleNumber);
+        }
+
+        return InputType::Example;
     }
 
     private function renderSolverResult(SymfonyStyle $style, SolverResult $resultPair): void

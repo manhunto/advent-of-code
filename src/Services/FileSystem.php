@@ -96,6 +96,6 @@ final class FileSystem
 
     private function buildFileName(InputType $inputType, string $extension): string
     {
-        return sprintf('/%s.%s', $inputType->value, $extension);
+        return sprintf('%s.%s', $inputType->value, $extension);
     }
 }
