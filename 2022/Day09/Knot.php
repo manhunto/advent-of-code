@@ -29,28 +29,16 @@ class Knot
         $this->move($diff[0], $diff[1]);
     }
 
-    public function moveTowards(Knot $head): void
+    public function moveTowards(Knot $target): void
     {
-        $diffX = $head->x - $this->x;
-        $diffY = $head->y - $this->y;
+        $diffX = $target->x - $this->x;
+        $diffY = $target->y - $this->y;
 
-        $distance = (abs(($diffX ** 2) + ($diffY ** 2))) ** 0.5;
-
-        $moveXByOne = $diffX > 0 ? 1 : -1;
-        $moveYByOne = $diffY > 0 ? 1 : -1;
-
-        // diagonally, all directions by one towards
-        if ($distance > 2) {
-            $this->move($moveXByOne, $moveYByOne);
+        if (abs($diffY) <= 1 && abs($diffX) <= 1) {
+            return; // touching, skip
         }
 
-        // +1 in direction - up, down, left, right
-        if ($distance > 1) {
-            $this->move(
-                $diffY !== 0 ? 0 : $moveXByOne,
-                $diffX !== 0 ? 0 : $moveYByOne
-            );
-        }
+        $this->move($diffX <=> 0, $diffY <=> 0); // move by one in direction
     }
 
     public function countPositionsVisitedAtLeastOnce(): int
