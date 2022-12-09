@@ -16,7 +16,7 @@ final class Solution implements Solver
 {
     public function solve(Input $input): Result
     {
-        $head = new MovingPoint();
+        $head = new Knot();
         $tails = $this->fillArrayWithTails(9);
 
         foreach ($input->asArray() as $row) {
@@ -25,6 +25,7 @@ final class Solution implements Solver
             for ($i = 0; $i < $steps; $i++) {
                 $head->moveInDirection($direction);
 
+                /** @var Knot[] $allKnots */
                 $allKnots = [$head, ...$tails];
                 foreach ($allKnots as $index => $knot) {
                     $knotBefore = $allKnots[$index - 1] ?? null;
@@ -40,19 +41,20 @@ final class Solution implements Solver
         $lastKnot = end($tails);
     
         return new Result(
-            $firstTail->countVisitedPointAtLeastOnce(),
-            $lastKnot->countVisitedPointAtLeastOnce()
+            $firstTail->countPositionsVisitedAtLeastOnce(),
+            $lastKnot->countPositionsVisitedAtLeastOnce()
         );
     }
 
-    private function print(MovingPoint $head, MovingPoint ...$tails): void
+    private function print(Knot $head, Knot ...$tails): void
     {
         $grid = [];
-        for ($i = 0; $i < 10 ; $i++) {
-            $grid[] = array_fill(0, 10, '.');
+        $gridSize = 10;
+        for ($i = 0; $i < $gridSize; $i++) {
+            $grid[] = array_fill(0, $gridSize, '.');
         }
 
-        $invertY = static fn (int $point): int => 10 - 1 - $point;
+        $invertY = static fn (int $point): int => $gridSize - 1 - $point;
 
         $grid[$invertY(0)][0] = 's';
         $grid[$invertY($head->y)][$head->x] = 'H';
@@ -78,13 +80,13 @@ final class Solution implements Solver
     }
 
     /**
-     * @return MovingPoint[]
+     * @return Knot[]
      */
     private function fillArrayWithTails(int $tailsCount): array
     {
         $tails = [];
         for ($i = 0; $i < $tailsCount; $i++) {
-            $tails[] = new MovingPoint();
+            $tails[] = new Knot();
         }
 
         return $tails;

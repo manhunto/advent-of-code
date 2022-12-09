@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\AdventOfCode2022\Day09;
 
-use AdventOfCode2022\Day09\MovingPoint;
+use AdventOfCode2022\Day09\Knot;
 use PHPUnit\Framework\TestCase;
 
 class MovingPointTest extends TestCase
@@ -17,19 +17,18 @@ class MovingPointTest extends TestCase
      * @param array $expected
      * @return void
      */
-    public function testMoveTowards(array $head, array $tail, array $expected)
+    public function testMoveTowards(array $head, array $tail, array $expected): void
     {
-        $head = new MovingPoint($head[0],$head[1]);
-        $tail = new MovingPoint($tail[0], $tail[1]);
+        $head = new Knot($head[0],$head[1]);
+        $tail = new Knot($tail[0], $tail[1]);
 
         $tail->moveTowards($head);
 
         self::assertSame($expected[0], $tail->x);
         self::assertSame($expected[1], $tail->y);
-
     }
 
-    public function moveTowardsData()
+    public function moveTowardsData(): iterable
     {
         // R4
         yield 'Initial' => [[0,0], [0,0], [0,0]];
