@@ -114,7 +114,7 @@ class UploadCommand extends Command
 
             $this->fileSystem->savePuzzleAnswers($date, $myResult);
 
-            $io->success('Answer for level ' . $level . ' has been uploaded and saved to file.');
+            $io->success('Answer for level ' . $level . ' has been uploaded and is correct. Answer saved to file.');
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
