@@ -80,7 +80,7 @@ class MovingPoint
 
     public function countVisitedPointAtLeastOnce(): int
     {
-        $visitedAtLeastOnce = array_filter($this->visitedPoints, fn (int $visitCount): bool => $visitCount > 0);
+        $visitedAtLeastOnce = array_filter($this->visitedPoints, static fn (int $visitCount): bool => $visitCount > 0);
 
         return count($visitedAtLeastOnce);
     }

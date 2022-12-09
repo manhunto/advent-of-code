@@ -17,7 +17,11 @@ final class Solution implements Solver
     public function solve(Input $input): Result
     {
         $head = new MovingPoint();
-        $tail = new MovingPoint();
+
+        $manyTails = [];
+        for ($i = 0; $i < 9; $i++) {
+            $manyTails[] = new MovingPoint();
+        }
 
         foreach ($input->asArray() as $row) {
             [$direction, $steps] = explode(' ', $row);
@@ -38,14 +42,27 @@ final class Solution implements Solver
                         break;
                 }
 
-                $tail->moveTowards($head);
+                $allKnots = [$head, ...$manyTails];
+                foreach ($allKnots as $index => $knot) {
+                    $knotBefore = $allKnots[$index - 1] ?? null;
+
+                    if ($knotBefore) {
+                        $knot->moveTowards($knotBefore);
+                    }
+                }
             }
         }
+
+        $firstTail = reset($manyTails);
+        $lastKnot = end($manyTails);
     
-        return new Result($tail->countVisitedPointAtLeastOnce());
+        return new Result(
+            $firstTail->countVisitedPointAtLeastOnce(),
+            $lastKnot->countVisitedPointAtLeastOnce()
+        );
     }
 
-    private function print(MovingPoint $head, MovingPoint $tail): void
+    private function print(MovingPoint $head, MovingPoint ...$tails): void
     {
         $grid = [];
         for ($i = 0; $i < 10 ; $i++) {
@@ -56,7 +73,10 @@ final class Solution implements Solver
 
         $grid[$invertY(0)][0] = 's';
         $grid[$invertY($head->y)][$head->x] = 'H';
-        $grid[$invertY($tail->y)][$tail->x] = 'T';
+
+        foreach ($tails as $index => $tail) {
+            $grid[$invertY($tail->y)][$tail->x] = $index + 1;
+        }
 
         foreach ($grid as $row) {
             foreach ($row as $point) {
@@ -66,7 +86,11 @@ final class Solution implements Solver
         }
 
         echo 'Head: ' . $head->x . ',' . $head->y . PHP_EOL;
-        echo 'Tail: ' . $tail->x . ',' . $tail->y . PHP_EOL;
+
+        foreach ($tails as $index => $tail) {
+            echo $index . ': ' . $tail->x . ',' . $tail->y . PHP_EOL;
+        }
+
         echo PHP_EOL;
     }
 }
