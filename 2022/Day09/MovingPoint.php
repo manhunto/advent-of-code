@@ -21,28 +21,27 @@ class MovingPoint
         ++$this->visitedPoints[$key];
     }
 
-    public function moveRight(): void
+    public function moveInDirection(string $direction): void
     {
-        $this->x++;
-        $this->addPositionToVisitedPoints();
-    }
+        $diffX = 0;
+        $diffY = 0;
 
-    public function moveLeft(): void
-    {
-        $this->x--;
-        $this->addPositionToVisitedPoints();
-    }
+        switch ($direction) {
+            case 'R' :
+                $diffX++;
+                break;
+            case 'L':
+                $diffX--;
+                break;
+            case 'U' :
+                $diffY++;
+                break;
+            case 'D':
+                $diffY--;
+                break;
+        }
 
-    public function moveUp(): void
-    {
-        $this->y++;
-        $this->addPositionToVisitedPoints();
-    }
-
-    public function moveDown(): void
-    {
-        $this->y--;
-        $this->addPositionToVisitedPoints();
+        $this->move($diffX, $diffY);
     }
 
     public function moveTowards(MovingPoint $head): void
@@ -53,23 +52,17 @@ class MovingPoint
         $distanceY = abs($diffY);
         $distanceX = abs($diffX);
 
+        // left or right
         if ($diffY === 0 && $distanceX > 1) {
-            if ($diffX > 1) {
-                $this->moveRight();
-            } elseif ($diffX < 1) {
-                $this->moveLeft();
-            }
+            $this->move($diffX > 1 ? 1 : -1, 0);
         }
 
+        //up or down
         if ($diffX === 0 && $distanceY > 1) {
-            if ($diffY > 1) {
-                $this->moveUp();
-            } elseif ($diffY < 1) {
-                $this->moveDown();
-            }
+            $this->move(0, $diffY > 1 ? 1 : -1);
         }
 
-
+        // diagonally
         if ($distanceX + $distanceY > 2) {
             $newDiffX = $this->x < $head->x ? 1 : -1;
             $newDiffY = $this->y < $head->y ? 1 : -1;

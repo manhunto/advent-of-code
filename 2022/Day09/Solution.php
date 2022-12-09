@@ -17,32 +17,15 @@ final class Solution implements Solver
     public function solve(Input $input): Result
     {
         $head = new MovingPoint();
-
-        $manyTails = [];
-        for ($i = 0; $i < 9; $i++) {
-            $manyTails[] = new MovingPoint();
-        }
+        $tails = $this->fillArrayWithTails(9);
 
         foreach ($input->asArray() as $row) {
             [$direction, $steps] = explode(' ', $row);
 
             for ($i = 0; $i < $steps; $i++) {
-                switch ($direction) {
-                    case 'R' :
-                        $head->moveRight();
-                        break;
-                    case 'L':
-                        $head->moveLeft();
-                        break;
-                    case 'U' :
-                        $head->moveUp();
-                        break;
-                    case 'D':
-                        $head->moveDown();
-                        break;
-                }
+                $head->moveInDirection($direction);
 
-                $allKnots = [$head, ...$manyTails];
+                $allKnots = [$head, ...$tails];
                 foreach ($allKnots as $index => $knot) {
                     $knotBefore = $allKnots[$index - 1] ?? null;
 
@@ -53,8 +36,8 @@ final class Solution implements Solver
             }
         }
 
-        $firstTail = reset($manyTails);
-        $lastKnot = end($manyTails);
+        $firstTail = reset($tails);
+        $lastKnot = end($tails);
     
         return new Result(
             $firstTail->countVisitedPointAtLeastOnce(),
@@ -92,5 +75,18 @@ final class Solution implements Solver
         }
 
         echo PHP_EOL;
+    }
+
+    /**
+     * @return MovingPoint[]
+     */
+    private function fillArrayWithTails(int $tailsCount): array
+    {
+        $tails = [];
+        for ($i = 0; $i < $tailsCount; $i++) {
+            $tails[] = new MovingPoint();
+        }
+
+        return $tails;
     }
 }
