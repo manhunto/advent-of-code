@@ -36,9 +36,9 @@ class Item implements \Stringable
         return (string) $this->worryLevel;
     }
 
-    public function isDivisibleBy(int $divisible): bool
+    public function isDivisibleBy(int $divisor): bool
     {
-        return $this->worryLevel % $divisible === 0;
+        return $this->worryLevel % $divisor === 0;
     }
 
     public function mod(int $value): void

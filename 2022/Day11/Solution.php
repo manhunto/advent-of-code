@@ -40,8 +40,8 @@ final class Solution implements Solver
     private function solvePart2(Input $input): int
     {
         $monkeys = $this->parseInput($input);
-        $commonProduct = $this->getCommonProduct($monkeys);
-        $reduceWorryLevelFunc = static fn (Item $item) => $item->mod($commonProduct);
+        $greatestCommonDivisor = $this->getGreatestCommonDivisor($monkeys);
+        $reduceWorryLevelFunc = static fn (Item $item) => $item->mod($greatestCommonDivisor);
 
         for ($round = 0; $round < 10_000; $round++) {
             foreach ($monkeys as $monkey) {
@@ -97,13 +97,11 @@ final class Solution implements Solver
     }
 
     /**
-     * Divisible are prime numbers. Common product of those numbers will reduce worry level of items.
+     * Modulo with the greatest common divisor of test numbers don't break calculation on worry level.
      */
-    private function getCommonProduct(array $monkeys): int
+    private function getGreatestCommonDivisor(array $monkeys): int
     {
-        $divisibleBy = array_map(static fn(Monkey $monkey) => $monkey->divisible, $monkeys);
-
-        return array_reduce($divisibleBy, static fn(int $value, int $divisibleOneBy) => $value * $divisibleOneBy, 1);
+        return array_reduce($monkeys, static fn(int $value, Monkey $monkey) => $value * $monkey->divisible, 1);
     }
 
     private function calculateMonkeyBusiness(array $monkeys): int
