@@ -8,6 +8,7 @@ use App\Input;
 use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
+use App\Utils\Regex;
 
 #[SolutionAttribute(
     name: 'Monkey in the Middle',
@@ -16,22 +17,39 @@ final class Solution implements Solver
 {
     public function solve(Input $input): Result
     {
+        $part1 = $this->solvePart1($input);
+        $part2 = $this->solvePart2($input);
+
+        return new Result($part1, $part2);
+    }
+
+    private function solvePart1(Input $input): int
+    {
         $monkeys = $this->parseInput($input);
+        $reduceWorryLevelFunc = static fn (Item $item) => $item->divideByThree();
 
         for ($round = 0; $round < 20; $round++) {
             foreach ($monkeys as $monkey) {
-                $monkey->inspectItems($monkeys);
+                $monkey->inspectItems($monkeys, $reduceWorryLevelFunc);
             }
         }
 
-        $inspectedItems = array_map(static fn (Monkey $monkey): int => $monkey->getInspectedItemsCount(), $monkeys);
+        return $this->calculateMonkeyBusiness($monkeys);
+    }
 
-        sort($inspectedItems);
+    private function solvePart2(Input $input): int
+    {
+        $monkeys = $this->parseInput($input);
+        $commonProduct = $this->getCommonProduct($monkeys);
+        $reduceWorryLevelFunc = static fn (Item $item) => $item->mod($commonProduct);
 
-        $mostActiveMonkeys = array_slice($inspectedItems, -2);
-        $monkeyBusiness = $mostActiveMonkeys[0] * $mostActiveMonkeys[1];
+        for ($round = 0; $round < 10_000; $round++) {
+            foreach ($monkeys as $monkey) {
+                $monkey->inspectItems($monkeys, $reduceWorryLevelFunc);
+            }
+        }
 
-        return new Result($monkeyBusiness);
+        return $this->calculateMonkeyBusiness($monkeys);
     }
 
     /**
@@ -50,14 +68,9 @@ final class Solution implements Solver
     private function parseNotesForMonkey(string $notesForMonkey): Monkey
     {
         $monkeyNoteByLines = explode(PHP_EOL, $notesForMonkey);
-        preg_match('/Monkey (\d+):/', $monkeyNoteByLines[0], $matches);
-        $name = (int) $matches[1];
 
-        preg_match('/Starting items: ([0-9,\s]+)/', $monkeyNoteByLines[1], $matches);
-        $items = explode(', ', $matches[1]);
-
-        preg_match('/Operation: new = old (.*)/', $monkeyNoteByLines[2], $matches);
-        $operationInstruction = $matches[1];
+        $items = explode(', ', Regex::matchSingle('/Starting items: ([0-9,\s]+)/', $monkeyNoteByLines[1]));
+        $operationInstruction = Regex::matchSingle('/Operation: new = old (.*)/', $monkeyNoteByLines[2]);
 
         [$op, $value] = explode(' ', $operationInstruction);
 
@@ -70,22 +83,13 @@ final class Solution implements Solver
                 $operation = static fn(Item $item) => $item->multiply((int)$value);
             }
         }
-
-        if (preg_match('/Test: divisible by (\d+)/', $monkeyNoteByLines[3], $matches)) {
-            $divisibleBy = (int) $matches[1];
-        } else {
-            throw new \LogicException('Unhandled test: ' . $monkeyNoteByLines[3]);
-        }
-
-        preg_match('/throw to monkey (\d+)/', $monkeyNoteByLines[4], $matches);
-        $ifTrue = (int) $matches[1];
-        preg_match('/throw to monkey (\d+)/', $monkeyNoteByLines[5], $matches);
-        $ifFalse = (int) $matches[1];
+        $divisibleBy = (int) Regex::matchSingle('/Test: divisible by (\d+)/', $monkeyNoteByLines[3]);
+        $ifTrue = (int) Regex::matchSingle('/throw to monkey (\d+)/', $monkeyNoteByLines[4]);
+        $ifFalse = (int) Regex::matchSingle('/throw to monkey (\d+)/', $monkeyNoteByLines[5]);
 
         return new Monkey(
-            $name,
             array_map(static fn (int $worryLevel) => new Item($worryLevel), $items),
-            $operation,
+            $operation ?? throw new LogicException('Cannot parse operation: '. $operationInstruction),
             $divisibleBy,
             $ifTrue,
             $ifFalse,
@@ -93,13 +97,20 @@ final class Solution implements Solver
     }
 
     /**
-     * @param Monkey[] $monkeys
+     * Divisible are prime numbers. Common product of those numbers will reduce worry level of items.
      */
-    private function print(array $monkeys)
+    private function getCommonProduct(array $monkeys): int
     {
-        foreach ($monkeys as $number => $monkey) {
-            $worryLevels = implode(', ', $monkey->items());
-            echo sprintf('Monkey %d: %s', $number, $worryLevels) . PHP_EOL;
-        }
+        $divisibleBy = array_map(static fn(Monkey $monkey) => $monkey->divisible, $monkeys);
+
+        return array_reduce($divisibleBy, static fn(int $value, int $divisibleOneBy) => $value * $divisibleOneBy, 1);
+    }
+
+    private function calculateMonkeyBusiness(array $monkeys): int
+    {
+        $inspectedItems = array_map(static fn(Monkey $monkey): int => $monkey->getInspectedItemsCount(), $monkeys);
+        rsort($inspectedItems);
+
+        return $inspectedItems[0] * $inspectedItems[1];
     }
 }

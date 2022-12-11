@@ -13,7 +13,7 @@ class Item implements \Stringable
 
     public function pow(): void
     {
-        $this->worryLevel = pow($this->worryLevel, 2);
+        $this->worryLevel = $this->worryLevel ** 2;
     }
 
     public function multiply(int $value): void
@@ -31,13 +31,18 @@ class Item implements \Stringable
         $this->worryLevel = (int) floor($this->worryLevel / 3);
     }
 
-    public function getWorryLevel(): int
-    {
-        return $this->worryLevel;
-    }
-
     public function __toString(): string
     {
         return (string) $this->worryLevel;
+    }
+
+    public function isDivisibleBy(int $divisible): bool
+    {
+        return $this->worryLevel % $divisible === 0;
+    }
+
+    public function mod(int $value): void
+    {
+        $this->worryLevel %= $value;
     }
 }
