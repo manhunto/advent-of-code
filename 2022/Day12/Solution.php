@@ -8,6 +8,7 @@ use App\Input;
 use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
+use App\Utils\PathFinding\Dijkstra;
 
 #[SolutionAttribute(
     name: 'Hill Climbing Algorithm',
@@ -41,12 +42,14 @@ final class Solution implements Solver
 
         $graph = $this->buildGraph($grid);
 
+        $dijkstra = new Dijkstra();
+
         // Part 1
-        $firstPathCosts = $this->dijkstra($graph, $end, [(string) $start]);
+        $firstPathCosts = $dijkstra->calculateDistance($graph, (string) $end, [(string) $start]);
         $stepsToLocationWithBestSignal = $firstPathCosts[(string)$start];
 
         // Part 2
-        $secondPartCosts = $this->dijkstra($graph, $end, $lowestPoints);
+        $secondPartCosts = $dijkstra->calculateDistance($graph, (string) $end, $lowestPoints);
 
         $aCost = array_filter(
             $secondPartCosts,
@@ -77,42 +80,5 @@ final class Solution implements Solver
         }
 
         return $graph;
-    }
-
-    private function dijkstra(array $graph, Point $start, array $stopAt = []): array
-    {
-        $unvisited = array_keys($graph);
-        $distance = array_fill_keys($unvisited, PHP_INT_MAX);
-        $distance[(string) $start] = 0;
-
-        while (!empty($unvisited)) {
-            $currentNode = $this->minDistanceNode($distance, $unvisited);
-            unset($unvisited[array_search($currentNode, $unvisited, true)]);
-
-            foreach ($graph[$currentNode] as $neighbour => $cost) {
-                $distance[$neighbour] = $distance[$currentNode] + $cost;
-            }
-
-            if (!empty($stopAt) && in_array($currentNode, $stopAt, true)) {
-                break;
-            }
-        }
-
-        return $distance;
-    }
-
-    private function minDistanceNode(array $distance, array $unvisited): string
-    {
-        $min = PHP_INT_MAX;
-        $next = null;
-
-        foreach ($distance as $nodeName => $currentDistance) {
-            if ($currentDistance <= $min && in_array($nodeName, $unvisited, true)) {
-                $min = $currentDistance;
-                $next = $nodeName;
-            }
-        }
-
-        return $next;
     }
 }
