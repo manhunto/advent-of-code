@@ -31,7 +31,7 @@ class Point implements \Stringable
 
     public function canMove(Point $point): bool
     {
-        $distance = $point->getElevation() - $this->getElevation();
+        $distance = $this->getElevation() - $point->getElevation();
 
         return $distance <= 1;
     }
@@ -69,6 +69,11 @@ class Point implements \Stringable
     public function isEnd(): bool
     {
         return $this->value === self::END_POSITION;
+    }
+
+    public function isTheLowestElevation(): bool
+    {
+        return $this->value === 'a';
     }
 
     public function __toString(): string

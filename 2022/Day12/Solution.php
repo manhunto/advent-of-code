@@ -8,7 +8,6 @@ use App\Input;
 use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
-use Taniko\Dijkstra\Graph;
 
 #[SolutionAttribute(
     name: 'Hill Climbing Algorithm',
@@ -23,6 +22,8 @@ final class Solution implements Solver
         /** @var Point|null $end */
         $end = null;
 
+        $lowestPoints = [];
+
         foreach ($grid as $y => $rows) {
             foreach ($rows as $x => $value) {
                 $point = new Point($value, $y, $x);
@@ -32,19 +33,32 @@ final class Solution implements Solver
                     $start = $point;
                 } elseif ($point->isEnd()) {
                     $end = $point;
+                } elseif ($point->isTheLowestElevation()) {
+                    $lowestPoints[] = (string)$point;
                 }
             }
         }
 
         $graph = $this->buildGraph($grid);
 
-        // todo: reverse, end -> start
-        // todo: part 1, to s
-        // todo: part 2, min -> fore a
+        // Part 1
+        $firstPathCosts = $this->dijkstra($graph, $end, [(string) $start]);
+        $stepsToLocationWithBestSignal = $firstPathCosts[(string)$start];
 
-        $cost = $this->dijkstra($graph, $start, $end);
+        // Part 2
+        $secondPartCosts = $this->dijkstra($graph, $end, $lowestPoints);
 
-        return new Result($cost[$end]);
+        $aCost = array_filter(
+            $secondPartCosts,
+            static fn (string $key) => in_array($key, $lowestPoints, true),
+            ARRAY_FILTER_USE_KEY
+        );
+        $stepsToTheFirstLowestLocation = min($aCost);
+
+        return new Result(
+            $stepsToLocationWithBestSignal,
+            $stepsToTheFirstLowestLocation
+        );
     }
 
     private function buildGraph(array $grid): array
@@ -55,12 +69,9 @@ final class Solution implements Solver
             /** @var Point $point */
             foreach ($rows as $point) {
                 $neighboursToMove = $point->getNeighboursToMove($grid);
-                if (empty($neighboursToMove)) {
-                    $graph[(string)$point] = [];
-                } else {
-                    foreach ($neighboursToMove as $neighbour) {
-                        $graph[(string)$point][(string)$neighbour] = 1;
-                    }
+
+                foreach ($neighboursToMove as $neighbour) {
+                    $graph[(string)$point][(string)$neighbour] = 1;
                 }
             }
         }
@@ -68,19 +79,22 @@ final class Solution implements Solver
         return $graph;
     }
 
-    private function dijkstra(array $graph, Point $start): array
+    private function dijkstra(array $graph, Point $start, array $stopAt = []): array
     {
         $unvisited = array_keys($graph);
         $distance = array_fill_keys($unvisited, PHP_INT_MAX);
         $distance[(string) $start] = 0;
 
         while (!empty($unvisited)) {
-            var_dump(count($unvisited));
             $currentNode = $this->minDistanceNode($distance, $unvisited);
             unset($unvisited[array_search($currentNode, $unvisited, true)]);
 
             foreach ($graph[$currentNode] as $neighbour => $cost) {
                 $distance[$neighbour] = $distance[$currentNode] + $cost;
+            }
+
+            if (!empty($stopAt) && in_array($currentNode, $stopAt, true)) {
+                break;
             }
         }
 
