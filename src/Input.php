@@ -25,4 +25,9 @@ final class Input
     {
         return explode(PHP_EOL, $this->content);
     }
+
+    public function asGrid(): array
+    {
+        return array_map(static fn (string $row) => str_split($row), $this->asArray());
+    }
 }
