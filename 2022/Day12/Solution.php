@@ -8,7 +8,7 @@ use App\Input;
 use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
-use App\Utils\PathFinding\Dijkstra;
+use App\Utils\PathFinding\BreadthFirstSearch;
 
 #[SolutionAttribute(
     name: 'Hill Climbing Algorithm',
@@ -42,21 +42,15 @@ final class Solution implements Solver
 
         $graph = $this->buildGraph($grid);
 
-        $dijkstra = new Dijkstra();
+        $bfs = new BreadthFirstSearch();
 
         // Part 1
-        $firstPathCosts = $dijkstra->calculateDistance($graph, (string) $end, [(string) $start]);
-        $stepsToLocationWithBestSignal = $firstPathCosts[(string)$start];
+        $firstPathCosts = $bfs->getPath($graph, (string) $end, [(string) $start]);
+        $stepsToLocationWithBestSignal = count($firstPathCosts) - 1;
 
         // Part 2
-        $secondPartCosts = $dijkstra->calculateDistance($graph, (string) $end, $lowestPoints);
-
-        $aCost = array_filter(
-            $secondPartCosts,
-            static fn (string $key) => in_array($key, $lowestPoints, true),
-            ARRAY_FILTER_USE_KEY
-        );
-        $stepsToTheFirstLowestLocation = min($aCost);
+        $secondPartCosts = $bfs->getPath($graph, (string) $end, $lowestPoints);
+        $stepsToTheFirstLowestLocation = count($secondPartCosts) - 1;
 
         return new Result(
             $stepsToLocationWithBestSignal,
@@ -71,10 +65,8 @@ final class Solution implements Solver
         foreach ($grid as $rows) {
             /** @var Point $point */
             foreach ($rows as $point) {
-                $neighboursToMove = $point->getNeighboursToMove($grid);
-
-                foreach ($neighboursToMove as $neighbour) {
-                    $graph[(string)$point][(string)$neighbour] = 1;
+                foreach ($point->getNeighboursToMove($grid) as $neighbour) {
+                    $graph[(string)$point][] = (string)$neighbour;
                 }
             }
         }
