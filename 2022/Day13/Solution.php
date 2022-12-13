@@ -14,10 +14,22 @@ use App\Solver;
 )]
 final class Solution implements Solver
 {
+    private const FIRST_DIVIDER = '[[2]]';
+    private const SECOND_DIVIDER = '[[6]]';
+
     public function solve(Input $input): Result
     {
-        $pairsAsString = explode(PHP_EOL.PHP_EOL, $input->asString());
-        $pairs = array_map(static fn (string $string) => Pair::parse($string), $pairsAsString);
+        $partOne = $this->solvePartOne($input);
+        $partTwo = $this->solvePartTwo($input);
+
+
+        return new Result($partOne, $partTwo);
+    }
+
+    private function solvePartOne(Input $input): int|float
+    {
+        $pairsAsString = explode(PHP_EOL . PHP_EOL, $input->asString());
+        $pairs = array_map(static fn(string $string) => Pair::parse($string), $pairsAsString);
 
         /** @var Pair[] $pairs */
         $pairs = array_combine(
@@ -32,7 +44,26 @@ final class Solution implements Solver
                 $pairIndicesInRightOrder[] = $index;
             }
         }
-    
-        return new Result(array_sum($pairIndicesInRightOrder));
+
+        return array_sum($pairIndicesInRightOrder);
+    }
+
+    private function solvePartTwo(Input $input): int
+    {
+        $packetsAsString = [...array_filter($input->asArray()), self::FIRST_DIVIDER, self::SECOND_DIVIDER];
+
+        $packets = array_map(static fn (string $packetAsString) => Packet::parse($packetAsString), $packetsAsString);
+
+        uasort($packets, static fn(Packet $A, Packet $B) => $A->isLowerThan($B) ? -1 : 1);
+
+        $resultPacketsAsStringWithIndices = array_combine(
+            range(1, count($packets)),
+            array_values(array_map(static fn (Packet $packet) => $packet->encode(), $packets))
+        );
+
+        $indexOfFirstDivider = array_search(self::FIRST_DIVIDER, $resultPacketsAsStringWithIndices, true);
+        $indexOfSecondDivider = array_search(self::SECOND_DIVIDER, $resultPacketsAsStringWithIndices, true);
+
+        return $indexOfFirstDivider * $indexOfSecondDivider;
     }
 }
