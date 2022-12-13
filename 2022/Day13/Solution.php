@@ -8,6 +8,7 @@ use App\Input;
 use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
+use App\Utils\Collection;
 
 #[SolutionAttribute(
     name: 'Distress Signal',
@@ -32,10 +33,7 @@ final class Solution implements Solver
         $pairs = array_map(static fn(string $string) => Pair::parse($string), $pairsAsString);
 
         /** @var Pair[] $pairs */
-        $pairs = array_combine(
-            range(1, count($pairs)),
-            array_values($pairs)
-        );
+        $pairs = Collection::withOneAsFirstIndex($pairs);
 
         $pairIndicesInRightOrder = [];
 
@@ -50,16 +48,14 @@ final class Solution implements Solver
 
     private function solvePartTwo(Input $input): int
     {
-        $packetsAsString = [...array_filter($input->asArray()), self::FIRST_DIVIDER, self::SECOND_DIVIDER];
+        $packetsAsString = [...$input->asArrayWithoutEmptyLines(), self::FIRST_DIVIDER, self::SECOND_DIVIDER];
 
         $packets = array_map(static fn (string $packetAsString) => Packet::parse($packetAsString), $packetsAsString);
 
         uasort($packets, static fn(Packet $A, Packet $B) => $A->isLowerThan($B) ? -1 : 1);
 
-        $resultPacketsAsStringWithIndices = array_combine(
-            range(1, count($packets)),
-            array_values(array_map(static fn (Packet $packet) => $packet->encode(), $packets))
-        );
+        $packetAsString = array_map(static fn(Packet $packet) => $packet->encode(), $packets);
+        $resultPacketsAsStringWithIndices = Collection::withOneAsFirstIndex($packetAsString);
 
         $indexOfFirstDivider = array_search(self::FIRST_DIVIDER, $resultPacketsAsStringWithIndices, true);
         $indexOfSecondDivider = array_search(self::SECOND_DIVIDER, $resultPacketsAsStringWithIndices, true);

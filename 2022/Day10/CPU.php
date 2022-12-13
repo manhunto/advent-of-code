@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AdventOfCode2022\Day10;
 
+use App\Utils\Collection;
+
 class CPU
 {
     /**
@@ -60,9 +62,6 @@ class CPU
 
     private function getInstructionsWithCycleAsIndex(): array
     {
-        return array_combine(
-            keys: range (1, count ($this->instructions)),
-            values: array_values($this->instructions)
-        );
+        return Collection::withOneAsFirstIndex($this->instructions);
     }
 }

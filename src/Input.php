@@ -26,6 +26,14 @@ final class Input
         return explode(PHP_EOL, $this->content);
     }
 
+    /**
+     * Removes empty lines inside input
+     */
+    public function asArrayWithoutEmptyLines(): array
+    {
+        return array_values(array_filter($this->asArray()));
+    }
+
     public function asGrid(): array
     {
         return array_map(static fn (string $row) => str_split($row), $this->asArray());
