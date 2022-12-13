@@ -56,14 +56,7 @@ class Packet
             }
         }
 
-        $countA = count($up);
-        $countB = count($down);
-
-        if ($countA > $countB) {
-            return false;
-        }
-
-        if ($countA < $countB) { // If the left list runs out of items first, the inputs are in the right order.
+        if (count($up) < count($down)) { // If the left list runs out of items first, the inputs are in the right order.
             return true;
         }
 

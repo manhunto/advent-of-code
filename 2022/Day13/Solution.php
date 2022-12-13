@@ -29,37 +29,24 @@ final class Solution implements Solver
 
     private function solvePartOne(Input $input): int|float
     {
-        $pairsAsString = explode(PHP_EOL . PHP_EOL, $input->asString());
-        $pairs = array_map(static fn(string $string) => Pair::parse($string), $pairsAsString);
-
-        /** @var Pair[] $pairs */
-        $pairs = Collection::withOneAsFirstIndex($pairs);
-
-        $pairIndicesInRightOrder = [];
-
-        foreach ($pairs as $index => $pair) {
-            if ($pair->isRightOrder()) {
-                $pairIndicesInRightOrder[] = $index;
-            }
-        }
-
-        return array_sum($pairIndicesInRightOrder);
+        return Collection::explode(PHP_EOL . PHP_EOL, $input->asString())
+            ->forEach(static fn(string $string) => Pair::parse($string))
+            ->indicesStartAtOne()
+            ->getIndices(static fn (Pair $pair) => $pair->isRightOrder())
+            ->sum();
     }
 
     private function solvePartTwo(Input $input): int
     {
-        $packetsAsString = [...$input->asArrayWithoutEmptyLines(), self::FIRST_DIVIDER, self::SECOND_DIVIDER];
+        $packets = new Collection([...$input->asArrayWithoutEmptyLines(), self::FIRST_DIVIDER, self::SECOND_DIVIDER]);
 
-        $packets = array_map(static fn (string $packetAsString) => Packet::parse($packetAsString), $packetsAsString);
-
-        uasort($packets, static fn(Packet $A, Packet $B) => $A->isLowerThan($B) ? -1 : 1);
-
-        $packetAsString = array_map(static fn(Packet $packet) => $packet->encode(), $packets);
-        $resultPacketsAsStringWithIndices = Collection::withOneAsFirstIndex($packetAsString);
-
-        $indexOfFirstDivider = array_search(self::FIRST_DIVIDER, $resultPacketsAsStringWithIndices, true);
-        $indexOfSecondDivider = array_search(self::SECOND_DIVIDER, $resultPacketsAsStringWithIndices, true);
-
-        return $indexOfFirstDivider * $indexOfSecondDivider;
+        return $packets
+            ->forEach(static fn (string $packetAsString) => Packet::parse($packetAsString))
+            ->uasort(static fn(Packet $A, Packet $B) => $A->isLowerThan($B) ? -1 : 1)
+            ->forEach(static fn(Packet $packet) => $packet->encode())
+            ->indicesStartAtOne()
+            ->getIndicesForItemsInArray([self::FIRST_DIVIDER, self::SECOND_DIVIDER])
+            ->multiply()
+        ;
     }
 }
