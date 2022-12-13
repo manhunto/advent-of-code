@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Day13;
+namespace Tests\AdventOfCode2022\Day13;
 
 use AdventOfCode2022\Day13\Pair;
 use PHPUnit\Framework\TestCase;

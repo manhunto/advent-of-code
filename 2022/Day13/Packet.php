@@ -16,66 +16,57 @@ class Packet
         return new self(json_decode($input, true, 512, JSON_THROW_ON_ERROR));
     }
 
-    public function isLowerThan(Packet $down): bool
+    public function encode(): string
     {
-        return $this->process($this->items, $down->items);
+        return json_encode($this->items, JSON_THROW_ON_ERROR);
     }
 
-    private function process(array|int $up, array|int $down): ?bool
+    public function isLowerThan(Packet $down): bool
     {
-        $countA = count($up);
-        $countB = count($down);
+        return $this->isLowerThanForArrays($this->items, $down->items);
+    }
 
+    /**
+     * @return bool|null null - if items are equals
+     */
+    private function isLowerThanForArrays(array $up, array $down): ?bool
+    {
         foreach ($up as $index => $A) {
-
             $B = $down[$index] ?? null;
 
-            if ($B === null) {
-                return false; // If the right list runs out of items first, the inputs are not in the right order.
+            if ($B === null) { // If the right list runs out of items first, the inputs are not in the right order.
+                return false;
             }
 
-            $isANumeric = is_numeric($A);
-            $isBNumeric = is_numeric($B);
+            $isAArray = is_array($A);
+            $isBArray = is_array($B);
 
-            if (!$isANumeric && !$isBNumeric) {
-                $result = $this->process($A, $B);
-                if ($result !== null) {
-                    return $result;
-                }
-            } elseif(!$isANumeric && $isBNumeric) {
-                $result = $this->process($A, [$B]);
-                if ($result !== null) {
-                    return $result;
-                }
-            } elseif($isANumeric && !$isBNumeric) {
-                $result = $this->process([$A], $B);
-                if ($result !== null) {
-                    return $result;
-                }
-            } else {
-                if ($A < $B) { // If the left integer is lower than the right integer, the inputs are in the right order.
-                    return true;
-                }
+            if (!$isAArray && !$isBArray && $A !== $B) {
+                return $A < $B;
+            }
 
-                if ($A > $B) { // If the left integer is higher than the right integer, the inputs are not in the right order.
-                    return false;
+            if ($isAArray || $isBArray) {
+                $A = $isAArray ? $A : [$A];
+                $B = $isBArray ? $B : [$B];
+
+                $result = $this->isLowerThanForArrays($A, $B);
+                if ($result !== null) {
+                    return $result;
                 }
             }
         }
+
+        $countA = count($up);
+        $countB = count($down);
 
         if ($countA > $countB) {
             return false;
         }
 
-        if ($countA < $countB) {
+        if ($countA < $countB) { // If the left list runs out of items first, the inputs are in the right order.
             return true;
         }
 
-        return null; // If the left list runs out of items first, the inputs are in the right order.
-    }
-
-    public function encode(): string
-    {
-        return json_encode($this->items, JSON_THROW_ON_ERROR);
+        return null;
     }
 }
