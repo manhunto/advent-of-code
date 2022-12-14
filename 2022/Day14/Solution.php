@@ -24,9 +24,9 @@ final class Solution implements Solver
 
     private function solveFirstPart(Input $input): int
     {
-        $grid = $this->generateCaveWithRocks($input);
+        $cave = $this->generateCaveWithRocks($input);
 
-        return $this->pourSand($grid);
+        return $this->pourSand($cave);
     }
 
     private function solveSecondPart(Input $input): int
@@ -37,7 +37,7 @@ final class Solution implements Solver
         return $this->pourSand($cave);
     }
 
-    private function generateCaveWithRocks(Input $input): Grid
+    private function generateCaveWithRocks(Input $input): Cave
     {
         $cave = $this->generateEmptyCave($input);
         $this->addRocksFromInput($input, $cave);
@@ -45,7 +45,7 @@ final class Solution implements Solver
         return $cave;
     }
 
-    private function generateEmptyCave(Input $input): Grid
+    private function generateEmptyCave(Input $input): Cave
     {
         $minX = PHP_INT_MAX;
         $maxX = PHP_INT_MIN;
@@ -62,10 +62,10 @@ final class Solution implements Solver
             }
         }
 
-        return Grid::generateEmpty($minX - 1, $maxX + 1, $maxY + 3);
+        return Cave::generateEmpty($minX - 1, $maxX + 1, $maxY + 3);
     }
 
-    private function addRocksFromInput(Input $input, Grid $grid): void
+    private function addRocksFromInput(Input $input, Cave $cave): void
     {
         foreach ($input->asArray() as $row) {
             $rockLineWaypoints = explode(' -> ', $row);
@@ -76,15 +76,15 @@ final class Solution implements Solver
                 [$nextX, $nextY] = explode(',', $item);
                 $prev = $item;
 
-                $grid->addRock((int)$prevX, (int)$prevY, (int)$nextX, (int)$nextY);
+                $cave->addRock((int)$prevX, (int)$prevY, (int)$nextX, (int)$nextY);
             }
         }
     }
 
-    private function pourSand(Grid $grid): int
+    private function pourSand(Cave $cave): int
     {
-        while (false === $grid->pourSand()) {}
+        while (false === $cave->pourSand()) {}
 
-        return $grid->countSandInCave();
+        return $cave->countSandInCave();
     }
 }

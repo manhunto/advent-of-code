@@ -6,7 +6,7 @@ namespace AdventOfCode2022\Day14;
 
 use App\Utils\Map;
 
-class Grid
+class Cave
 {
     private const AIR = '.';
     private const ROCK = '#';
@@ -45,9 +45,9 @@ class Grid
 
     public function addFloor(): void
     {
-        $width = $this->calculateWidthToAddSand($this->rockMinX);
-
+        $width = $this->calculateWidthToAddSand(self::SAND_POURING_X);
         $this->map->cropOnRight($width, self::AIR);
+        $width = $this->calculateWidthToAddSand(self::SAND_POURING_X);
         $this->map->cropOnLeft($width, self::AIR);
 
         $this->placeFloor();
@@ -128,9 +128,7 @@ class Grid
 
     private function calculateWidthToAddSand(int $x): int
     {
-        $height = $this->highestY - self::SAND_POURING_Y + 2;
-
-        return $x - self::SAND_POURING_X + $height;
+        return $this->highestY - self::SAND_POURING_Y;
     }
 
     private function placeFloor(): void

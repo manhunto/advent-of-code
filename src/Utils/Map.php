@@ -36,16 +36,17 @@ class Map
 
     public function drawLine(int $startX, int $startY, int $endX, int $endY, string $element): void
     {
-        if ($startX === $endX) { // horizontal
-            for($y = min($startY, $endY); $y <= max($startY, $endY); $y++) {
-                $this->grid[$y][$startX] = $element;
-            }
-        } elseif ($startY === $endY) { // vertical
-            for($x = min($startX, $endX); $x <= max($startX, $endX); $x++) {
-                $this->grid[$startY][$x] = $element;
-            }
-        } else {
+        if ($startX !== $endX && $startY !== $endY) {
             throw new \LogicException('Diagonal line is unsupported yet');
+        }
+
+        [$x1, $x2] = Arrays::sortedAsc([$startX, $endX]);
+        [$y1, $y2] = Arrays::sortedAsc([$startY, $endY]);
+
+        for($y = $y1; $y <= $y2; $y++) {
+            for($x = $x1; $x <= $x2; $x++) {
+                $this->grid[$y][$x] = $element;
+            }
         }
     }
 
@@ -85,21 +86,29 @@ class Map
 
     public function drawFullWidthLineHorizontally(int $y, string $element): void
     {
-        $width = $this->getWidth();
-        $this->grid[$y] = array_fill(
-            min(array_keys($this->grid[$y])),
-            $width,
-            $element
-        );
-    }
+        $fromX = $this->getMinX();
+        $toX = $this->getMaxX();
 
-    private function getWidth(): int
-    {
-        return count($this->getFirstRow());
+        $this->drawLine($fromX, $y, $toX, $y, $element);
     }
 
     private function getFirstRow(): mixed
     {
         return reset($this->grid);
+    }
+
+    private function getMinX(): mixed
+    {
+        return min($this->getFirstRowPositions());
+    }
+
+    private function getMaxX()
+    {
+        return max($this->getFirstRowPositions());
+    }
+
+    private function getFirstRowPositions(): array
+    {
+        return array_keys($this->getFirstRow());
     }
 }
