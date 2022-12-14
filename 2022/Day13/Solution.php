@@ -23,7 +23,6 @@ final class Solution implements Solver
         $partOne = $this->solvePartOne($input);
         $partTwo = $this->solvePartTwo($input);
 
-
         return new Result($partOne, $partTwo);
     }
 
@@ -38,9 +37,7 @@ final class Solution implements Solver
 
     private function solvePartTwo(Input $input): int
     {
-        $packets = new Collection([...$input->asArrayWithoutEmptyLines(), self::FIRST_DIVIDER, self::SECOND_DIVIDER]);
-
-        return $packets
+        return Collection::create([...$input->asArrayWithoutEmptyLines(), self::FIRST_DIVIDER, self::SECOND_DIVIDER])
             ->forEach(static fn (string $packetAsString) => Packet::parse($packetAsString))
             ->uasort(static fn(Packet $A, Packet $B) => $A->isLowerThan($B) ? -1 : 1)
             ->forEach(static fn(Packet $packet) => $packet->encode())

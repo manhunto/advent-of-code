@@ -58,7 +58,7 @@ final class PuzzleMetadataFetcher
         $pattern = "/.*?for example.*?\<code\>(.*?)\<\/code\>/is";
 
         if (preg_match($pattern, $puzzleDescriptionPageContent, $matches)) {
-            return $matches[1];
+            return htmlspecialchars_decode(strip_tags($matches[1]));
         }
 
         return null;

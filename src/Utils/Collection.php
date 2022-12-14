@@ -13,12 +13,17 @@ class Collection
 
     public static function explode(string $separator, string $string): self
     {
-        return new self(explode($separator, $string));
+        return self::create(explode($separator, $string));
+    }
+
+    public static function create(array $array): self
+    {
+        return new self($array);
     }
 
     public function indicesStartAtOne(): self
     {
-        return new self(self::withOneAsFirstIndex($this->items));
+        return self::create(self::withOneAsFirstIndex($this->items));
     }
 
     public static function withOneAsFirstIndex(array $array): array
@@ -31,7 +36,7 @@ class Collection
 
     public function forEach(callable $callback): self
     {
-        return new self(array_map($callback, $this->items));
+        return self::create(array_map($callback, $this->items));
     }
 
     public function uasort(callable $callback): self
@@ -40,7 +45,7 @@ class Collection
 
         uasort($items, $callback);
 
-        return new self($items);
+        return self::create($items);
     }
 
     public function getIndex(mixed $needle): bool|int|string
@@ -58,7 +63,7 @@ class Collection
             }
         }
 
-        return new self($indices);
+        return self::create($indices);
     }
 
     public function sum(): float|int
@@ -68,14 +73,7 @@ class Collection
 
     public function multiply(): float|int
     {
-        return array_reduce($this->items, static function ($carry, mixed $item) {
-            if ($carry === null) {
-                return $item;
-
-            }
-
-            return $carry * $item;
-        });
+        return array_reduce($this->items, static fn($carry, mixed $item) => $carry * $item, 1);
     }
 
     public function getIndicesForItemsInArray(array $haystack): self
