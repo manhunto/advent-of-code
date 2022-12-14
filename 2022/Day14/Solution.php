@@ -16,21 +16,36 @@ final class Solution implements Solver
 {
     public function solve(Input $input): Result
     {
-        $grid = $this->getGrid($input);
-        $this->addRocksFromInput($input, $grid);
+        $sandInCaveFirstPart = $this->solveFirstPart($input);
+        $sandInCaveSecondPart = $this->solveSecondPart($input);
 
-        $sandProduced = 0;
-
-        while (false === $grid->addSand()) {
-            $sandProduced++;
-        }
-
-//        $grid->print();
-
-        return new Result($sandProduced);
+        return new Result($sandInCaveFirstPart, $sandInCaveSecondPart);
     }
 
-    private function getGrid(Input $input): Grid
+    private function solveFirstPart(Input $input): int
+    {
+        $grid = $this->generateGridWithRocks($input);
+
+        return $this->pourSand($grid);
+    }
+
+    private function solveSecondPart(Input $input): int
+    {
+        $grid = $this->generateGridWithRocks($input);
+        $grid->addFloor();
+
+        return $this->pourSand($grid);
+    }
+
+    private function generateGridWithRocks(Input $input): Grid
+    {
+        $grid = $this->generateEmptyGrid($input);
+        $this->addRocksFromInput($input, $grid);
+
+        return $grid;
+    }
+
+    private function generateEmptyGrid(Input $input): Grid
     {
         $minX = PHP_INT_MAX;
         $maxX = PHP_INT_MIN;
@@ -47,7 +62,7 @@ final class Solution implements Solver
             }
         }
 
-        return Grid::generateEmpty($minX - 1, $maxX + 1, $maxY + 2);
+        return Grid::generateEmpty($minX - 1, $maxX + 1, $maxY + 3);
     }
 
     private function addRocksFromInput(Input $input, Grid $grid): void
@@ -64,5 +79,12 @@ final class Solution implements Solver
                 $grid->addRock((int)$prevX, (int)$prevY, (int)$nextX, (int)$nextY);
             }
         }
+    }
+
+    private function pourSand(Grid $grid): int
+    {
+        while (false === $grid->pourSand()) {}
+
+        return $grid->countSandInCave();
     }
 }
