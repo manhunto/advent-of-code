@@ -83,7 +83,7 @@ final class Solution implements Solver
 
     private function pourSand(Cave $cave): int
     {
-        while (false === $cave->pourSand()) {}
+        $cave->pourSand();
 
         return $cave->countSandInCave();
     }

@@ -53,23 +53,25 @@ class Cave
         $this->placeFloor();
     }
 
-    public function pourSand(): bool
+    public function pourSand(): void
     {
-        $sand = new Sand(self::SAND_POURING_X, self::SAND_POURING_Y);
-
         while (true) {
-            if ($this->hasSandReachAbyss($sand)) {
-                return true;
-            }
+            $sand = new Sand(self::SAND_POURING_X, self::SAND_POURING_Y);
 
-            if (false === $this->move($sand)) {
-                $this->placeSand($sand);
-
-                if ($this->sandIsBlocked($sand)) {
-                    return true;
+            while (true) {
+                if ($this->hasSandReachAbyss($sand)) {
+                    break 2;
                 }
 
-                return false;
+                if (false === $this->move($sand)) {
+                    $this->placeSand($sand);
+
+                    if ($this->sandIsBlocked($sand)) {
+                        break 2;
+                    }
+
+                    break; // next sand
+                }
             }
         }
     }
