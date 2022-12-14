@@ -32,7 +32,7 @@ class Cave
 
     public function print(): void
     {
-        $this->map->print();
+        echo $this->map->asString();
     }
 
     public function addRock(int $startX, int $startY, int $endX, int $endY): void

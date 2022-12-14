@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Utils;
 
+use SebastianBergmann\CodeCoverage\Report\PHP;
+
 class Map
 {
     public function __construct(
@@ -20,18 +22,19 @@ class Map
         ));
     }
 
-    public function print(): void
+    public function asString(): string
     {
         $grid = $this->grid;
         ksort($grid);
 
+        $string = '';
+
         foreach ($this->grid as $row) {
             ksort($row);
-            foreach ($row as $item) {
-                echo $item;
-            }
-            echo PHP_EOL;
+            $string .= implode('', $row) . PHP_EOL;
         }
+
+        return $string;
     }
 
     public function drawLine(int $startX, int $startY, int $endX, int $endY, string $element): void
