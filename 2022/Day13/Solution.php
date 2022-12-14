@@ -28,7 +28,7 @@ final class Solution implements Solver
 
     private function solvePartOne(Input $input): int|float
     {
-        return Collection::explode(PHP_EOL . PHP_EOL, $input->asString())
+        return Collection::withExplode(PHP_EOL . PHP_EOL, $input->asString())
             ->forEach(static fn(string $string) => Pair::parse($string))
             ->indicesStartAtOne()
             ->getIndices(static fn (Pair $pair) => $pair->isRightOrder())

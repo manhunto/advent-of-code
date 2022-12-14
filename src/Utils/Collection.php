@@ -11,7 +11,7 @@ class Collection
     ) {
     }
 
-    public static function explode(string $separator, string $string): self
+    public static function withExplode(string $separator, string $string): self
     {
         return self::create(explode($separator, $string));
     }
@@ -79,5 +79,10 @@ class Collection
     public function getIndicesForItemsInArray(array $haystack): self
     {
         return $this->getIndices(static fn (string $encodedPacket) => in_array($encodedPacket, $haystack, true));
+    }
+
+    public function toArray(): array
+    {
+        return $this->items;
     }
 }
