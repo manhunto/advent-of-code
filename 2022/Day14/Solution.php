@@ -24,28 +24,28 @@ final class Solution implements Solver
 
     private function solveFirstPart(Input $input): int
     {
-        $grid = $this->generateGridWithRocks($input);
+        $grid = $this->generateCaveWithRocks($input);
 
         return $this->pourSand($grid);
     }
 
     private function solveSecondPart(Input $input): int
     {
-        $grid = $this->generateGridWithRocks($input);
-        $grid->addFloor();
+        $cave = $this->generateCaveWithRocks($input);
+        $cave->addFloor();
 
-        return $this->pourSand($grid);
+        return $this->pourSand($cave);
     }
 
-    private function generateGridWithRocks(Input $input): Grid
+    private function generateCaveWithRocks(Input $input): Grid
     {
-        $grid = $this->generateEmptyGrid($input);
-        $this->addRocksFromInput($input, $grid);
+        $cave = $this->generateEmptyCave($input);
+        $this->addRocksFromInput($input, $cave);
 
-        return $grid;
+        return $cave;
     }
 
-    private function generateEmptyGrid(Input $input): Grid
+    private function generateEmptyCave(Input $input): Grid
     {
         $minX = PHP_INT_MAX;
         $maxX = PHP_INT_MIN;
