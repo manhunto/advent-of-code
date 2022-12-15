@@ -21,6 +21,7 @@ final class Solution implements Solver
         /** @var Sensor[] $sensors */
         $sensors = [];
         $lineToCheck = null;
+        $max = null;
 
         foreach ($input->asArray() as $row) {
             if (preg_match('/^Sensor at x=(-?\d+), y=(-?\d+): closest beacon is at x=(-?\d+), y=(-?\d+)$/', $row, $matches)) {
@@ -29,9 +30,23 @@ final class Solution implements Solver
                 $sensors[] = new Sensor(new Point((int) $sx, (int) $sy), new Point((int) $bx, (int) $by));
             } elseif(preg_match('/^y=(\d+)$/', $row, $matches)) {
                 $lineToCheck = (int) $matches[1];
+            } elseif (preg_match('/^max=(\d+)$/', $row, $matches)) {
+                $max = (int) $matches[1];
             }
         }
 
+        $countPositionsCannotContainBeacon = $this->solveFirstPart($sensors, $lineToCheck);
+        $tuningSignal = $this->solveSecondPart($sensors, $max);
+
+
+        return new Result($countPositionsCannotContainBeacon, $tuningSignal);
+    }
+
+    /**
+     * @param Sensor[] $sensors
+     */
+    private function solveFirstPart(array $sensors, int $lineToCheck): int
+    {
         $coveredYPositions = [];
         $beaconsInThisLine = [];
 
@@ -46,11 +61,39 @@ final class Solution implements Solver
             }
         }
 
-        $countPositionsCannotContainBeacon = Collection::create($coveredYPositions)
+        return Collection::create($coveredYPositions)
             ->diff($beaconsInThisLine)
             ->unique()
             ->count();
-    
-        return new Result($countPositionsCannotContainBeacon);
+    }
+
+    /**
+     * @param Sensor[] $sensors
+     */
+    private function solveSecondPart(array $sensors, int $max): int
+    {
+        $allLines = range(0, $max);
+
+        foreach ($allLines as $line) {
+            $coveredYPositions = [];
+
+            foreach ($sensors as $sensor) {
+                $coveredYPositions = [
+                    ...$coveredYPositions,
+                    ...$sensor->getCoveredXPositionsInY($line),
+                ];
+            }
+
+            $diff = array_values(array_diff($allLines, $coveredYPositions));
+
+            if (!empty($diff)) {
+                return $this->calculateTuningSignal($diff[0], $line);
+            }
+        }
+    }
+
+    private function calculateTuningSignal(int $x, int $y): int
+    {
+        return $x * 4_000_000 + $y;
     }
 }
