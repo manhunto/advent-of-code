@@ -10,8 +10,8 @@ namespace App\Utils;
 class Point
 {
     public function __construct(
-        private readonly int $x,
-        private readonly int $y,
+        public readonly int $x,
+        public readonly int $y,
     ) {
     }
 

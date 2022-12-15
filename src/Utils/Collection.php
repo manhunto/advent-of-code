@@ -16,7 +16,7 @@ class Collection
         return self::create(explode($separator, $string));
     }
 
-    public static function create(array $array): self
+    public static function create(array $array = []): self
     {
         return new self($array);
     }
@@ -84,5 +84,20 @@ class Collection
     public function toArray(): array
     {
         return $this->items;
+    }
+
+    public function diff(array ...$arrays): self
+    {
+        return self::create(array_diff($this->items, ...$arrays));
+    }
+
+    public function unique(): self
+    {
+        return self::create(array_unique($this->items));
+    }
+
+    public function count(): int
+    {
+        return count($this->items);
     }
 }
