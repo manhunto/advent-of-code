@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AdventOfCode2022\Day15;
 
 use App\Input;
+use App\InputType;
 use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
@@ -20,23 +21,19 @@ final class Solution implements Solver
     {
         /** @var Sensor[] $sensors */
         $sensors = [];
-        $lineToCheck = null;
-        $max = null;
+        $lineToCheck = $input->inputType->isExample() ? 10 : 2000000;
+        $maxCord = $input->inputType->isExample() ? 20 : 4000000;
 
         foreach ($input->asArray() as $row) {
             if (preg_match('/^Sensor at x=(-?\d+), y=(-?\d+): closest beacon is at x=(-?\d+), y=(-?\d+)$/', $row, $matches)) {
                 [, $sx, $sy, $bx, $by] = $matches;
 
                 $sensors[] = new Sensor(new Point((int) $sx, (int) $sy), new Point((int) $bx, (int) $by));
-            } elseif(preg_match('/^y=(\d+)$/', $row, $matches)) {
-                $lineToCheck = (int) $matches[1];
-            } elseif (preg_match('/^max=(\d+)$/', $row, $matches)) {
-                $max = (int) $matches[1];
             }
         }
 
         $countPositionsCannotContainBeacon = $this->solveFirstPart($sensors, $lineToCheck);
-        $tuningSignal = $this->solveSecondPart($sensors, $max);
+        $tuningSignal = $this->solveSecondPart($sensors, $maxCord);
 
 
         return new Result($countPositionsCannotContainBeacon, $tuningSignal);

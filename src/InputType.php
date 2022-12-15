@@ -24,4 +24,9 @@ enum InputType: string
 
         return $inputType;
     }
+
+    public function isExample(): bool
+    {
+        return str_starts_with($this->value, 'example');
+    }
 }

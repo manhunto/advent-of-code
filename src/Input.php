@@ -8,12 +8,13 @@ final class Input
 {
     public function __construct(
         private readonly string $content,
+        public readonly InputType $inputType,
     ) {
     }
 
-    public static function fromArray(array $data): self
+    public static function fromArray(array $data, InputType $inputType): self
     {
-        return new self(implode(PHP_EOL, $data));
+        return new self(implode(PHP_EOL, $data), $inputType);
     }
 
     public function asString(): string

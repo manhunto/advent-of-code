@@ -23,7 +23,7 @@ final class FileSystem
         $inputFileLocation = $this->buildFilePath($date, $this->buildFileName($inputType, self::EXTENSION_IN));
         $fileContent = $this->loadFile($inputFileLocation);
 
-        return Input::fromArray($fileContent);
+        return Input::fromArray($fileContent, $inputType);
     }
 
     /**
