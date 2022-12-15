@@ -12,7 +12,8 @@
         "psr-4": {
             "App\\": "src/",
             "AdventOfCode2022\\": "2022/",
-            "Tests\\AdventOfCode2022\\": "tests/2022"
+            "Tests\\AdventOfCode2022\\": "tests/2022",
+            "Tests\\Lib\\": "tests/lib"
         }
     },
     "require": {
