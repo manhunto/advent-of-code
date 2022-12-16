@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace AdventOfCode2022\Day15;
 
 use App\Input;
-use App\InputType;
 use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
 use App\Utils\Collection;
 use App\Utils\Point;
+use App\Utils\Range;
+use App\Utils\RangeCollection;
 
 #[SolutionAttribute(
     name: 'Beacon Exclusion Zone',
@@ -69,22 +70,25 @@ final class Solution implements Solver
      */
     private function solveSecondPart(array $sensors, int $max): int
     {
-        $allLines = range(0, $max);
+        $searchRange = new Range(0, $max);
 
-        foreach ($allLines as $line) {
-            $coveredYPositions = [];
+        foreach ($searchRange->getItems() as $line) {
+            $sensorRanges = array_map(static fn (Sensor $sensor) => $sensor->getRangeOnLine($line), $sensors);
+            $sensorRanges = array_filter($sensorRanges);
 
-            foreach ($sensors as $sensor) {
-                $coveredYPositions = [
-                    ...$coveredYPositions,
-                    ...$sensor->getCoveredXPositionsInY($line),
-                ];
-            }
+            $rc = new RangeCollection();
+            $rc->union(...$sensorRanges);
+            $rc->intersect($searchRange);
+            $gaps = $rc->getGaps();
 
-            $diff = array_values(array_diff($allLines, $coveredYPositions));
+            if (empty($gaps) === false) {
+                $gap = $gaps[0];
 
-            if (!empty($diff)) {
-                return $this->calculateTuningSignal($diff[0], $line);
+                if ($gap->hasOneItem() === false) {
+                    throw new \LogicException('Something went wrong');
+                }
+
+                return $this->calculateTuningSignal($gap->from, $line);
             }
         }
     }

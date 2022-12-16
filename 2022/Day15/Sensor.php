@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AdventOfCode2022\Day15;
 
 use App\Utils\Point;
+use App\Utils\Range;
 
 class Sensor
 {
@@ -29,18 +30,29 @@ class Sensor
 
     public function getCoveredXPositionsInY(int $y): array
     {
+        $range = $this->getRangeOnLine($y);
+
+        if ($range === null) {
+            return [];
+        }
+
+        return range($range->from, $range->to);
+    }
+
+    public function getRangeOnLine(int $y): ?Range
+    {
         $originDistance = $this->getDistanceInManhattanGeometry();
 
         $diffInY = abs($this->sensorLocation->y - $y);
 
-        $minX = $this->sensorLocation->x - $originDistance + $diffInY;
-        $maxX = $this->sensorLocation->x + $originDistance - $diffInY;
+        $from = $this->sensorLocation->x - $originDistance + $diffInY;
+        $to = $this->sensorLocation->x + $originDistance - $diffInY;
 
-        if ($minX > $maxX) {
-            return [];
+        try {
+            return new Range($from, $to);
+        } catch (\LogicException) {
+            return null;
         }
-
-        return range($minX, $maxX);
     }
 
     private function getDistanceInManhattanGeometry(): int
