@@ -15,38 +15,14 @@ class Sensor
     ) {
     }
 
-    public function isInRange(Point $point): bool
-    {
-        $distanceToBeacon = $this->getDistanceInManhattanGeometry();
-        $distanceToPoint = $this->sensorLocation->distanceInManhattanGeometry($point);
-
-        return $distanceToBeacon > $distanceToPoint;
-    }
-
-    public function isBeaconPosition(Point $point): bool
-    {
-        return $this->beaconLocation->equals($point);
-    }
-
-    public function getCoveredXPositionsInY(int $y): array
-    {
-        $range = $this->getRangeOnLine($y);
-
-        if ($range === null) {
-            return [];
-        }
-
-        return range($range->from, $range->to);
-    }
-
     public function getRangeOnLine(int $y): ?Range
     {
-        $originDistance = $this->getDistanceInManhattanGeometry();
+        $radius = $this->getDistanceInManhattanGeometry();
 
         $diffInY = abs($this->sensorLocation->y - $y);
 
-        $from = $this->sensorLocation->x - $originDistance + $diffInY;
-        $to = $this->sensorLocation->x + $originDistance - $diffInY;
+        $from = $this->sensorLocation->x - $radius + $diffInY;
+        $to = $this->sensorLocation->x + $radius - $diffInY;
 
         try {
             return new Range($from, $to);

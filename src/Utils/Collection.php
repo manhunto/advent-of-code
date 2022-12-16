@@ -100,4 +100,9 @@ class Collection
     {
         return count($this->items);
     }
+
+    public function filter(callable $callable = null): self
+    {
+        return self::create(array_filter($this->items, $callable));
+    }
 }

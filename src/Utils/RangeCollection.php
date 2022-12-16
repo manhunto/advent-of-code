@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Utils;
 
-class RangeCollection
+final class RangeCollection
 {
     /** @var Range[] */
     private array $ranges = [];
@@ -53,11 +53,11 @@ class RangeCollection
 
         /**
          * @var int $suspectIndex
-         * @var Range $suspectToSumRange
+         * @var Range $suspectToIntersectRange
          */
-        foreach ($ranges as $suspectIndex => $suspectToSumRange) {
+        foreach ($ranges as $suspectIndex => $suspectToIntersectRange) {
             try {
-                $intersected = $range->intersect($suspectToSumRange);
+                $intersected = $range->intersect($suspectToIntersectRange);
                 $ranges[$suspectIndex] = $intersected;
             } catch (\LogicException) {
             }
@@ -66,6 +66,26 @@ class RangeCollection
         $this->ranges = $this->sort(...$ranges);
     }
 
+    /**
+     * @todo tests
+     */
+    public function diff(Range $range): void
+    {
+        $ranges = array_values($this->ranges);
+
+        /**
+         * @var int $suspectIndex
+         * @var Range $suspectToDiffRange
+         */
+        foreach ($ranges as $suspectIndex => $suspectToDiffRange) {
+            $diff = $suspectToDiffRange->diff($range);
+
+            unset ($ranges[$suspectIndex]);
+            $ranges = [...$ranges, ...$diff];
+        }
+
+        $this->ranges = $this->sort(...$ranges);
+    }
 
     /**
      * @return Range[]
@@ -107,5 +127,13 @@ class RangeCollection
         });
 
         return array_values($ranges);
+    }
+
+    /**
+     * @todo tests
+     */
+    public function length(): int
+    {
+        return array_reduce($this->ranges, static fn (int $carry, Range $range) => $carry + $range->length(), 0);
     }
 }

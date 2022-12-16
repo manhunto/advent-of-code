@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Utils;
 
-class Range implements \Stringable
+final class Range implements \Stringable
 {
     public function __construct(
         public readonly int $from,
@@ -13,6 +13,11 @@ class Range implements \Stringable
         if ($this->from > $this->to) {
             throw new \LogicException(sprintf('From cannot be greater than to in range. Given {%d, %d}.', $this->from, $this->to));
         }
+    }
+
+    public static function createForPoint(int $x): self
+    {
+        return new self($x, $x);
     }
 
     /**
@@ -97,12 +102,17 @@ class Range implements \Stringable
         return abs($this->to - $range->from) <= 1 || abs($this->from - $range->to) <= 1;
     }
 
-    public function hasOneItem(): bool
+    /**
+     * @todo tests
+     */
+    public function isPoint(): bool
     {
-        return $this->from === $this->to;
+        return $this->length() === 1;
     }
 
     /**
+     * @todo tests
+     *
      * @return int[]
      */
     public function getItems(): iterable
@@ -110,6 +120,14 @@ class Range implements \Stringable
         for ($i = $this->from ; $i <= $this->to; $i++) {
             yield $i;
         }
+    }
+
+    /**
+     * @todo tests
+     */
+    public function length(): int
+    {
+        return $this->to - $this->from + 1;
     }
 
     public function __toString(): string

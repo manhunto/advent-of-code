@@ -36,7 +36,6 @@ final class Solution implements Solver
         $countPositionsCannotContainBeacon = $this->solveFirstPart($sensors, $lineToCheck);
         $tuningSignal = $this->solveSecondPart($sensors, $maxCord);
 
-
         return new Result($countPositionsCannotContainBeacon, $tuningSignal);
     }
 
@@ -45,24 +44,14 @@ final class Solution implements Solver
      */
     private function solveFirstPart(array $sensors, int $lineToCheck): int
     {
-        $coveredYPositions = [];
-        $beaconsInThisLine = [];
+        $rc = $this->getSensorRangesInLine($sensors, $lineToCheck);
+        $rcBeacons = $this->getBeaconsInLineAsRanges($sensors, $lineToCheck);
 
-        foreach ($sensors as $sensor) {
-            $coveredYPositions = [
-                ...$coveredYPositions,
-                ...$sensor->getCoveredXPositionsInY($lineToCheck),
-            ];
-
-            if ($sensor->beaconLocation->y === $lineToCheck) {
-                $beaconsInThisLine[] = $sensor->beaconLocation->x;
-            }
+        foreach ($rcBeacons as $range) {
+            $rc->diff($range);
         }
 
-        return Collection::create($coveredYPositions)
-            ->diff($beaconsInThisLine)
-            ->unique()
-            ->count();
+        return $rc->length();
     }
 
     /**
@@ -73,24 +62,49 @@ final class Solution implements Solver
         $searchRange = new Range(0, $max);
 
         foreach ($searchRange->getItems() as $line) {
-            $sensorRanges = array_map(static fn (Sensor $sensor) => $sensor->getRangeOnLine($line), $sensors);
-            $sensorRanges = array_filter($sensorRanges);
-
-            $rc = new RangeCollection();
-            $rc->union(...$sensorRanges);
+            $rc = $this->getSensorRangesInLine($sensors, $line);
             $rc->intersect($searchRange);
             $gaps = $rc->getGaps();
 
             if (empty($gaps) === false) {
                 $gap = $gaps[0];
 
-                if ($gap->hasOneItem() === false) {
+                if ($gap->isPoint() === false) {
                     throw new \LogicException('Something went wrong');
                 }
 
                 return $this->calculateTuningSignal($gap->from, $line);
             }
         }
+    }
+
+    /**
+     * @param Sensor[] $sensors
+     */
+    private function getSensorRangesInLine(array $sensors, int $line): RangeCollection
+    {
+        $sensorRanges = Collection::create($sensors)
+            ->forEach(static fn(Sensor $sensor) => $sensor->getRangeOnLine($line))
+            ->filter()
+            ->toArray();
+
+        $rc = new RangeCollection();
+        $rc->union(...$sensorRanges);
+
+        return $rc;
+    }
+
+    /**
+     * @param Sensor[] $sensors
+     * @return Range[]
+     */
+    private function getBeaconsInLineAsRanges(array $sensors, int $lineToCheck): array
+    {
+        return Collection::create($sensors)
+            ->filter(static fn (Sensor $sensor) => $sensor->beaconLocation->y === $lineToCheck)
+            ->forEach(static fn (Sensor $sensor) => Range::createForPoint($sensor->beaconLocation->x))
+            ->unique()
+            ->toArray();
     }
 
     private function calculateTuningSignal(int $x, int $y): int
