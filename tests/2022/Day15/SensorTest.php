@@ -13,7 +13,7 @@ class SensorTest extends TestCase
     /**
      * @dataProvider  coveredPointsInLine
      */
-    public function testGetCoveredXPositionsInY(int $y, ?Range $expected): void
+    public function testGetRangeOnLine(int $y, ?Range $expected): void
     {
         $sensor = new Sensor(new Point(0, 0), new Point(1, 3));
 

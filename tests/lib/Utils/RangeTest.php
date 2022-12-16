@@ -47,9 +47,6 @@ class RangeTest extends TestCase
         yield 'Adjacent on left' => [[0, 5], [-5, -1], [-5, 5]];
         yield 'Adjacent on right by one' => [[0, 5], [5, 10], [0, 10]];
         yield 'Adjacent on left by one' => [[0, 5], [-5, 0], [-5, 5]];
-
-
-        // todo cannot when not colide
     }
 
     /**
