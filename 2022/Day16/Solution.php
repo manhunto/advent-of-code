@@ -120,23 +120,33 @@ final class Solution implements Solver
 
         $maxReleasedPressure = 0;
 
-        foreach ($myPaths as $key => $My) {
-            $elephantPaths = Collection::create($myPaths)
-                ->removeAtBeginning($key + 1)
+        $scores = [];
+        $paths = [];
+
+        foreach ($myPaths as $myPath) {
+            $key = implode(',', $myPath);
+            $scores[$key] = $this->helper->calculatePressureReleased($myPath, $valves, $pathFromValveToValve, $minutes);
+            $paths[$key] = $myPath;
+        }
+
+        $cp = count($paths);
+
+        $key = 0;
+        foreach ($paths as $myKey => $my) {
+            var_dump($key / $cp * 100);
+            $elephantPaths = Collection::create($paths)
+                ->removeAtBeginning(++$key)
                 ->toArray();
 
-            foreach ($elephantPaths as $El) {
-                $tA = $My;
+            foreach ($elephantPaths as $elKey => $El) {
+                $tA = $my;
                 $tB = $El;
                 unset($tA[0], $tB[0]);
 
                 if (empty(array_intersect($tA, $tB))) {
-                    $releasedPressure = $this->helper->calculatePressureReleased($My, $valves, $pathFromValveToValve, $minutes);
-                    $releasedPressure += $this->helper->calculatePressureReleased($El, $valves, $pathFromValveToValve, $minutes);
+                    $releasedPressure = $scores[$myKey] + $scores[$elKey];
 
-                    if ($maxReleasedPressure < $releasedPressure) {
-                        $maxReleasedPressure = $releasedPressure;
-                    }
+                    $maxReleasedPressure = max($maxReleasedPressure, $releasedPressure);
                 }
             }
         }
