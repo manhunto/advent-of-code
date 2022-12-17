@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Utils\PathFinding;
 
+/**
+ * Generates paths which every node should be visited only once
+ */
 class EveryPossiblePathGenerator
 {
     private array $paths = [];
@@ -17,7 +20,6 @@ class EveryPossiblePathGenerator
     public function __construct(
         array $nodes,
         string $startAt,
-        private readonly int $maxMoves,
     ) {
         foreach ($nodes as $node) {
             $this->nodes[$node->name] = $node;
@@ -33,22 +35,23 @@ class EveryPossiblePathGenerator
         return $this->paths;
     }
 
-    private function visit(Node $nodeToVisit, array $currentPath = [], int $move = 0): void
+    private function visit(Node $nodeToVisit, array $currentPath = []): void
     {
         $currentPath[] = $nodeToVisit->name;
 
-        if ($move >= $this->maxMoves) {
-            $this->paths[] = $currentPath;
-
-            return;
-        }
-
+        $wasEveryNodeVisitedInPath = true;
         foreach ($nodeToVisit->neighbours as $neighbour) {
             $node = $this->getNode($neighbour);
 
-            if ($node->visitableOnlyOnce === false || ($node->visitableOnlyOnce && in_array($node->name, $currentPath, true) === false)) {
-                $this->visit($node, $currentPath, $move + 1);
+            if (in_array($node->name, $currentPath, true) === false) {
+                $this->visit($node, $currentPath);
+                $wasEveryNodeVisitedInPath = false;
             }
+        }
+
+        if ($wasEveryNodeVisitedInPath) {
+            $this->paths[] = $currentPath;
+            var_dump(count($this->paths));
         }
     }
 

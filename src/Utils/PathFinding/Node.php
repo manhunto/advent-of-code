@@ -12,7 +12,6 @@ class Node
     public function __construct(
         public readonly string $name,
         public readonly array $neighbours,
-        public readonly bool $visitableOnlyOnce = false,
     ) {
     }
 }

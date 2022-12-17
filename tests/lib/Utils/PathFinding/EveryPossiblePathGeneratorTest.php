@@ -100,4 +100,22 @@ class EveryPossiblePathGeneratorTest extends TestCase
             self::assertLessThanOrEqual(1, $valuesCounted['CC-once'] ?? 0);
         }
     }
+
+    public function testAllVisibleOnce(): void
+    {
+        $nodes = [
+            new Node('AA', ['BB', 'CC'], true),
+            new Node('BB', ['AA', 'CC'], true),
+            new Node('CC', ['AA', 'BB'], true),
+        ];
+
+        $generator = new EveryPossiblePathGenerator($nodes, 'AA', 20);
+
+        $paths = $generator->generate();
+
+        self::assertEquals([
+            ['AA', 'BB', 'CC'],
+            ['AA', 'CC', 'BB']
+        ], $paths);
+    }
 }

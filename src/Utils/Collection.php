@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Utils;
 
-class Collection
+final class Collection
 {
     public function __construct(
         private readonly array $items
@@ -78,7 +78,7 @@ class Collection
 
     public function getIndicesForItemsInArray(array $haystack): self
     {
-        return $this->getIndices(static fn (string $encodedPacket) => in_array($encodedPacket, $haystack, true));
+        return $this->getIndices(static fn(string $encodedPacket) => in_array($encodedPacket, $haystack, true));
     }
 
     public function toArray(): array
@@ -104,5 +104,46 @@ class Collection
     public function filter(callable $callable = null): self
     {
         return self::create(array_filter($this->items, $callable));
+    }
+
+    public function filterKeys(callable $callable): self
+    {
+        return self::create(array_filter($this->items, $callable, ARRAY_FILTER_USE_KEY));
+    }
+
+    public function keys(): self
+    {
+        return self::create(array_keys($this->items));
+    }
+
+    public function values(): self
+    {
+        return self::create(array_values($this->items));
+    }
+
+    public function removeItem(mixed $item): self
+    {
+        $tmp = $this->items;
+
+        $index = array_search($item, $this->items, true);
+        unset($tmp[$index]);
+
+        return self::create($tmp);
+    }
+
+    public function add(mixed $item): self
+    {
+        return self::create([...$this->items, $item]);
+    }
+
+    public function removeAtBeginning(int $howMuch): self
+    {
+        $count = count($this->items);
+
+        if ($howMuch === 0 || $count === $howMuch) {
+            throw new \LogicException('Cannot remove zero or all items from collection');
+        }
+
+        return self::create(array_slice($this->items, -1 * ($count - $howMuch)));
     }
 }
