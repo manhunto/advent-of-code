@@ -8,6 +8,7 @@ use App\Input;
 use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
+use App\Utils\Arrays;
 use App\Utils\Collection;
 use App\Utils\PathFinding\BreadthFirstSearch;
 use App\Utils\PathFinding\EveryPossiblePathGenerator;
@@ -105,9 +106,7 @@ final class Solution implements Solver
         foreach ($paths as $path) {
             $releasedPressure = $this->helper->calculatePressureReleased($path, $valves, $pathFromValveToValve, $minutes);
 
-            if ($maxReleasedPressure < $releasedPressure) {
-                $maxReleasedPressure = $releasedPressure;
-            }
+            $maxReleasedPressure = max($maxReleasedPressure, $releasedPressure);
         }
 
         return $maxReleasedPressure;
@@ -124,16 +123,17 @@ final class Solution implements Solver
         $paths = [];
 
         foreach ($myPaths as $myPath) {
-            $key = implode(',', $myPath);
-            $scores[$key] = $this->helper->calculatePressureReleased($myPath, $valves, $pathFromValveToValve, $minutes);
-            $paths[$key] = $myPath;
-        }
+            $sorted = Arrays::sortedAsc($myPath);
 
-        $cp = count($paths);
+            $key = md5(serialize($sorted));
+
+            $score = $this->helper->calculatePressureReleased($myPath, $valves, $pathFromValveToValve, $minutes);
+            $scores[$key] = max($scores[$key] ?? 0, $score);
+            $paths[$key] = $sorted;
+        }
 
         $key = 0;
         foreach ($paths as $myKey => $my) {
-            var_dump($key / $cp * 100);
             $elephantPaths = Collection::create($paths)
                 ->removeAtBeginning(++$key)
                 ->toArray();
