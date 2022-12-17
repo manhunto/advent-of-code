@@ -7,7 +7,7 @@ namespace App\Utils\PathFinding;
 use SplQueue;
 
 /**
- * Finding the shortest path for unweighted graph
+ * Finding the shortest path for unweighted graph, one direction
  */
 class BreadthFirstSearch
 {
