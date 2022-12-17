@@ -63,61 +63,36 @@ final class Solution implements Solver
             $nodes[] = new Node($valveToOpen, $allValvesWithoutCurrent);
         }
 
-        $generator = new EveryPossiblePathGenerator($nodes, self::START_NODE);
+        $generator = new EveryPossiblePathGenerator(
+            $nodes,
+            self::START_NODE,
+            new CheckPathExceed30Minutes(
+                $valves,
+                $pathFromValveToValve
+            )
+        );
         $paths = $generator->generate();
 
-        var_dump(count($paths));
+        $helper = new ValveHelpers();
 
         $instructions = [];
         foreach ($paths as $path) {
-            $instruction = [];
-            $prevValveName = array_shift($path);
-            $instruction[] = $prevValveName;
-
-            foreach ($path as $nextValveName) {
-                $nextValve = $valves[$nextValveName];
-                $pathPrevNext = $pathFromValveToValve[$prevValveName . '-' . $nextValveName];
-                $instruction = [...$instruction, ...$pathPrevNext];
-                if ($nextValve->canValveBeOpen()) {
-                    $instruction[] = $nextValve->name . '-open';
-                }
-                $prevValveName = $nextValveName;
-            }
-
-            $instructions[] = $instruction;
+            $instructions[] = $helper->convertPathBetweenOpenableValvesToFullPath(
+                $path,
+                $valves,
+                $pathFromValveToValve,
+            );
         }
 
         $maxReleasedPressure = 0;
-        $bestPath = [];
-
-        var_dump(count($instructions));
 
         foreach ($instructions as $instruction) {
-            $releasedPressure = 0;
-            $minutesLeft = 30;
-            foreach ($instruction as $move) {
-                if ($minutesLeft <= 0) { 
-                    break;
-                }
-
-                if (str_ends_with($move, '-open')) {
-                    $valveName = str_replace('-open', '', $move);
-                    /** @var Valve $valve */
-                    $valve = $valves[$valveName];
-                    $releasedPressure += $valve->calculateReleasedPressure($minutesLeft);
-                }
-                $minutesLeft--;
-            }
+            $releasedPressure = $this->calculateReleasedPressure($instruction, $valves);
 
             if ($maxReleasedPressure < $releasedPressure) {
                 $maxReleasedPressure = $releasedPressure;
-                $bestPath = $instruction;
             }
         }
-
-        var_dump($maxReleasedPressure);
-        print_r($bestPath);
-
 
         return new Result($maxReleasedPressure);
     }
@@ -139,5 +114,28 @@ final class Solution implements Solver
             }
         }
         return $valves;
+    }
+
+    /**
+     * @param array $instructions
+     * @param Valve[] $valves
+     * @return int
+     */
+    private function calculateReleasedPressure(array $instructions, array $valves): int
+    {
+        $releasedPressure = 0;
+        $minutesLeft = 30;
+        foreach ($instructions as $move) {
+            if (str_ends_with($move, '-open')) {
+                $valveName = str_replace('-open', '', $move);
+                /** @var Valve $valve */
+                $valve = $valves[$valveName];
+                $releasedPressure += $valve->calculateReleasedPressure($minutesLeft);
+            }
+
+            $minutesLeft--;
+        }
+
+        return $releasedPressure;
     }
 }

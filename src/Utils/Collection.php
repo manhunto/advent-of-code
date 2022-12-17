@@ -140,7 +140,7 @@ final class Collection
     {
         $count = count($this->items);
 
-        if ($howMuch === 0 || $count === $howMuch) {
+        if ($howMuch <= 0 || $howMuch >= $count) {
             throw new \LogicException('Cannot remove zero or all items from collection');
         }
 

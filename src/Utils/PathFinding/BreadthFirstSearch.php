@@ -8,6 +8,7 @@ use SplQueue;
 
 /**
  * Finding the shortest path for unweighted graph, one direction
+ * FIFO
  */
 class BreadthFirstSearch
 {
