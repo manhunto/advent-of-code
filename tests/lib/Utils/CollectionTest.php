@@ -22,8 +22,10 @@ class CollectionTest extends TestCase
 
     public function removeAtBeginningData(): iterable
     {
+        yield [0, ['A', 'B', 'C', 'D']];
         yield [1, ['B', 'C', 'D']];
         yield [2, ['C', 'D']];
         yield [3, ['D']];
+        yield [4, []];
     }
 }

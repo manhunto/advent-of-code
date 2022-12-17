@@ -21,6 +21,11 @@ final class Collection
         return new self($array);
     }
 
+    private static function empty(): self
+    {
+        return self::create([]);
+    }
+
     public function indicesStartAtOne(): self
     {
         return self::create(self::withOneAsFirstIndex($this->items));
@@ -138,12 +143,17 @@ final class Collection
 
     public function removeAtBeginning(int $howMuch): self
     {
-        $count = count($this->items);
+        $count = $this->count();
 
-        if ($howMuch <= 0 || $howMuch >= $count) {
-            throw new \LogicException('Cannot remove zero or all items from collection');
+        if ($howMuch < 0 || $howMuch > $count) {
+            throw new \LogicException('Cannot remove less than zero or more than item count in collection');
         }
 
-        return self::create(array_slice($this->items, -1 * ($count - $howMuch)));
+        return self::create(array_slice($this->items, $howMuch, $count - $howMuch));
+    }
+
+    public function isEmpty(): bool
+    {
+        return empty($this->items);
     }
 }

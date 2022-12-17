@@ -8,7 +8,7 @@ use App\Utils\PathFinding\Utils\CanVisitNodeInterface;
 use App\Utils\PathFinding\Utils\DummyCanVisitNode;
 
 /**
- * Generates paths which every node should be visited only once
+ * Generates paths which every node should be visited once or zero times
  */
 class EveryPossiblePathGenerator
 {
@@ -44,8 +44,8 @@ class EveryPossiblePathGenerator
     private function visit(Node $nodeToVisit, array $currentPath = []): void
     {
         $currentPath[] = $nodeToVisit->name;
+        $this->paths[] = $currentPath;
 
-        $wasEveryNodeVisitedInPath = true;
         foreach ($nodeToVisit->neighbours as $neighbour) {
             $node = $this->getNode($neighbour);
 
@@ -58,11 +58,6 @@ class EveryPossiblePathGenerator
             }
 
             $this->visit($node, $currentPath);
-            $wasEveryNodeVisitedInPath = false;
-        }
-
-        if ($wasEveryNodeVisitedInPath) {
-            $this->paths[] = $currentPath;
         }
     }
 

@@ -20,6 +20,13 @@ final class Solution implements Solver
 {
     private const START_NODE = 'AA';
 
+    private Helper $helper;
+
+    public function __construct()
+    {
+        $this->helper = new Helper();
+    }
+
     public function solve(Input $input): Result
     {
         $valves = $this->parseValves($input);
@@ -30,9 +37,9 @@ final class Solution implements Solver
         }
 
         $valvesToOpen = Collection::create($valves)
-            ->filter(static fn (Valve $valve) => $valve->canValveBeOpen())
+            ->filter(static fn(Valve $valve) => $valve->canValveBeOpen())
             ->add($valves[self::START_NODE])
-            ->forEach(static fn (Valve $valve) => $valve->name)
+            ->forEach(static fn(Valve $valve) => $valve->name)
             ->values()
             ->toArray();
 
@@ -43,11 +50,11 @@ final class Solution implements Solver
                 if ($fromValve !== $toValve) {
                     $path = $bfs->getPath($graph, $fromValve, [$toValve]);
 
-                    $collection = Collection::create($path)
+                    $pathWithoutStartNode = Collection::create($path)
                         ->removeAtBeginning(1)
                         ->toArray();
 
-                    $pathFromValveToValve[$fromValve . '-' . $toValve] = $collection;
+                    $pathFromValveToValve[$fromValve . '-' . $toValve] = $pathWithoutStartNode;
                 }
             }
         }
@@ -63,38 +70,10 @@ final class Solution implements Solver
             $nodes[] = new Node($valveToOpen, $allValvesWithoutCurrent);
         }
 
-        $generator = new EveryPossiblePathGenerator(
-            $nodes,
-            self::START_NODE,
-            new CheckPathExceed30Minutes(
-                $valves,
-                $pathFromValveToValve
-            )
-        );
-        $paths = $generator->generate();
+        $firstPart = $this->solveFirstPart($nodes, $valves, $pathFromValveToValve);
+        $secondPart = $this->solveSecondPart($nodes, $valves, $pathFromValveToValve);
 
-        $helper = new ValveHelpers();
-
-        $instructions = [];
-        foreach ($paths as $path) {
-            $instructions[] = $helper->convertPathBetweenOpenableValvesToFullPath(
-                $path,
-                $valves,
-                $pathFromValveToValve,
-            );
-        }
-
-        $maxReleasedPressure = 0;
-
-        foreach ($instructions as $instruction) {
-            $releasedPressure = $this->calculateReleasedPressure($instruction, $valves);
-
-            if ($maxReleasedPressure < $releasedPressure) {
-                $maxReleasedPressure = $releasedPressure;
-            }
-        }
-
-        return new Result($maxReleasedPressure);
+        return new Result($firstPart, $secondPart);
     }
 
     /**
@@ -108,7 +87,7 @@ final class Solution implements Solver
             if (preg_match('/Valve ([A-Z]{2}) has flow rate=(\d+); tunnels? leads? to valves? ([A-Z\s,]+)/', $row, $matches)) {
                 [, $name, $flowRate, $neighbourValves] = $matches;
 
-                $valves[$name] = new Valve($name, (int) $flowRate, explode(', ', $neighbourValves));
+                $valves[$name] = new Valve($name, (int)$flowRate, explode(', ', $neighbourValves));
             } else {
                 throw new \LogicException('Invalid regex. Cannot parse valve');
             }
@@ -116,26 +95,67 @@ final class Solution implements Solver
         return $valves;
     }
 
-    /**
-     * @param array $instructions
-     * @param Valve[] $valves
-     * @return int
-     */
-    private function calculateReleasedPressure(array $instructions, array $valves): int
+    private function solveFirstPart(array $nodes, array $valves, array $pathFromValveToValve): int
     {
-        $releasedPressure = 0;
-        $minutesLeft = 30;
-        foreach ($instructions as $move) {
-            if (str_ends_with($move, '-open')) {
-                $valveName = str_replace('-open', '', $move);
-                /** @var Valve $valve */
-                $valve = $valves[$valveName];
-                $releasedPressure += $valve->calculateReleasedPressure($minutesLeft);
-            }
+        $minutes = 30;
+        $paths = $this->generateAllPossiblePathsBetweenValves($nodes, $valves, $pathFromValveToValve, $minutes);
 
-            $minutesLeft--;
+        $maxReleasedPressure = 0;
+
+        foreach ($paths as $path) {
+            $releasedPressure = $this->helper->calculatePressureReleased($path, $valves, $pathFromValveToValve, $minutes);
+
+            if ($maxReleasedPressure < $releasedPressure) {
+                $maxReleasedPressure = $releasedPressure;
+            }
         }
 
-        return $releasedPressure;
+        return $maxReleasedPressure;
+    }
+
+    private function solveSecondPart(array $nodes, array $valves, array $pathFromValveToValve): int
+    {
+        $minutes = 26;
+        $myPaths = $this->generateAllPossiblePathsBetweenValves($nodes, $valves, $pathFromValveToValve, $minutes);
+
+        $maxReleasedPressure = 0;
+
+        foreach ($myPaths as $key => $My) {
+            $elephantPaths = Collection::create($myPaths)
+                ->removeAtBeginning($key + 1)
+                ->toArray();
+
+            foreach ($elephantPaths as $El) {
+                $tA = $My;
+                $tB = $El;
+                unset($tA[0], $tB[0]);
+
+                if (empty(array_intersect($tA, $tB))) {
+                    $releasedPressure = $this->helper->calculatePressureReleased($My, $valves, $pathFromValveToValve, $minutes);
+                    $releasedPressure += $this->helper->calculatePressureReleased($El, $valves, $pathFromValveToValve, $minutes);
+
+                    if ($maxReleasedPressure < $releasedPressure) {
+                        $maxReleasedPressure = $releasedPressure;
+                    }
+                }
+            }
+        }
+
+        return $maxReleasedPressure;
+    }
+
+    private function generateAllPossiblePathsBetweenValves(array $nodes, array $valves, array $pathFromValveToValve, int $minutes): array
+    {
+        $generator = new EveryPossiblePathGenerator(
+            $nodes,
+            self::START_NODE,
+            new CheckPathExceedNMinutes(
+                $valves,
+                $pathFromValveToValve,
+                $minutes
+            )
+        );
+
+        return $generator->generate();
     }
 }
