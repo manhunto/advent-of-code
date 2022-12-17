@@ -125,9 +125,11 @@ final class Solution implements Solver
         foreach ($myPaths as $myPath) {
             $sorted = Arrays::sortedAsc($myPath);
 
-            $key = md5(serialize($sorted));
-
             $score = $this->helper->calculatePressureReleased($myPath, $valves, $pathFromValveToValve, $minutes);
+
+            unset($sorted[0]); // remove start item
+
+            $key = md5(serialize($sorted));
             $scores[$key] = max($scores[$key] ?? 0, $score);
             $paths[$key] = $sorted;
         }
@@ -138,12 +140,8 @@ final class Solution implements Solver
                 ->removeAtBeginning(++$key)
                 ->toArray();
 
-            foreach ($elephantPaths as $elKey => $El) {
-                $tA = $my;
-                $tB = $El;
-                unset($tA[0], $tB[0]);
-
-                if (empty(array_intersect($tA, $tB))) {
+            foreach ($elephantPaths as $elKey => $el) {
+                if (empty(array_intersect($my, $el))) {
                     $releasedPressure = $scores[$myKey] + $scores[$elKey];
 
                     $maxReleasedPressure = max($maxReleasedPressure, $releasedPressure);
