@@ -143,13 +143,13 @@ class Shape
         $this->layout = $new;
     }
 
-    public function collide(Map $map): bool
+    public function collide(Map $map, string $element): bool
     {
         foreach ($this->layout as $y => $row) {
             foreach ($row as $x => $value) {
                 if ($value === 1) {
                     $mapValue = $map->asArray()[$y][$x] ?? '.';
-                    if ($mapValue === '#') {
+                    if ($mapValue === $element) {
                         return true;
                     }
                 }
@@ -191,26 +191,26 @@ class Shape
         return count($this->layout);
     }
 
-    public function canMoveRight(Map $map): bool
+    public function canMoveRight(Map $map, string $elementToCheck): bool
     {
-        return $this->test(static fn (self $test) => $test->moveRight(), $map);
+        return $this->test(static fn (self $test) => $test->moveRight(), $map, $elementToCheck);
     }
 
-    public function canMoveLeft(Map $map): bool
+    public function canMoveLeft(Map $map, string $elementToCheck): bool
     {
-        return $this->test(static fn (self $test) => $test->moveLeft(), $map);
+        return $this->test(static fn (self $test) => $test->moveLeft(), $map, $elementToCheck);
     }
 
-    public function canFall(Map $map): bool
+    public function canFall(Map $map, string $elementToCheck): bool
     {
-        return $this->test(static fn (self $test) => $test->fall(), $map);
+        return $this->test(static fn (self $test) => $test->fall(), $map, $elementToCheck);
     }
 
-    private function test(callable $callable, Map $map): bool
+    private function test(callable $callable, Map $map, string $elementToCheck): bool
     {
         $test = clone $this;
         $callable($test);
 
-        return $test->collide($map) === false;
+        return $test->collide($map, $elementToCheck) === false;
     }
 }

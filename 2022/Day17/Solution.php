@@ -16,6 +16,9 @@ use App\Utils\Map;
 final class Solution implements Solver
 {
     private const SPACE_FROM_BOTTOM = 3;
+    private const MOVING_ROCK = '@';
+    private const AIR = '.';
+    private const SOLID_ROCK = '#';
 
     public function solve(Input $input): Result
     {
@@ -32,24 +35,32 @@ final class Solution implements Solver
         $movementNumber = 0;
         $towerHeight = 0;
 
-        $map = Map::generateFilled(1, 6, '#');
-        $map->cropOnUp(3, '.');
+        $map = Map::generateFilled(1, 6, self::SOLID_ROCK);
+        $map->cropOnUp(3, self::AIR);
 
         do {
             $shape = Shape::createWithShapeNumber($shapeNumber, $towerHeight + self::SPACE_FROM_BOTTOM + 1);
-            $map->cropOnUp($shape->getHeight(), '.'); // todo crop to size
+            $map->cropOnUp($shape->getHeight(), self::AIR); // todo crop to size
 
             $individualShapeMove = 0;
+            $canFall = true;
 
             do {
-//                $map->printer()
-//                    ->drawTemporaryShape($shape->onlySolid(), '@')
-//                    ->print();
+//                $movementInRow = $movementNumber % count($movements);
+
+//                if ($movementInRow === 0) {
+//                    $map->printer()
+//                        ->withoutRowNumbers()
+//                        ->drawTemporaryShape($shape->asArrayOnlyWithShape(), self::MOVING_ROCK)
+//                        ->print();
 //
-//                readline();
+//                    var_dump($shapeNumber);
+//
+//                    readline();
+//
+//                }
 
                 $movement = $movements[$movementNumber % count($movements)];
-//                var_dump($movementNumber);
                 $movementNumber++;
                 $individualShapeMove++;
 
@@ -57,10 +68,10 @@ final class Solution implements Solver
                 $shouldTest = $individualShapeMove > self::SPACE_FROM_BOTTOM;
 
                 if ($movement === '>') {
-                    if ($shouldTest === false || $shape->canMoveRight($map)) {
+                    if ($shouldTest === false || $shape->canMoveRight($map, self::SOLID_ROCK)) {
                         $shape->moveRight();
                     }
-                } else if ($shouldTest === false || $shape->canMoveLeft($map)) {
+                } else if ($shouldTest === false || $shape->canMoveLeft($map, self::SOLID_ROCK)) {
                     $shape->moveLeft();
                 }
 
@@ -71,19 +82,14 @@ final class Solution implements Solver
 //                readline();
 //
 
-                if ($shouldTest && $shape->canFall($map) === false) {
-                    break;
+                if ($shouldTest && $shape->canFall($map, self::SOLID_ROCK) === false) {
+                    $canFall = false;
+                } else {
+                    $shape->fall();
                 }
+            } while ($canFall);
 
-                $shape->fall();
-            } while (true);
-
-            $map->drawShape($shape->asArrayOnlyWithShape(), '#');
-
-//            $map->printer()
-//                ->print();
-//
-//            readline();
+            $map->drawShape($shape->asArrayOnlyWithShape(), self::SOLID_ROCK);
 
             $towerHeight = max($towerHeight, $shape->getMaxY());
             $shapeNumber++;

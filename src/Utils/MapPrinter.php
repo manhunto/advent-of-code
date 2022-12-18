@@ -7,11 +7,18 @@ namespace App\Utils;
 class MapPrinter
 {
     private bool $reversedHorizontally = true;
+    private bool $withRowNumbers = true;
 
     public function __construct(
         private array $map,
-    )
+    ) {
+    }
+
+    public function withoutRowNumbers(): self
     {
+        $this->withRowNumbers = false;
+
+        return $this;
     }
 
     public function drawTemporaryShape(array $shape, string $string): self
@@ -36,10 +43,15 @@ class MapPrinter
         $digits = strlen((string) $maxY);
 
         foreach ($map as $row => $item) {
-            echo sprintf('%s |%s|',
-                    str_pad((string)$row, $digits + 1, ' ', STR_PAD_LEFT),
-                    implode('', $item)
-                ) . PHP_EOL;
+            $valueToPrint = implode('', $item);
+            if ($this->withRowNumbers) {
+                echo sprintf('%s |%s|',
+                        str_pad((string)$row, $digits + 1, ' ', STR_PAD_LEFT),
+                        $valueToPrint
+                    ) . PHP_EOL;
+            } else {
+                echo $valueToPrint . PHP_EOL;
+            }
         }
     }
 }
