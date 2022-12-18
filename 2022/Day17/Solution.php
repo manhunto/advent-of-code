@@ -39,6 +39,8 @@ final class Solution implements Solver
             $shape = Shape::createWithShapeNumber($shapeNumber, $towerHeight + self::SPACE_FROM_BOTTOM + 1);
             $map->cropOnUp($shape->getHeight(), '.'); // todo crop to size
 
+            $individualShapeMove = 0;
+
             do {
 //                $map->printer()
 //                    ->drawTemporaryShape($shape->onlySolid(), '@')
@@ -49,20 +51,17 @@ final class Solution implements Solver
                 $movement = $movements[$movementNumber % count($movements)];
 //                var_dump($movementNumber);
                 $movementNumber++;
+                $individualShapeMove++;
 
-                $test = clone $shape;
+
+                $shouldTest = $individualShapeMove > self::SPACE_FROM_BOTTOM;
 
                 if ($movement === '>') {
-                    $test->moveRight();
-
-                    if ($test->collide($map) === false) {
+                    if ($shouldTest === false || $shape->canMoveRight($map)) {
                         $shape->moveRight();
                     }
-                } else {
-                    $test->moveLeft();
-                    if ($test->collide($map) === false) {
-                        $shape->moveLeft();
-                    }
+                } else if ($shouldTest === false || $shape->canMoveLeft($map)) {
+                    $shape->moveLeft();
                 }
 
 //                $map->printer()
@@ -72,10 +71,7 @@ final class Solution implements Solver
 //                readline();
 //
 
-                $test = clone $shape;
-                $test->fall();
-
-                if ($test->collide($map)) {
+                if ($shouldTest && $shape->canFall($map) === false) {
                     break;
                 }
 

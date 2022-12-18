@@ -190,4 +190,27 @@ class Shape
     {
         return count($this->layout);
     }
+
+    public function canMoveRight(Map $map): bool
+    {
+        return $this->test(static fn (self $test) => $test->moveRight(), $map);
+    }
+
+    public function canMoveLeft(Map $map): bool
+    {
+        return $this->test(static fn (self $test) => $test->moveLeft(), $map);
+    }
+
+    public function canFall(Map $map): bool
+    {
+        return $this->test(static fn (self $test) => $test->fall(), $map);
+    }
+
+    private function test(callable $callable, Map $map): bool
+    {
+        $test = clone $this;
+        $callable($test);
+
+        return $test->collide($map) === false;
+    }
 }
