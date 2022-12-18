@@ -23,7 +23,7 @@ final class Solution implements Solver
     public function solve(Input $input): Result
     {
         $towerHeightPartOne = $this->simulateForNShapes($input, 2022);
-//        $towerHeightPartTwo = $this->simulateForNShapes($input, 1_000_000_000_000);
+        $towerHeightPartTwo = $this->simulateForNShapes($input, 1_000_000_000_000);
 
         return new Result($towerHeightPartOne);
     }
@@ -39,8 +39,9 @@ final class Solution implements Solver
         $map->cropOnUp(3, self::AIR);
 
         do {
+//            echo number_format($shapeNumber / $maxShapes * 100, 6) . ' - ' . $shapeNumber . PHP_EOL;
             $shape = Shape::createWithShapeNumber($shapeNumber, $towerHeight + self::SPACE_FROM_BOTTOM + 1);
-            $map->cropOnUp($shape->getHeight(), self::AIR); // todo crop to size
+            $map->cropOnUpToHeight($towerHeight + self::SPACE_FROM_BOTTOM + $shape->getHeight(), self::AIR); // todo crop to size
 
             $individualShapeMove = 0;
             $canFall = true;
@@ -74,13 +75,6 @@ final class Solution implements Solver
                 } else if ($shouldTest === false || $shape->canMoveLeft($map, self::SOLID_ROCK)) {
                     $shape->moveLeft();
                 }
-
-//                $map->printer()
-//                    ->drawTemporaryShape($shape->onlySolid(), '@')
-//                    ->print();
-//
-//                readline();
-//
 
                 if ($shouldTest && $shape->canFall($map, self::SOLID_ROCK) === false) {
                     $canFall = false;

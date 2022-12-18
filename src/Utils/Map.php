@@ -79,8 +79,7 @@ class Map
 
     public function cropOnLeft(int $width, string $element): void
     {
-        $firstRow = $this->getFirstRow();
-        $minX = min(array_keys($firstRow));
+        $minX = $this->getMinX();
 
         for ($x = $minX - 1; $x >= $minX - $width; $x--) {
             foreach ($this->grid as $y => $item) {
@@ -91,8 +90,7 @@ class Map
 
     public function cropOnRight(int $width, string $element): void
     {
-        $firstRow = $this->getFirstRow();
-        $maxX = max(array_keys($firstRow));
+        $maxX = $this->getMaxX();
 
         for ($x = $maxX + 1; $x <= $maxX + $width; $x++) {
             foreach ($this->grid as $y => $item) {
@@ -103,12 +101,21 @@ class Map
 
     public function cropOnUp(int $height, string $element): void
     {
-        $firstRow = $this->getFirstRow();
-        $maxX = max(array_keys($firstRow));
-        $maxY = max(array_keys($this->grid));
+        $maxX = $this->getMaxX();
+        $maxY = $this->getMaxY();
 
         for ($y = $maxY + 1; $y <= $maxY + $height; $y++) {
             $this->grid[$y] = array_fill(0, $maxX + 1, $element);
+        }
+    }
+
+    public function cropOnUpToHeight(int $totalHeight, string $element): void
+    {
+        $maxY = $this->getMaxY();
+        $diff = $totalHeight - $maxY;
+
+        if ($diff) {
+            $this->cropOnUp($diff, $element);
         }
     }
 
@@ -143,5 +150,10 @@ class Map
     private function getFirstRowPositions(): array
     {
         return array_keys($this->getFirstRow());
+    }
+
+    private function getMaxY(): mixed
+    {
+        return max(array_keys($this->grid));
     }
 }
