@@ -156,4 +156,14 @@ final class Collection
     {
         return empty($this->items);
     }
+
+    public function max(): int
+    {
+        return max($this->items);
+    }
+
+    public function min(): int
+    {
+        return min($this->items);
+    }
 }

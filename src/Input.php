@@ -39,4 +39,9 @@ final class Input
     {
         return array_map(static fn (string $row) => str_split($row), $this->asArray());
     }
+
+    public function asChars(): array
+    {
+        return str_split($this->asString());
+    }
 }

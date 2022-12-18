@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Utils;
 
-use SebastianBergmann\CodeCoverage\Report\PHP;
-
 class Map
 {
     public function __construct(
@@ -35,6 +33,22 @@ class Map
         }
 
         return $string;
+    }
+
+    public function drawShape(array $shape, string $string): self
+    {
+        foreach ($shape as $y => $row) {
+            foreach ($row as $x => $value) {
+                $this->grid[$y][$x] = $string;
+            }
+        }
+
+        return $this;
+    }
+
+    public function asArray(): array
+    {
+        return $this->grid;
     }
 
     public function drawLine(int $startX, int $startY, int $endX, int $endY, string $element): void
@@ -87,12 +101,28 @@ class Map
         }
     }
 
+    public function cropOnUp(int $height, string $element): void
+    {
+        $firstRow = $this->getFirstRow();
+        $maxX = max(array_keys($firstRow));
+        $maxY = max(array_keys($this->grid));
+
+        for ($y = $maxY + 1; $y <= $maxY + $height; $y++) {
+            $this->grid[$y] = array_fill(0, $maxX + 1, $element);
+        }
+    }
+
     public function drawFullWidthLineHorizontally(int $y, string $element): void
     {
         $fromX = $this->getMinX();
         $toX = $this->getMaxX();
 
         $this->drawLine($fromX, $y, $toX, $y, $element);
+    }
+
+    public function printer(): MapPrinter
+    {
+        return new MapPrinter($this->grid);
     }
 
     private function getFirstRow(): mixed
