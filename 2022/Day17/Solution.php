@@ -25,7 +25,7 @@ final class Solution implements Solver
         $towerHeightPartOne = $this->simulateForNShapes($input, 2022);
         $towerHeightPartTwo = $this->simulateForNShapes($input, 1_000_000_000_000);
 
-        return new Result($towerHeightPartOne);
+        return new Result($towerHeightPartOne, $towerHeightPartTwo);
     }
 
     private function simulateForNShapes(Input $input, int $maxShapes): mixed
@@ -35,32 +35,69 @@ final class Solution implements Solver
         $movementNumber = 0;
         $towerHeight = 0;
 
+        $movementHistory = [];
+        $firstDetectedMovement = null;
+        $wasCycleAdded = false;
+
         $map = Map::generateFilled(1, 6, self::SOLID_ROCK);
         $map->cropOnUp(3, self::AIR);
 
         do {
-//            echo number_format($shapeNumber / $maxShapes * 100, 6) . ' - ' . $shapeNumber . PHP_EOL;
             $shape = Shape::createWithShapeNumber($shapeNumber, $towerHeight + self::SPACE_FROM_BOTTOM + 1);
-            $map->cropOnUpToHeight($towerHeight + self::SPACE_FROM_BOTTOM + $shape->getHeight(), self::AIR); // todo crop to size
+            $map->cropOnUpToHeight($towerHeight + self::SPACE_FROM_BOTTOM + $shape->getHeight(), self::AIR);
 
             $individualShapeMove = 0;
             $canFall = true;
 
-            do {
-//                $movementInRow = $movementNumber % count($movements);
+            $historyKey = $shapeNumber % 5 . '/' . $movementNumber % count($movements);
 
-//                if ($movementInRow === 0) {
+            if ($wasCycleAdded === false && isset($movementHistory[$historyKey])) {
+                if ($firstDetectedMovement === null)  {
+                    $firstDetectedMovement = $historyKey;
+                } elseif ($firstDetectedMovement === $historyKey) {
+                    $fromHist = $movementHistory[$historyKey];
+                    $cycleHeight = $towerHeight - $fromHist['height'];
+                    $cycleShapeNumbers = $shapeNumber - $fromHist['shape-number'];
+
+                    $cyclesLeft = floor(($maxShapes - $shapeNumber )/ $cycleShapeNumbers);
+
+                    $towerHeightBefore = $towerHeight;
+
+                    $towerHeight += (int) $cyclesLeft * $cycleHeight;
+                    $shapeNumber += (int) $cyclesLeft * $cycleShapeNumbers;
+
 //                    $map->printer()
-//                        ->withoutRowNumbers()
+//                        ->naturalHorizontally()
 //                        ->drawTemporaryShape($shape->asArrayOnlyWithShape(), self::MOVING_ROCK)
 //                        ->print();
 //
-//                    var_dump($shapeNumber);
+//                    var_dump($towerHeightBefore);
+//                    var_dump($towerHeight);
+//
 //
 //                    readline();
-//
-//                }
 
+
+                    $map->moveRowsTo($towerHeight - $towerHeightBefore);
+                    $wasCycleAdded = true;
+                    $shape = Shape::createWithShapeNumber($shapeNumber, $towerHeight + self::SPACE_FROM_BOTTOM + 1);
+                    $map->cropOnUpToHeight($towerHeight + self::SPACE_FROM_BOTTOM + $shape->getHeight(), self::AIR);
+
+//                    $map->printer()
+//                            ->naturalHorizontally()
+//                        ->drawTemporaryShape($shape->asArrayOnlyWithShape(), self::MOVING_ROCK)
+//                        ->print();
+//
+//                    readline();
+                }
+            }
+
+            $movementHistory[$historyKey] = [
+                'height' => $towerHeight,
+                'shape-number' => $shapeNumber,
+            ];
+
+            do {
                 $movement = $movements[$movementNumber % count($movements)];
                 $movementNumber++;
                 $individualShapeMove++;

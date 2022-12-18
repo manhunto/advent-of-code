@@ -14,6 +14,13 @@ class MapPrinter
     ) {
     }
 
+    public function naturalHorizontally(): self
+    {
+        $this->reversedHorizontally = false;
+
+        return $this;
+    }
+
     public function withoutRowNumbers(): self
     {
         $this->withRowNumbers = false;

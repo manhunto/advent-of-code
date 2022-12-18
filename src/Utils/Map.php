@@ -156,4 +156,19 @@ class Map
     {
         return max(array_keys($this->grid));
     }
+
+    public function getRow(int $y): array
+    {
+        return $this->grid[$y] ?? [];
+    }
+
+    public function moveRowsTo(int $value): void
+    {
+        $new = [];
+        foreach ($this->grid as $y => $row) {
+            $new[$y + $value] = $row;
+        }
+
+        $this->grid = $new;
+    }
 }
