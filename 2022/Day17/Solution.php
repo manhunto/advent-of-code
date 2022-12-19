@@ -31,9 +31,9 @@ final class Solution implements Solver
     private function simulateForNShapes(Input $input, int $maxShapes): mixed
     {
         $shapeNumber = 0;
-        $movements = $input->asChars();
         $movementNumber = 0;
         $towerHeight = 0;
+        $movements = $input->asChars();
 
         $movementHistory = [];
         $firstDetectedMovement = null;
@@ -59,36 +59,25 @@ final class Solution implements Solver
                     $cycleHeight = $towerHeight - $fromHist['height'];
                     $cycleShapeNumbers = $shapeNumber - $fromHist['shape-number'];
 
-                    $cyclesLeft = floor(($maxShapes - $shapeNumber )/ $cycleShapeNumbers);
+                    $cyclesLeft = floor(($maxShapes - $shapeNumber) / $cycleShapeNumbers);
 
                     $towerHeightBefore = $towerHeight;
 
                     $towerHeight += (int) $cyclesLeft * $cycleHeight;
                     $shapeNumber += (int) $cyclesLeft * $cycleShapeNumbers;
 
-//                    $map->printer()
-//                        ->naturalHorizontally()
-//                        ->drawTemporaryShape($shape->asArrayOnlyWithShape(), self::MOVING_ROCK)
-//                        ->print();
-//
-//                    var_dump($towerHeightBefore);
-//                    var_dump($towerHeight);
-//
-//
-//                    readline();
-
-
                     $map->moveRowsTo($towerHeight - $towerHeightBefore);
                     $wasCycleAdded = true;
-                    $shape = Shape::createWithShapeNumber($shapeNumber, $towerHeight + self::SPACE_FROM_BOTTOM + 1);
-                    $map->cropOnUpToHeight($towerHeight + self::SPACE_FROM_BOTTOM + $shape->getHeight(), self::AIR);
 
-//                    $map->printer()
-//                            ->naturalHorizontally()
-//                        ->drawTemporaryShape($shape->asArrayOnlyWithShape(), self::MOVING_ROCK)
-//                        ->print();
-//
-//                    readline();
+                    if ($shapeNumber === $maxShapes) {
+                        break;
+                    }
+
+                    if ($shapeNumber > $maxShapes) {
+                        throw new \LogicException('Something went wrong in cycle calculations');
+                    }
+
+                    continue;
                 }
             }
 
@@ -101,7 +90,6 @@ final class Solution implements Solver
                 $movement = $movements[$movementNumber % count($movements)];
                 $movementNumber++;
                 $individualShapeMove++;
-
 
                 $shouldTest = $individualShapeMove > self::SPACE_FROM_BOTTOM;
 
@@ -125,6 +113,7 @@ final class Solution implements Solver
             $towerHeight = max($towerHeight, $shape->getMaxY());
             $shapeNumber++;
         } while ($shapeNumber < $maxShapes);
+
         return $towerHeight;
     }
 }
