@@ -55,10 +55,10 @@ final class PuzzleMetadataFetcher
 
     private function getExampleInput(string $puzzleDescriptionPageContent): ?string
     {
-        $pattern = "/.*?for example.*?\<code\>(.*?)\<\/code\>/is";
+        $pattern = "/.*?(for example|Here's a larger example).*?\<code\>(.*?)\<\/code\>/is";
 
         if (preg_match($pattern, $puzzleDescriptionPageContent, $matches)) {
-            return htmlspecialchars_decode(strip_tags($matches[1]));
+            return htmlspecialchars_decode(strip_tags($matches[2]));
         }
 
         return null;
