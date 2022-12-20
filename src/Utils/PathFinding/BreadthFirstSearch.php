@@ -20,6 +20,10 @@ class BreadthFirstSearch
      */
     public function getPath(array $graph, string $start, array $endNodes = []): array
     {
+        if (in_array($start, $endNodes, true)) {
+            return [$start];
+        }
+
         $queue = new SplQueue();
         $queue->enqueue([$start]);
         $visited = [$start];

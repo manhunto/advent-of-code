@@ -135,7 +135,15 @@ final class Range implements \Stringable
         return json_encode(['from' => $this->from, 'to' => $this->to], JSON_THROW_ON_ERROR);
     }
 
-    private function isNumberInRange(int $number): bool
+    public function expandTo(int $value): self
+    {
+        return new Range(
+            min($this->from, $value),
+            max($this->to, $value),
+        );
+    }
+
+    public function isNumberInRange(int $number): bool
     {
         return $this->from <= $number && $this->to >= $number;
     }

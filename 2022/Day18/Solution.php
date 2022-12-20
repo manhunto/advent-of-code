@@ -8,6 +8,8 @@ use App\Input;
 use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
+use App\Utils\Collection;
+use App\Utils\Point3D;
 
 #[SolutionAttribute(
     name: 'Boiling Boulders',
@@ -16,44 +18,18 @@ final class Solution implements Solver
 {
     public function solve(Input $input): Result
     {
-        $grid3d = [];
+        $points3D = Collection::create($input->asArray())
+            ->forEach(static function (string $row): Point3D {
+                [$x, $y, $z] = explode(',', $row);
 
-        foreach ($input->asArray() as $row) {
-            [$x, $y, $z] = explode(',', $row);
-            $grid3d[$x][$y][$z] = 1;
-        }
+                return new Point3D((int) $x, (int) $y, (int) $z);
+            })
+            ->toArray();
 
-        $surface = $this->calculateWholeAre($grid3d);
+        $droplet = new Droplet($points3D);
+        $surfaceFirstPart = $droplet->calculateWholeSurface();
+        $surfaceSecondPart = $droplet->calculateExteriorSurface();
 
-        return new Result($surface);
-    }
-
-    private function calculateWholeAre(array $grid3d): int
-    {
-        $adjecentsGrid = [
-            [1, 0, 0],
-            [0, 1, 0],
-            [0, 0, 1],
-            [-1, 0, 0],
-            [0, -1, 0],
-            [0, 0, -1],
-        ];
-
-        $surface = 0;
-        foreach ($grid3d as $x => $xies) {
-            foreach ($xies as $y => $yies) {
-                foreach ($yies as $z => $value) {
-                    foreach ($adjecentsGrid as $adjecentGrid) {
-                        $adjecent = $grid3d[$x + $adjecentGrid[0]][$y + $adjecentGrid[1]][$z + $adjecentGrid[2]] ?? 0;
-
-                        if ($adjecent === 0) {
-                            $surface++;
-                        }
-                    }
-                }
-            }
-        }
-
-        return $surface;
+        return new Result($surfaceFirstPart, $surfaceSecondPart);
     }
 }
