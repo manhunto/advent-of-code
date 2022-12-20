@@ -4,21 +4,12 @@ declare(strict_types=1);
 
 namespace AdventOfCode2022\Day18;
 
-use App\Utils\PathFinding\BreadthFirstSearch;
+use App\Utils\FloodFill;
 use App\Utils\Point3D;
-use App\Utils\Range;
+use App\Utils\Space3DBoundary;
 
 class Droplet
 {
-    private const ADJACENT_GRID = [
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1],
-        [-1, 0, 0],
-        [0, -1, 0],
-        [0, 0, -1],
-    ];
-
     /** @var Point3D[] */
     private array $points;
 
@@ -35,10 +26,8 @@ class Droplet
     {
         $surface = 0;
         foreach ($this->points as $point) {
-            foreach (self::ADJACENT_GRID as $adjacentPosition) {
-                $adjacentPoint = $point->move($adjacentPosition[0], $adjacentPosition[1], $adjacentPosition[2]);
-
-                if (isset($this->points[(string) $adjacentPoint]) === false) {
+            foreach ($point->getAdjacentNeighboursWithoutDiagonals() as $adjacentPoint) {
+                if ($this->pointBelongsToDroplet($adjacentPoint) === false) {
                     $surface++;
                 }
             }
@@ -49,141 +38,62 @@ class Droplet
 
     public function calculateExteriorSurface(): int
     {
-        $surface = 0;
+        $floodedPointsFromOutside = $this->getPointsFromOutside();
 
-        $boundaryPoints = $this->getBoundaryCubePoints();
-        $graph = $this->buildGraph();
-
-        $bfs = new BreadthFirstSearch(); // todo use flood fill alogrithm
-
-        $count = count($this->points);
-
-        $i = 0;
+        $exteriorSurface = 0;
         foreach ($this->points as $point) {
-            echo number_format(++$i / $count * 100, 2). PHP_EOL;
-
-            $closestBoundaryPoint = $this->getClosesBoundaryPoint($point, $boundaryPoints);
-
-            foreach (self::ADJACENT_GRID as $adjacentPosition) {
-                $adjacentPoint = $point->move($adjacentPosition[0], $adjacentPosition[1], $adjacentPosition[2]);
-
-                if (isset($this->points[(string) $adjacentPoint]) === false) {
-                    try {
-                        $path = $bfs->getPath($graph, (string) $adjacentPoint, [(string) $closestBoundaryPoint]);
-
-                        if (!empty($path)) {
-                            $surface++;
-                        }
-                    } catch (\LogicException $e) {
-                    }
-
+            foreach ($point->getAdjacentNeighboursWithoutDiagonals() as $adjacentPoint) {
+                if (in_array((string) $adjacentPoint, $floodedPointsFromOutside, true)) {
+                    $exteriorSurface++;
                 }
             }
         }
 
-        return $surface;
+        return $exteriorSurface;
     }
 
-    private function getBoundaryCubePoints(): array
+    private function buildGraph(Space3DBoundary $spaceBoundary): array
     {
-        [$x, $y, $z] = $this->getBoundaryRanges();
-
-        return [
-            new Point3D($x->from, $y->from, $z->from),
-            new Point3D($x->from, $y->to, $z->from),
-            new Point3D($x->from, $y->to, $z->to),
-            new Point3D($x->from, $y->from, $z->to),
-            new Point3D($x->to, $y->to, $z->to),
-            new Point3D($x->to, $y->from, $z->from),
-            new Point3D($x->to, $y->to, $z->from),
-            new Point3D($x->to, $y->from, $z->to),
-        ];
-    }
-
-    /**
-     * @param Point3D[] $boundaryPoints
-     */
-    private function getClosesBoundaryPoint(Point3D $point, array $boundaryPoints): Point3D
-    {
-        $dist = PHP_INT_MAX;
-        $closest = null;
-
-        foreach ($boundaryPoints as $boundaryPoint) {
-            $distanceToBoundary = $point->manhattanDistance($boundaryPoint);
-            if ($distanceToBoundary < $dist) {
-                $dist = $distanceToBoundary;
-                $closest = $boundaryPoint;
-            }
-        }
-
-        return $closest;
-    }
-
-    private function buildGraph(): array
-    {
-
-        $boundaries = $this->getBoundaryRanges();
-        [$rangeX, $rangeY, $rangeZ] = $boundaries;
-
         $graph = [];
-        foreach ($rangeX->getItems() as $x) {
-            foreach ($rangeY->getItems() as $y) {
-                foreach ($rangeZ->getItems() as $z) {
-                    $point = new Point3D($x, $y, $z);
 
-                    $availableMoves = [];
-                    foreach (self::ADJACENT_GRID as $adjacentPosition) {
-                        $adjacentPoint = $point->move($adjacentPosition[0], $adjacentPosition[1], $adjacentPosition[2]);
-
-                        if ($this->isOutsideBoundaries($adjacentPoint, $boundaries)) {
-                            continue;
-                        }
-
-                        if (isset($this->points[(string) $adjacentPoint]) === false) {
-                            $availableMoves[] = (string) $adjacentPoint;
-                        }
-                    }
-
-                    $graph[(string) $point] = $availableMoves;
-                }
-            }
-        }
+        $spaceBoundary->forEachPointInBoundary(function (Point3D $point, Space3DBoundary $spaceBoundary) use (&$graph) {
+            $graph[(string) $point] = $this->getAvailableAdjacentNeighbours($point, $spaceBoundary);
+        });
 
         return $graph;
     }
 
-    /**
-     * @return Range[]
-     */
-    private function getBoundaryRanges(): array
+    private function getAvailableAdjacentNeighbours(Point3D $point, Space3DBoundary $space3DBoundary): array
     {
-        $points = $this->points;
+        $availableAdjacentNeighbours = [];
 
-        $firstPoint = array_shift($points);
+        foreach ($point->getAdjacentNeighboursWithoutDiagonals() as $adjacentPoint) {
+            if ($space3DBoundary->isPointInside($adjacentPoint) === false) {
+                continue;
+            }
 
-        $rangeX = Range::createForPoint($firstPoint->x);
-        $rangeY = Range::createForPoint($firstPoint->y);
-        $rangeZ = Range::createForPoint($firstPoint->z);
-
-
-        foreach ($points as $point) {
-            $rangeX = $rangeX->expandTo($point->x - 1)->expandTo($point->x + 1);
-            $rangeY = $rangeY->expandTo($point->y - 1)->expandTo($point->y + 1);
-            $rangeZ = $rangeZ->expandTo($point->z - 1)->expandTo($point->z + 1);
+            if ($this->pointBelongsToDroplet($adjacentPoint) === false) {
+                $availableAdjacentNeighbours[] = (string) $adjacentPoint;
+            }
         }
 
-        return [$rangeX, $rangeY, $rangeZ];
+        return $availableAdjacentNeighbours;
     }
 
-    /**
-     * @param Range[] $boundaries
-     */
-    private function isOutsideBoundaries(Point3D $point, array $boundaries): bool
+    private function pointBelongsToDroplet(Point3D $point): bool
     {
-        [$x, $y, $z] = $boundaries;
+        return isset($this->points[(string) $point]);
+    }
 
-        return $x->isNumberInRange($point->x) === false
-            || $y->isNumberInRange($point->y) === false
-            || $z->isNumberInRange($point->z) === false;
+    private function getPointsFromOutside(): array
+    {
+        $boundarySpaceExpandedByOne = Space3DBoundary::createForPoints(...$this->points)->expandBy(1);
+        $lowestPossiblePoint = $boundarySpaceExpandedByOne->getLowestPossiblePoint();
+
+        $graph = $this->buildGraph($boundarySpaceExpandedByOne);
+
+        $floodFill = new FloodFill();
+
+        return $floodFill->fill($graph, (string) $lowestPossiblePoint);
     }
 }

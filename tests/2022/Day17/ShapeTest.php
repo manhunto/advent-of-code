@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\AdventOfCode2022\Day17;
 
 use AdventOfCode2022\Day17\Shape;
+use App\Utils\Map;
 use PHPUnit\Framework\TestCase;
 
 class ShapeTest extends TestCase
@@ -96,15 +97,15 @@ class ShapeTest extends TestCase
             [0, 0, 0, 0, 1, 1, 0],
         ], 2);
 
-        $map = [
-            1 => [1,1,1,1,1,1,1]
-        ];
+        $map = new Map([
+            1 => ['#','#','#','#','#','#','#']
+        ]);
 
-        self::assertFalse($s->collide($map));
+        self::assertFalse($s->collide($map, '#'));
 
         $s->fall();
 
-        self::assertTrue($s->collide($map));
+        self::assertTrue($s->collide($map, '#'));
     }
 
     public function testGetMaxY(): void

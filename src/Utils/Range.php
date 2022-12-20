@@ -102,17 +102,12 @@ final class Range implements \Stringable
         return abs($this->to - $range->from) <= 1 || abs($this->from - $range->to) <= 1;
     }
 
-    /**
-     * @todo tests
-     */
     public function isPoint(): bool
     {
         return $this->length() === 1;
     }
 
     /**
-     * @todo tests
-     *
      * @return int[]
      */
     public function getItems(): iterable
@@ -122,9 +117,6 @@ final class Range implements \Stringable
         }
     }
 
-    /**
-     * @todo tests
-     */
     public function length(): int
     {
         return $this->to - $this->from + 1;
@@ -137,9 +129,17 @@ final class Range implements \Stringable
 
     public function expandTo(int $value): self
     {
-        return new Range(
+        return new self(
             min($this->from, $value),
             max($this->to, $value),
+        );
+    }
+
+    public function expandBoundariesBy(int $value): self
+    {
+        return new self(
+            $this->from - $value,
+            $this->to + $value
         );
     }
 

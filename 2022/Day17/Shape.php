@@ -148,7 +148,7 @@ class Shape
         foreach ($this->layout as $y => $row) {
             foreach ($row as $x => $value) {
                 if ($value === 1) {
-                    $mapValue = $map->asArray()[$y][$x] ?? '.';
+                    $mapValue = $map->asArray()[$y][$x] ?? null;
                     if ($mapValue === $element) {
                         return true;
                     }

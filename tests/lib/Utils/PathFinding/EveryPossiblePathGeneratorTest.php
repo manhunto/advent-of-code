@@ -23,7 +23,10 @@ class EveryPossiblePathGeneratorTest extends TestCase
         $paths = $generator->generate();
 
         self::assertEquals([
+            ['AA'],
+            ['AA', 'BB'],
             ['AA', 'BB', 'CC'],
+            ['AA', 'CC'],
             ['AA', 'CC', 'BB']
         ], $paths);
     }

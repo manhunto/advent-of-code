@@ -145,7 +145,7 @@ class RangeTest extends TestCase
 
         $result = $range->diff(new Range($B[0], $B[1]));
 
-        $expectedResult = array_map(static fn (array $row) => new Range($row[0], $row[1]), $expected);
+        $expectedResult = array_map(static fn(array $row) => new Range($row[0], $row[1]), $expected);
 
         self::assertEquals($expectedResult, $result);
     }
@@ -171,5 +171,66 @@ class RangeTest extends TestCase
         yield 'Inside, point' => [[2, 9], [5, 5], [[2, 4], [6, 9]]];
         yield 'Inside, adjacent on right' => [[2, 9], [5, 9], [[2, 4]]];
         yield 'Inside, adjacent on left' => [[2, 9], [2, 5], [[6, 9]]];
+    }
+
+    /**
+     * @dataProvider lengthProvider
+     */
+    public function testLength(int $from, int $to, int $expected): void
+    {
+        $range = new Range($from, $to);
+
+        self::assertSame($expected, $range->length());
+    }
+
+    public function lengthProvider(): iterable
+    {
+        yield [2, 2, 1];
+        yield [1, 3, 3];
+        yield [-10, 10, 21];
+    }
+
+    public function testIsPoint(): void
+    {
+        $range = Range::createForPoint(2);
+
+        self::assertTrue($range->isPoint());
+    }
+
+    public function testIsNotPoint(): void
+    {
+        $range = new Range(1, 2);
+
+        self::assertFalse($range->isPoint());
+    }
+
+    /**
+     * @dataProvider getItemsData
+     */
+    public function testGetItems(int $from, int $to, array $expected): void
+    {
+        $range = new Range($from, $to);
+
+        self::assertEquals($expected, iterator_to_array($range->getItems()));
+    }
+
+    public function getItemsData(): iterable
+    {
+        yield [2, 2, [2]];
+        yield [1, 3, [1, 2, 3]];
+        yield [-2, 3, [-2, -1, 0, 1, 2, 3]];
+    }
+
+    public function testExpandBoundariesBy(): void
+    {
+        $range = new Range(3, 5);
+
+        $newRange = $range->expandBoundariesBy(2);
+
+        self::assertSame(3, $range->from);
+        self::assertSame(5, $range->to);
+
+        self::assertSame(1, $newRange->from);
+        self::assertSame(7, $newRange->to);
     }
 }

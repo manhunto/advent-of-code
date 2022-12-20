@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Utils;
 
-/**
- * @todo move to Utils, maybe convert Sand to this class
- */
 class Point
 {
     public function __construct(
