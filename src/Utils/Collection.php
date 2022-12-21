@@ -166,4 +166,51 @@ final class Collection
     {
         return min($this->items);
     }
+
+    public function searchKey(callable $callable): int|string|null
+    {
+        $searchedIndex = null;
+
+        foreach ($this->items as $index => $item) {
+            if ($callable($item)) {
+                $searchedIndex = $index;
+                break;
+            }
+        }
+
+        return $searchedIndex;
+    }
+
+    public function unsetKeys(array $indexesToRemove): self
+    {
+        $newItems = $this->items;
+
+        foreach ($indexesToRemove as $index) {
+            unset($newItems[$index]);
+        }
+
+        return self::create($newItems);
+    }
+
+    public function unset(callable $callable): self
+    {
+        $new = $this->items;
+
+        foreach ($new as $index => $item) {
+            if ($callable($item, $index)) {
+                unset($new[$index]);
+            }
+        }
+
+        return self::create($new);
+    }
+
+    public function insertItemAtIndex(mixed $item, int|string $newIndex): self
+    {
+        $new = $this->items;
+
+        array_splice($new, $newIndex, 0, [$item]);
+
+        return self::create($new);
+    }
 }
