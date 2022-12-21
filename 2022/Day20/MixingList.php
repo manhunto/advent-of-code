@@ -43,20 +43,15 @@ class MixingList
         $value = $number->value;
 
         if ($value !== 0) {
-            $newIndex = $positionInCurrentOrder + $value % count($this->currentOrder);
-            if ($value > 0) {
-                $newIndex = ($positionInCurrentOrder + $value + 1) % count($this->currentOrder);
-            } else {
-                $newIndex = $positionInCurrentOrder + $value;
+            $numbers = Collection::create($this->currentOrder)
+                ->unsetKeys([$positionInCurrentOrder]);
 
-                if ($newIndex <= 0) {
-                    $diff = $newIndex % count($this->currentOrder);
+            $newIndex = ($positionInCurrentOrder + $value) % $numbers->count();
 
-                    $newIndex = count($this->currentOrder) + $diff;
-                }
-            }
-
-            $this->replaceNumberInCurrent($number, $newIndex);
+            $this->currentOrder = $numbers
+                ->insertItemAtIndex($number, $newIndex)
+                ->values()
+                ->toArray();
         }
 
         $this->currentMove++;
@@ -72,17 +67,6 @@ class MixingList
         }
 
         return $index;
-    }
-
-    private function replaceNumberInCurrent(Number $number, int $newItemIndex): void
-    {
-        $this->currentOrder = Collection::create($this->currentOrder)
-            ->insertItemAtIndex($number, $newItemIndex)
-            ->unset(static fn (Number $other, int $index): bool =>
-                $other->isTheSame($number) && $index !== $newItemIndex
-            )
-            ->values()
-            ->toArray();
     }
 
     public function getNumberNAfterZero(int $value): int

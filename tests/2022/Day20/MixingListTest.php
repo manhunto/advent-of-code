@@ -27,13 +27,13 @@ class MixingListTest extends TestCase
         self::assertEquals([1, 2, -2, -3, 0, 3, 4], $list->asArrayOfInt());
 
         $list->move(); // -2
-        self::assertEquals([1, 2, -3, 0, 3, 4, -2], $list->asArrayOfInt());
+        self::assertEquals([-2, 1, 2, -3, 0, 3, 4], $list->asArrayOfInt());
 
         $list->move(); // 0
-        self::assertEquals([1, 2, -3, 0, 3, 4, -2], $list->asArrayOfInt());
+        self::assertEquals([-2, 1, 2, -3, 0, 3, 4], $list->asArrayOfInt());
 
         $list->move(); // 4
-        self::assertEquals([1, 2, -3, 4, 0, 3, -2], $list->asArrayOfInt());
+        self::assertEquals([-2, 1, 2, -3, 4, 0, 3], $list->asArrayOfInt());
     }
 
     /**
@@ -90,24 +90,6 @@ class MixingListTest extends TestCase
             [1, 2, 3, -2, -3, 0, 4],
             [1, 2, 3, -2, -3, 0, 4],
             6
-        ];
-
-        yield 'Circural twice to right' => [
-            [1, 2, 3, -2, -3, 0, 7],
-            [7, 1, 2, 3, -2, -3, 0],
-            7
-        ];
-
-        yield 'Circural twice to left' => [
-            [-8, 2, 3, -2, -3, 0, 1],
-            [2, 3, -2, -3, 0, -8, 1],
-            1
-        ];
-
-        yield 'Circural twice to left to end' => [
-            [-7, 2, 3, -2, -3, 0, 1],
-            [2, 3, -2, -3, 0, 1, -7],
-            1
         ];
 
         yield 'Example position forward' => [
