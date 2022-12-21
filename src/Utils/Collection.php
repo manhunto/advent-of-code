@@ -213,4 +213,19 @@ final class Collection
 
         return self::create($new);
     }
+
+    public function filterKeysByValue(int|string ...$keys): self
+    {
+        return $this->filterKeys(static fn (int $index) => in_array($index, [...$keys], true));
+    }
+
+    public function get(int $index): mixed
+    {
+        return $this->items[$index] ?? null;
+    }
+
+    public function clone(): self
+    {
+        return self::create($this->items);
+    }
 }

@@ -8,50 +8,49 @@ use App\Utils\Collection;
 
 class MixingList
 {
-    /** @var Number[] */
-    private readonly array $initialNumbers;
-    private array $currentOrder;
+    private const GROOVE_COORDINATES = [1000, 2000, 3000];
+
+    private readonly Collection $initialOrder;
+    private Collection $currentOrder;
     private int $currentMove;
 
     public function __construct(
         array $numbers,
+        int $encryptionKey = 1,
         int $currentMove = 1,
-    )
-    {
-        $newNumbers = [];
-        foreach ($numbers as $number) {
-            $newNumbers[] = new Number((int) $number);
-        }
+    ) {
+        $this->initialOrder = Collection::create(array_map(
+            static fn ($value): Number => new Number((int) $value * $encryptionKey),
+            $numbers
+        ));
 
-        $this->initialNumbers = $newNumbers;
-        $this->currentOrder = $this->initialNumbers;
+        $this->currentOrder = $this->initialOrder->clone();
         $this->currentMove = $currentMove;
     }
 
     public function asArrayOfInt(): array
     {
-        return array_map(static fn(Number $number): int => $number->value, $this->currentOrder);
+        return $this->currentOrder
+            ->forEach(static fn(Number $number): int => $number->value)
+            ->toArray();
     }
 
     public function move(): void
     {
-        $originIndex = $this->currentMove - 1;
-
-        $number = $this->initialNumbers[$originIndex];
+        /** @var Number $number */
+        $number = $this->initialOrder->get($this->currentMove - 1);
         $positionInCurrentOrder = $this->getIndexInCurrentOrder($number);
 
         $value = $number->value;
 
         if ($value !== 0) {
-            $numbers = Collection::create($this->currentOrder)
+            $numbers = $this->currentOrder
                 ->unsetKeys([$positionInCurrentOrder]);
 
             $newIndex = ($positionInCurrentOrder + $value) % $numbers->count();
 
             $this->currentOrder = $numbers
-                ->insertItemAtIndex($number, $newIndex)
-                ->values()
-                ->toArray();
+                ->insertItemAtIndex($number, $newIndex);
         }
 
         $this->currentMove++;
@@ -59,7 +58,7 @@ class MixingList
 
     private function getIndexInCurrentOrder(Number $searchFor): int
     {
-        $index = Collection::create($this->currentOrder)
+        $index = $this->currentOrder
             ->searchKey(static fn (Number $number): bool => $searchFor->isTheSame($number));
 
         if ($index === null) {
@@ -69,27 +68,6 @@ class MixingList
         return $index;
     }
 
-    public function getNumberNAfterZero(int $value): int
-    {
-        $zeroIndex = Collection::create($this->currentOrder)
-            ->searchKey(static fn (Number $number): bool => $number->value === 0);
-
-
-        if ($zeroIndex === null) {
-            throw new \LogicException('Cannot found 0 in list');
-        }
-
-        $nextIndex = ($zeroIndex + $value) % count($this->currentOrder);
-        $nextNumber = $this->currentOrder[$nextIndex] ?? null;
-
-        if ($nextNumber === null) {
-            throw new \LogicException('There is no number at index ' . $nextIndex);
-        }
-
-
-        return $nextNumber->value;
-    }
-
     public function mix(): void
     {
         $move = 1;
@@ -97,8 +75,30 @@ class MixingList
         do {
             $this->move();
             $move++;
-        } while ($move <= count($this->currentOrder));
+        } while ($move <= $this->initialOrder->count());
 
         $this->currentMove = 1;
+    }
+
+    public function mixTenTimes(): void
+    {
+        for ($i = 0; $i < 10; $i++) {
+            $this->mix();
+        }
+    }
+
+    public function getGrooveCoordinatesValuesSum(): int
+    {
+        $zeroIndex = $this->currentOrder
+            ->searchKey(static fn (Number $number): bool => $number->value === 0);
+
+        $normalizedKeys = Collection::create(self::GROOVE_COORDINATES)
+            ->forEach(fn (int $value): int => ($zeroIndex + $value) % $this->currentOrder->count())
+            ->toArray();
+
+        return $this->currentOrder
+            ->filterKeysByValue(...$normalizedKeys)
+            ->forEach(static fn (Number $number): int => $number->value)
+            ->sum();
     }
 }

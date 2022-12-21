@@ -41,7 +41,7 @@ class MixingListTest extends TestCase
      */
     public function testName2(array $start, array $expected, int $currentMove): void
     {
-        $list = new MixingList($start, $currentMove);
+        $list = new MixingList($start, currentMove: $currentMove);
 
         $list->move();
 
@@ -68,7 +68,7 @@ class MixingListTest extends TestCase
             5,
         ];
 
-        yield 'Circural right to beginning' => [ // or should be end?
+        yield 'Circural right to beginning' => [
             [1, 2, -3, 3, -2, 0, 4],
             [3, 1, 2, -3, -2, 0, 4],
             4,

@@ -14,15 +14,19 @@ use App\Solver;
 )]
 final class Solution implements Solver
 {
+    private const ENCRYPTION_KEY = 811589153;
+
     public function solve(Input $input): Result
     {
-        $list = new MixingList($input->asArray());
-        $list->mix();
+        $listFirstPart = new MixingList($input->asArray());
+        $listFirstPart->mix();
 
-        $sum = $list->getNumberNAfterZero(1000)
-            + $list->getNumberNAfterZero(2000)
-            + $list->getNumberNAfterZero(3000);
+        $listSecondPart = new MixingList($input->asArray(), self::ENCRYPTION_KEY);
+        $listSecondPart->mixTenTimes();
 
-        return new Result($sum);
+        return new Result(
+            $listFirstPart->getGrooveCoordinatesValuesSum(),
+            $listSecondPart->getGrooveCoordinatesValuesSum()
+        );
     }
 }
