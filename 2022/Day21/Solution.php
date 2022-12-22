@@ -14,9 +14,6 @@ use App\Solver;
 )]
 final class Solution implements Solver
 {
-    private const VARIABLE = '$x';
-    private const EQUALS = ' == ';
-
     public function solve(Input $input): Result
     {
         $firstPartResult = $this->solveFirstPart($input);
@@ -31,49 +28,22 @@ final class Solution implements Solver
 
         $expression = $this->buildRootExpression($monkeys);
 
-        return $this->doEquation($expression);
+        $equationSolver = new OperationSolver();
+
+        return $equationSolver->resolve($expression);
     }
 
     private function solveSecondPart(Input $input): string
     {
-        $monkeys  = $this->parseMonkeys($input);
-        $monkeys['root'] = str_replace('+', '==', $monkeys['root']);
-        $monkeys['humn'] = self::VARIABLE;
+        $monkeys = $this->parseMonkeys($input);
+        $monkeys['root'] = str_replace(' + ', EquationSolver::EQUALS, $monkeys['root']);
+        $monkeys['humn'] = EquationSolver::VARIABLE;
 
         $expression = $this->buildRootExpression($monkeys);
 
-        $expression = $this->doEquationIfPossible($expression);
+        $equationSolver = new EquationSolver();
 
-        [$left, $right] = explode(self::EQUALS, $expression);
-
-        $x = null;
-
-        while ($x === null) {
-            $left = $this->trimBrackets($left);
-
-            if (preg_match('/^\((.*)\) (\/|\+|\*|\/|\-) (\d+)$/', $left, $matches)
-                || preg_match('/^(\d+) (\/|\+|\*|\/|\-) \((.*)\)$/', $left, $matches)) {
-
-                $number = is_numeric($matches[1]) ? $matches[1] : $matches[3];
-                $equation = is_numeric($matches[1]) ? $matches[3] : $matches[1];
-
-                $operation = $matches[2];
-
-                $right = $this->calculate($operation, $number, $right);
-
-                $left = $equation;
-
-            } elseif (preg_match('/^(\$x) (\/|\+|\*|\/|\-) (\d+)$/', $left, $matches)
-                || preg_match('/^(\d+) (\/|\+|\*|\/|\-) (\$x)$/', $left, $matches)
-            ) {
-                $number = is_numeric($matches[1]) ? $matches[1] : $matches[3];
-                $operation = $matches[2];
-
-                $x = $this->calculate($operation, $number, $right);
-            }
-        }
-
-        return $x;
+        return $equationSolver->resolveEquation($expression);
     }
 
     private function parseMonkeys(Input $input): array
@@ -91,53 +61,6 @@ final class Solution implements Solver
         }
 
         return $monkeys;
-    }
-
-    private function doEquation(string $equation): int|float
-    {
-        return eval('return ' . $equation . ';');
-    }
-
-    private function trimBrackets(string $expression): string
-    {
-        if (preg_match('/^\((.*)\)$/', $expression, $matches)) {
-            return $matches[1];
-        }
-
-        return $expression;
-    }
-
-    private function doEquationIfPossible(string $expression): string
-    {
-        [$left, $right] = explode(self::EQUALS, $expression);
-
-        if (!str_contains($left, self::VARIABLE)) {
-            $left = $this->doEquation($left);
-        }
-
-        if (!str_contains($right, self::VARIABLE)) {
-            $right = $this->doEquation($right);
-        }
-
-        $expression = $left . self::EQUALS . $right;
-
-        while (preg_match('/\(\d+ (\+|\-|\*|\/) \d+\)/', $expression, $matches)) {
-            $result = $this->doEquation($matches[0]);
-            $expression = str_replace($matches[0], (string) $result, $expression);
-        }
-
-        return $expression;
-    }
-
-    private function calculate(string $operation, string $number, string $right): string
-    {
-        return match ($operation) {
-            '/' => bcmul($right, $number),
-            '+' => bcsub($right, $number),
-            '*' => bcdiv($right, $number),
-            '-' => bcadd($right, $number),
-            default => throw new \LogicException('Unexpected operation `' . $operation . '`'),
-        };
     }
 
     private function buildRootExpression(array $monkeys): string
