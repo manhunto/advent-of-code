@@ -26,4 +26,44 @@ class Point
     {
         return $this->x === $other->x && $this->y && $other->y;
     }
+
+    public function moveRight(): self
+    {
+        return new self($this->x + 1, $this->y);
+    }
+
+    public function moveDown(): self
+    {
+        return new self($this->x, $this->y + 1);
+    }
+
+    public function moveLeft(): self
+    {
+        return new self($this->x - 1, $this->y);
+    }
+
+    public function moveUp(): self
+    {
+        return new self($this->x, $this->y - 1);
+    }
+
+    public function isBeforeInColumn(self $than): bool
+    {
+        return $this->y < $than->y;
+    }
+
+    public function isAfterInColumn(self $than): bool
+    {
+        return $this->y > $than->y;
+    }
+
+    public function isBeforeInRow(self $than): bool
+    {
+        return $this->x < $than->x;
+    }
+
+    public function isAfterInRow(self $than): bool
+    {
+        return $this->x > $than->x;
+    }
 }

@@ -61,4 +61,11 @@ class MapPrinter
             }
         }
     }
+
+    public function drawTemporaryPoint(Point $point, string $element): self
+    {
+        $this->map[$point->y][$point->x] = $element;
+
+        return $this;
+    }
 }

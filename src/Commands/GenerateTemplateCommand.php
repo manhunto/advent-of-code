@@ -98,6 +98,7 @@ use App\Input;
 use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
+use App\Utils\Output\Console as C;
 
 #[SolutionAttribute(
     name: '{puzzleName}',

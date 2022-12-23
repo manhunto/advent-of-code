@@ -74,7 +74,9 @@ class Map
 
     public function hasElement(int $y, int $x, string $element): bool
     {
-        return $this->grid[$y][$x] === $element;
+        $item = $this->grid[$y][$x] ?? null;
+
+        return $item === $element;
     }
 
     public function cropOnLeft(int $width, string $element): void
@@ -170,5 +172,72 @@ class Map
         }
 
         $this->grid = $new;
+    }
+
+    public function findFirst(string $element): ?Point
+    {
+        foreach ($this->grid as $y => $row) {
+            foreach ($row as $x => $item) {
+                if ($item === $element) {
+                    return new Point($x, $y);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public function drawPoint(Point $point, string $element): void
+    {
+        $this->grid[$point->y][$point->x] = $element;
+    }
+
+    public function findFirstInRow(int $y, string $element): ?Point
+    {
+        foreach ($this->grid[$y] as $x => $item) {
+            if ($element === $item) {
+                return new Point($x, $y);
+            }
+        }
+
+        return null;
+    }
+
+    public function findLastInRow(int $y, string $element): ?Point
+    {
+        foreach (array_reverse($this->grid[$y]) as $x => $item) {
+            if ($element === $item) {
+                return new Point($x, $y);
+            }
+        }
+
+        return null;
+    }
+
+    public function findFirstInColumn(int $x, string $element): ?Point
+    {
+        foreach (array_column($this->grid, $x) as $y => $item) {
+            if ($element === $item) {
+                return new Point($x, $y);
+            }
+        }
+
+        return null;
+    }
+
+    public function findLastInColumn(int $x, string $element): ?Point
+    {
+        foreach (array_reverse(array_column($this->grid, $x)) as $y => $item) {
+            if ($element === $item) {
+                return new Point($x, $y);
+            }
+        }
+
+        return null;
+    }
+
+    public function isInsideMap(int $y, int $x): bool
+    {
+        return isset($this->grid[$y][$x]);
     }
 }
