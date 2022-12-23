@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AdventOfCode2022\Day22;
 
+use App\Utils\Direction;
 use App\Utils\Map;
 use App\Utils\Point;
 
@@ -16,7 +17,7 @@ class Player
     public function __construct(Point $startingPosition)
     {
         $this->position = $startingPosition;
-        $this->direction = Direction::RIGHT;
+        $this->direction = Direction::EAST;
     }
 
     public function turnClockwise(): void
@@ -42,7 +43,7 @@ class Player
                 $this->addToHistory();
                 $step++;
             } elseif (
-                $map->hasElement($newPosition->y, $newPosition->x, ' ')
+                $map->hasElementOnPoint($newPosition, ' ')
                 || $map->isInsideMap($newPosition->y, $newPosition->x) === false
             ) {
                 $newPosition = $this->wrapAroundMap($map);
@@ -62,12 +63,9 @@ class Player
 
     private function canMoveHere(Map $map, Point $newPosition): bool
     {
-        $x = $newPosition->x;
-        $y = $newPosition->y;
-
-        return $map->hasElement($y, $x, '#') === false
-            && $map->hasElement($y, $x, ' ') === false
-            && $map->isInsideMap($y, $x);
+        return $map->hasElementOnPoint($newPosition, '#') === false
+            && $map->hasElementOnPoint($newPosition, ' ') === false
+            && $map->isPointInsideMap($newPosition);
     }
 
     public function getFinalPassword(): int
@@ -82,17 +80,12 @@ class Player
 
     private function moveOneStepInCurrentDirection(): Point
     {
-        return match ($this->direction) {
-            Direction::RIGHT => $this->position->moveRight(),
-            Direction::DOWN => $this->position->moveDown(),
-            Direction::LEFT => $this->position->moveLeft(),
-            Direction::UP => $this->position->moveUp(),
-        };
+        return $this->position->moveInDirection($this->direction);
     }
 
     private function wrapAroundMap(Map $map): ?Point
     {
-        if ($this->direction === Direction::RIGHT) {
+        if ($this->direction === Direction::EAST) {
             $block = $map->findFirstInRow($this->position->y, '#');
             $freeSpace = $map->findFirstInRow($this->position->y, '.');
 
@@ -103,7 +96,7 @@ class Player
             return $freeSpace;
         }
 
-        if ($this->direction === Direction::LEFT) {
+        if ($this->direction === Direction::WEST) {
             $block = $map->findLastInRow($this->position->y, '#');
             $freeSpace = $map->findLastInRow($this->position->y, '.');
 
@@ -114,7 +107,7 @@ class Player
             return $freeSpace;
         }
 
-        if ($this->direction === Direction::DOWN) {
+        if ($this->direction === Direction::SOUTH) {
             $block = $map->findFirstInColumn($this->position->x, '#');
             $freeSpace = $map->findFirstInColumn($this->position->x, '.');
 
@@ -122,18 +115,16 @@ class Player
                 return null;
             }
 
-
             return $freeSpace;
         }
 
-        if ($this->direction === Direction::UP) {
+        if ($this->direction === Direction::NORTH) {
             $block = $map->findLastInColumn($this->position->x, '#');
             $freeSpace = $map->findLastInColumn($this->position->x, '.');
 
             if ($block !== null && $block->isAfterInColumn($freeSpace)) {
                 return null;
             }
-
 
             return $freeSpace;
         }

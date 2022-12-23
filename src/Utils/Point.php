@@ -98,4 +98,14 @@ class Point
     {
         return $this->x === $than->x;
     }
+
+    public function moveInDirection(Direction $direction): self
+    {
+        return match ($direction) {
+            Direction::EAST => $this->moveRight(),
+            Direction::SOUTH => $this->moveDown(),
+            Direction::WEST => $this->moveLeft(),
+            Direction::NORTH => $this->moveUp(),
+        };
+    }
 }

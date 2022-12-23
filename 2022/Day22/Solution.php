@@ -8,6 +8,7 @@ use App\Input;
 use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
+use App\Utils\Collection;
 use App\Utils\Map;
 use App\Utils\Output\Console as C;
 
@@ -44,7 +45,7 @@ final class Solution implements Solver
             $printer->drawTemporaryPoint($history[0], $history[1]);
         }
 
-//        $printer->print();
+        $printer->print();
 
         return new Result($player->getFinalPassword());
     }
@@ -53,27 +54,16 @@ final class Solution implements Solver
     {
         $instructions = null;
         $mapRow = [];
-        $rows = PHP_INT_MIN;
 
         foreach ($input->asArrayWithoutEmptyLines() as $row) {
             if (preg_match('/[0-9RL]+/', $row)) {
                 $instructions = $row;
             } else {
-                $mapRow[] = $row;
-
-                $rows = max($rows, strlen($row));
+                $mapRow[] = str_split($row);
             }
         }
 
-        $columns = count($mapRow);
-
-        $map = Map::generateFilled($columns, $rows - 1, self::ABYSS);
-
-        foreach ($mapRow as $y => $item) {
-            foreach (str_split($item) as $x => $char) {
-                $map->draw($y, $x, $char);
-            }
-        }
+        $map = Map::generateForRowsAndFilledNonExisting($mapRow, self::ABYSS);
 
         preg_match_all('/\d+|R|L/', $instructions, $matches);
 

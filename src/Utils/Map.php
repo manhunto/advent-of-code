@@ -20,6 +20,24 @@ class Map
         ));
     }
 
+    public static function generateForRowsAndFilledNonExisting(array $mapRow, string $missingElement): self
+    {
+        $rows = Collection::create($mapRow)
+            ->forEach(static fn (array $row) => count($mapRow))
+            ->max();
+        $columns = count($mapRow);
+
+        $map = self::generateFilled($columns, $rows - 1, $missingElement);
+
+        foreach ($mapRow as $y => $item) {
+            foreach ($item as $x => $char) {
+                $map->draw($y, $x, $char);
+            }
+        }
+
+        return $map;
+    }
+
     public function asString(): string
     {
         $grid = $this->grid;
@@ -77,6 +95,11 @@ class Map
         $item = $this->grid[$y][$x] ?? null;
 
         return $item === $element;
+    }
+
+    public function hasElementOnPoint(Point $point, string $element): bool
+    {
+        return $this->hasElement($point->y, $point->x, $element);
     }
 
     public function cropOnLeft(int $width, string $element): void
@@ -239,5 +262,10 @@ class Map
     public function isInsideMap(int $y, int $x): bool
     {
         return isset($this->grid[$y][$x]);
+    }
+
+    public function isPointInsideMap(Point $point): bool
+    {
+        return $this->isInsideMap($point->y, $point->x);
     }
 }
