@@ -44,9 +44,7 @@ final class Solution implements Solver
             $printer->drawTemporaryPoint($history[0], $history[1]);
         }
 
-
-        $printer->print();
-        C::wait();
+//        $printer->print();
 
         return new Result($player->getFinalPassword());
     }

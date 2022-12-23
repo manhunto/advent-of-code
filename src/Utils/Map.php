@@ -205,7 +205,7 @@ class Map
 
     public function findLastInRow(int $y, string $element): ?Point
     {
-        foreach (array_reverse($this->grid[$y]) as $x => $item) {
+        foreach (array_reverse($this->grid[$y], true) as $x => $item) {
             if ($element === $item) {
                 return new Point($x, $y);
             }
@@ -227,7 +227,7 @@ class Map
 
     public function findLastInColumn(int $x, string $element): ?Point
     {
-        foreach (array_reverse(array_column($this->grid, $x)) as $y => $item) {
+        foreach (array_reverse(array_column($this->grid, $x), true) as $y => $item) {
             if ($element === $item) {
                 return new Point($x, $y);
             }

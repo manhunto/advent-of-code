@@ -19,16 +19,6 @@ class Player
         $this->direction = Direction::RIGHT;
     }
 
-//    public function getPosition(): Point
-//    {
-//        return $this->position;
-//    }
-//
-//    public function getDirection(): Direction
-//    {
-//        return $this->direction;
-//    }
-
     public function turnClockwise(): void
     {
         $this->direction = $this->direction->turnClockwise();
@@ -56,10 +46,6 @@ class Player
                 || $map->isInsideMap($newPosition->y, $newPosition->x) === false
             ) {
                 $newPosition = $this->wrapAroundMap($map);
-
-//                if ($newPosition !== null && $map->hasElement($newPosition->y, $newPosition->x, ' ')) {
-//                    var_dump('test'); // todo check me..
-//                }
 
                 if ($newPosition === null) {
                     break;

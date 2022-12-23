@@ -49,21 +49,53 @@ class Point
 
     public function isBeforeInColumn(self $than): bool
     {
+        $this->validateTheSameColumn($than);
+
         return $this->y < $than->y;
     }
 
     public function isAfterInColumn(self $than): bool
     {
+        $this->validateTheSameColumn($than);
+
         return $this->y > $than->y;
     }
 
     public function isBeforeInRow(self $than): bool
     {
+        $this->validateTheSameRow($than);
+
         return $this->x < $than->x;
     }
 
     public function isAfterInRow(self $than): bool
     {
+        $this->validateTheSameRow($than);
+
         return $this->x > $than->x;
+    }
+
+    private function validateTheSameRow(self $than): void
+    {
+        if ($this->isTheSameRow($than) === false) {
+            throw new \LogicException('Point are not in the same row');
+        }
+    }
+
+    private function isTheSameRow(self $than): bool
+    {
+        return $this->y === $than->y;
+    }
+
+    private function validateTheSameColumn(self $than): void
+    {
+        if ($this->isTheSameColumn($than) === false) {
+            throw new \LogicException('Point are not in the same column');
+        }
+    }
+
+    private function isTheSameColumn(self $than): bool
+    {
+        return $this->x === $than->x;
     }
 }
