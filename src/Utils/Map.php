@@ -268,4 +268,39 @@ class Map
     {
         return $this->isInsideMap($point->y, $point->x);
     }
+
+    public function calculateAreaForElements(array $elements): int
+    {
+        $area = 0;
+
+        foreach ($this->grid as $row) {
+            foreach ($row as $element) {
+                if (in_array($element, $elements, true)) {
+                    $area++;
+                }
+            }
+        }
+
+        return $area;
+    }
+
+    /**
+     * @return iterable<Point>
+     */
+    public function getPointsWithElements(array $elements): iterable
+    {
+        foreach ($this->grid as $y => $row) {
+            foreach ($row as $x => $element) {
+                if (in_array($element, $elements, true)) {
+                    yield new Point($x, $y);
+                }
+            }
+        }
+
+    }
+
+    public function getElementForPoint(Point $point): ?string
+    {
+        return $this->grid[$point->y][$point->x] ?? null;
+    }
 }

@@ -8,9 +8,9 @@ use App\Input;
 use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
-use App\Utils\Collection;
 use App\Utils\Map;
 use App\Utils\Output\Console as C;
+use App\Utils\Rotation;
 
 #[SolutionAttribute(
     name: 'Monkey Map',
@@ -29,12 +29,12 @@ final class Solution implements Solver
         $player = new Player($myPosition);
 
         foreach ($instructions as $instruction) {
-            if ($instruction === 'R') {
-                $player->turnClockwise();
-            } elseif ($instruction === 'L') {
-                $player->turnAntiClockwise();
-            } else {
+            if (is_numeric($instruction)) {
                 $player->moveForward((int) $instruction, $map);
+            } else {
+                $rotation = $this->getRotation($instruction);
+
+                $player->rotate($rotation);
             }
         }
 
@@ -68,5 +68,14 @@ final class Solution implements Solver
         preg_match_all('/\d+|R|L/', $instructions, $matches);
 
         return [$map, $matches[0]];
+    }
+
+    private function getRotation(string $instruction): Rotation
+    {
+        return match ($instruction) {
+            'R' => Rotation::CLOCKWISE,
+            'L' => Rotation::ANTICLOCKWISE,
+            default => throw new \LogicException('Unexpected instruction for rotation')
+        };
     }
 }

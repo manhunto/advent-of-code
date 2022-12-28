@@ -45,8 +45,31 @@ enum Direction: int
         return $this->turnClockwise()->turnClockwise();
     }
 
+    public function rotate(Rotation $rotation): self
+    {
+        return match ($rotation) {
+            Rotation::CLOCKWISE => $this->turnClockwise(),
+            Rotation::ANTICLOCKWISE => $this->turnAntiClockwise(),
+            Rotation::TURNABOUT => $this->reversed(),
+            default => throw new \LogicException('Unexpected rotation')
+        };
+    }
+
     private static function count(): int
     {
         return count(self::cases());
+    }
+
+    public function getRotationTo(self $other): Rotation
+    {
+        foreach (Rotation::cases() as $rotation) {
+            $rotated = $this->rotate($rotation);
+
+            if ($other === $rotated) {
+                return $rotation;
+            }
+        }
+
+        throw new \LogicException('Unexpected rotation state');
     }
 }

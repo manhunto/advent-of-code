@@ -136,6 +136,19 @@ final class Collection
         return self::create($tmp);
     }
 
+    public function removeItems(array $itemsToRemove): self
+    {
+        $items = $this->items;
+
+        foreach ($itemsToRemove as $itemToRemove) {
+            $items = self::create($items)
+                ->removeItem($itemToRemove)
+                ->toArray();
+        }
+
+        return self::create($items);
+    }
+
     public function add(mixed $item): self
     {
         return self::create([...$this->items, $item]);
@@ -227,5 +240,14 @@ final class Collection
     public function clone(): self
     {
         return self::create($this->items);
+    }
+
+    public function first(): mixed
+    {
+        $items = $this->items;
+
+        $first = reset($items);
+
+        return $first !== false ? $first : null;
     }
 }

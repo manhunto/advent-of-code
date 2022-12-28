@@ -7,6 +7,7 @@ namespace AdventOfCode2022\Day22;
 use App\Utils\Direction;
 use App\Utils\Map;
 use App\Utils\Point;
+use App\Utils\Rotation;
 
 class Player
 {
@@ -20,15 +21,9 @@ class Player
         $this->direction = Direction::EAST;
     }
 
-    public function turnClockwise(): void
+    public function rotate(Rotation $rotation): void
     {
-        $this->direction = $this->direction->turnClockwise();
-        $this->addToHistory();
-    }
-
-    public function turnAntiClockwise(): void
-    {
-        $this->direction = $this->direction->turnAntiClockwise();
+        $this->direction = $this->direction->rotate($rotation);
         $this->addToHistory();
     }
 
@@ -71,11 +66,6 @@ class Player
     public function getFinalPassword(): int
     {
         return ($this->position->y + 1) * 1_000 + ($this->position->x + 1) * 4 + $this->direction->value;
-    }
-
-    private function drawCurrent(Map $map): void
-    {
-        $map->drawPoint($this->position, $this->direction->asString());
     }
 
     private function moveOneStepInCurrentDirection(): Point

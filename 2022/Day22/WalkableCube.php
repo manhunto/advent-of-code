@@ -8,14 +8,21 @@ use App\Utils\Direction;
 use App\Utils\Map;
 use App\Utils\Point;
 
+/**
+ * @todo https://www.youtube.com/watch?v=qWgLdNFYDDo
+ */
 class WalkableCube
 {
+    use CubeTrait;
+
+    private readonly int $lengthOfEdge;
+
     public function __construct(
-        private readonly CubeTemplate $template,
-        private readonly int          $sizeOfSideEdge,
-        private readonly array        $walkableElements,
-        private readonly Map          $map
+        private readonly array $walkableElements,
+        private readonly Map $map,
+        private readonly array $mapElements
     ) {
+        $this->lengthOfEdge = $this->calculateLengthOfEdge();
     }
 
     public function getNextPosition(Point $position, Direction $direction): Point
@@ -33,7 +40,6 @@ class WalkableCube
         }
 
         return $this->handleEdgeMove($position, $direction);
-
     }
 
     private function validateCurrentPosition(Point $position): void
@@ -51,10 +57,10 @@ class WalkableCube
 
     private function isPointOnEdge(Point $position): bool
     {
-        return $position->y % $this->sizeOfSideEdge === 0
-            || $position->y % $this->sizeOfSideEdge + 1 === 0
-            || $position->x % $this->sizeOfSideEdge === 0
-            || $position->x % $this->sizeOfSideEdge + 1 === 0;
+        return $position->y % $this->lengthOfEdge === 0
+            || $position->y % $this->lengthOfEdge + 1 === 0
+            || $position->x % $this->lengthOfEdge === 0
+            || $position->x % $this->lengthOfEdge + 1 === 0;
     }
 
     private function canMoveThroughMap(Point $nextPosition): bool
@@ -74,15 +80,14 @@ class WalkableCube
 
     private function handleEdgeMove(Point $position, Direction $direction): Point
     {
-        // https://stackoverflow.com/a/66179230/12540449
+        $innerPoints = $this->getInnerPoints(); // todo extract to edge mapper
 
-        if ($this->template === CubeTemplate::EXAMPLE_INPUT) {
-            $currentSide = $this->template->getCurrentFace($position, $this->sizeOfSideEdge);
-            $nextFace = $this->template->getFaceInDirection();
+        // todo walk on edges and create map point1 to point2 and dir with rotation
+        // todo walk each po
+
+        var_dump($innerPoints); die;
 
 
-            var_dump($currentSide);
-        }
 
         throw new \LogicException('Unhandled move');
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Utils;
 
-class Point
+class Point implements \Stringable
 {
     public function __construct(
         public readonly int $x,
@@ -24,27 +24,27 @@ class Point
 
     public function equals(self $other): bool
     {
-        return $this->x === $other->x && $this->y && $other->y;
+        return $this->x === $other->x && $this->y === $other->y;
     }
 
     public function moveRight(): self
     {
-        return new self($this->x + 1, $this->y);
+        return $this->move(x: 1);
     }
 
     public function moveDown(): self
     {
-        return new self($this->x, $this->y + 1);
+        return $this->move(y: 1);
     }
 
     public function moveLeft(): self
     {
-        return new self($this->x - 1, $this->y);
+        return $this->move(x: -1);
     }
 
     public function moveUp(): self
     {
-        return new self($this->x, $this->y - 1);
+        return $this->move(y: -1);
     }
 
     public function isBeforeInColumn(self $than): bool
@@ -107,5 +107,86 @@ class Point
             Direction::WEST => $this->moveLeft(),
             Direction::NORTH => $this->moveUp(),
         };
+    }
+
+    /**
+     * @return iterable<self>
+     */
+    public function getStraightAdjacent(): iterable
+    {
+        foreach (Direction::cases() as $direction) {
+            yield $this->moveInDirection($direction);
+        }
+    }
+
+    /**
+     * @return iterable<self>
+     */
+    public function getAdjacentOnDiagonals(): iterable
+    {
+        $diagonals = [
+            [1, 1],
+            [-1, -1],
+            [1, -1],
+            [-1, 1]
+        ];
+
+        foreach ($diagonals as $diagonal) {
+            yield $this->move($diagonal[0], $diagonal[1]);
+        }
+    }
+
+    /**
+     * @return iterable<self>
+     */
+    public function getAllAdjacentPoints(): iterable
+    {
+        yield from $this->getStraightAdjacent();
+        yield from $this->getAdjacentOnDiagonals();
+    }
+
+    private function move(int $x = 0, int $y = 0): self
+    {
+        return new self($this->x + $x, $this->y + $y);
+    }
+
+    public function isAdjacent(self $other): bool
+    {
+        foreach ($this->getStraightAdjacent() as $adjacent) {
+            if ($other->equals($adjacent)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Array based coordinate system
+     */
+    public function getDirection(self $other): Direction
+    {
+        if ($this->isTheSameRow($other)) {
+            if ($this->isBeforeInRow($other)) {
+                return Direction::EAST;
+            }
+
+            return Direction::WEST;
+        }
+
+        if ($this->isTheSameColumn($other)) {
+            if ($this->isBeforeInColumn($other)) {
+                return Direction::SOUTH;
+            }
+
+            return Direction::NORTH;
+        }
+
+        throw new \LogicException('Cannot get direction for points that are not in the same row or column');
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('%d,%d', $this->x, $this->y);
     }
 }
