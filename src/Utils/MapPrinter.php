@@ -68,4 +68,18 @@ class MapPrinter
 
         return $this;
     }
+
+    public function drawTemporaryPointWithCounter(Location $location, string $element, string $empty): void
+    {
+        $item = $this->map[$location->y][$location->x];
+
+        if (is_numeric($element)) {
+            $item = (int) $item;
+            $this->drawTemporaryPoint($location, (string) ++$item);
+        } elseif ($item === $empty) {
+            $this->drawTemporaryPoint($location, $element);
+        } else {
+            $this->drawTemporaryPoint($location, '2');
+        }
+    }
 }

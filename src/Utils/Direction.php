@@ -11,13 +11,29 @@ enum Direction: int
     case WEST = 2;
     case NORTH = 3;
 
+    private const EAST_STRING = '>';
+    private const SOUTH_STRING = 'v';
+    private const WEST_STRING = '<';
+    private const NORTH_STRING = '^';
+
+    public static function tryFromString(string $item): self
+    {
+        return match ($item) {
+            self::EAST_STRING => self::EAST,
+            self::SOUTH_STRING => self::SOUTH,
+            self::WEST_STRING => self::WEST,
+            self::NORTH_STRING => self::NORTH,
+            default => throw new \LogicException('Unexpected string direction ' . $item)
+        };
+    }
+
     public function asString(): string
     {
         return match ($this) {
-            self::EAST => '>',
-            self::SOUTH => 'v',
-            self::WEST => '<',
-            self::NORTH => '^',
+            self::EAST => self::EAST_STRING,
+            self::SOUTH => self::SOUTH_STRING,
+            self::WEST => self::WEST_STRING,
+            self::NORTH => self::NORTH_STRING,
         };
     }
 

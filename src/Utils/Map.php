@@ -231,6 +231,19 @@ class Map
         return null;
     }
 
+    public function findLast(string $element): ?Location
+    {
+        foreach (array_reverse($this->grid, true) as $y => $row) {
+            foreach (array_reverse($row, true) as $x => $item) {
+                if ($item === $element) {
+                    return new Location($x, $y);
+                }
+            }
+        }
+
+        return null;
+    }
+
     public function drawPoint(Location $point, string $element): void
     {
         $this->grid[$point->y][$point->x] = $element;

@@ -12,7 +12,7 @@ class DirectionalLocation implements \Stringable
     ) {
     }
 
-    private static function fromPrimitiveLocation(int $x, int $y, Direction $direction): self
+    public static function fromPrimitiveLocation(int $x, int $y, Direction $direction): self
     {
         return new self(new Location($x, $y), $direction);
     }
@@ -75,5 +75,20 @@ class DirectionalLocation implements \Stringable
     public function equals(DirectionalLocation $other): bool
     {
         return $this->hasTheSame($other->location, $other->direction);
+    }
+
+    public function moveInDirection(): self
+    {
+        return new self($this->location->moveInDirection($this->direction), $this->direction);
+    }
+
+    public function changeX(int $x): self
+    {
+        return self::fromPrimitiveLocation($x, $this->location->y, $this->direction);
+    }
+
+    public function changeY(int $y): self
+    {
+        return self::fromPrimitiveLocation($this->location->x, $y, $this->direction);
     }
 }
