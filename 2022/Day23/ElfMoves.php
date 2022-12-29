@@ -13,6 +13,9 @@ use App\Utils\Output\Console;
 
 class ElfMoves
 {
+    private const ELF_POSITION = '#';
+    private const GROUND_POSITION = '.';
+
     /** @var Direction[] */
     private array $directions;
 
@@ -36,7 +39,7 @@ class ElfMoves
 
         foreach ($input->asArray() as $y => $row) {
             foreach (str_split($row) as $x => $item) {
-                if ($item === '#') {
+                if ($item === self::ELF_POSITION) {
                     $locations[] = new Location($x, $y);
                 }
             }
@@ -49,25 +52,28 @@ class ElfMoves
     {
         $map = $this->generateMap();
 
-        $newLocations = [];
+        $proposedMoves = [];
 
         $anyElfMoves = false;
 
         foreach ($this->elvesLocations as $elfLocation) {
             if ($this->hasAdjacentElf($elfLocation, $map)) {
-                $newLocations[] = [$elfLocation, $elfLocation];
+                $proposedMoves[] = [$elfLocation, $elfLocation];
 
                 continue;
             }
 
             $newLocation = $this->moveElfToNewLocation($elfLocation, $map);
-
-            $newLocations[] = [$elfLocation, $newLocation];
+            if ($newLocation === null ){
+                $proposedMoves[] = [$elfLocation, $elfLocation];
+            } else {
+                $proposedMoves[] = [$elfLocation, $newLocation];
+            }
 
             $anyElfMoves = true;
         }
 
-        $this->elvesLocations = $this->moveOnlyPossible($newLocations);
+        $this->elvesLocations = $this->moveOnlyPossible($proposedMoves);
         $this->directions = Collection::create($this->directions)
             ->moveFirstToEnd()
             ->toArray()
@@ -78,13 +84,13 @@ class ElfMoves
 
     public function generateMap(): Map
     {
-        return Map::generateForLocations($this->elvesLocations, '#', '.');
+        return Map::generateForLocations($this->elvesLocations, self::ELF_POSITION, self::GROUND_POSITION);
     }
 
     private function hasAdjacentElf(Location $loc, Map $map): bool
     {
         foreach ($loc->getAllAdjacentLocations() as $adjacent) {
-            if ($map->hasElementOnPoint($adjacent, '#')) {
+            if ($map->hasElementOnPoint($adjacent, self::ELF_POSITION)) {
                 return false;
             }
         }
@@ -106,7 +112,7 @@ class ElfMoves
     private function hasAnyElfInDirection(Location $loc, Direction $direction, Map $map): bool
     {
         foreach ($loc->getAllAdjacentLocationsInDirection($direction) as $adjacent) {
-            if ($map->hasElementOnPoint($adjacent, '#')) {
+            if ($map->hasElementOnPoint($adjacent, self::ELF_POSITION)) {
                 return true;
             }
         }
@@ -121,7 +127,7 @@ class ElfMoves
         foreach ($newLocations as $index => $newLocation) {
             /**
              * @var Location $old
-             * @var ?Location $new
+             * @var Location $new
              */
             [$old, $new] = $newLocation;
 
@@ -130,7 +136,6 @@ class ElfMoves
             } else {
                 $newLocationsWithoutCurrent = Collection::create($newLocations)
                     ->unsetKeys([$index])
-                    ->filter(static fn (array $row) => $row[1] !== null)
                     ->forEach(static fn (array $row): Location => $row[1]);
 
                 if ($newLocationsWithoutCurrent->searchKey(static fn (Location $search): bool => $search->equals($new))) {
@@ -139,7 +144,6 @@ class ElfMoves
                     $newElvesLocations[] = $new;
                 }
             }
-
         }
 
         return $newElvesLocations;
@@ -160,6 +164,19 @@ class ElfMoves
     {
         $map = $this->generateMap();
 
-        return $map->calculateAreaForElements(['.']);
+        return $map->calculateAreaForElements([self::GROUND_POSITION]);
+    }
+
+    public function getNumberOfRoundWhereNoElfMoves(): int
+    {
+        $roundNumber = 1;
+
+        while ($this->move()) {
+            $roundNumber++;
+
+            Console::writeln($roundNumber);
+        }
+
+        return $roundNumber;
     }
 }

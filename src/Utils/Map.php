@@ -74,21 +74,6 @@ class Map
         return self::generateFilled($yRange->to, $xRange->to, $element, $xRange->from, $yRange->from);
     }
 
-    public function asString(): string
-    {
-        $grid = $this->grid;
-        ksort($grid);
-
-        $string = '';
-
-        foreach ($this->grid as $row) {
-            ksort($row);
-            $string .= implode('', $row) . PHP_EOL;
-        }
-
-        return $string;
-    }
-
     public function drawShape(array $shape, string $string): self
     {
         foreach ($shape as $y => $row) {

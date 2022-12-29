@@ -30,11 +30,6 @@ class Cave
         return new self(Map::generateFilled($maxY, $maxX, self::AIR, minX: $minX));
     }
 
-    public function print(): void
-    {
-        echo $this->map->asString();
-    }
-
     public function addRock(int $startX, int $startY, int $endX, int $endY): void
     {
         $this->map->drawLine($startX, $startY, $endX, $endY, self::ROCK);
@@ -45,9 +40,8 @@ class Cave
 
     public function addFloor(): void
     {
-        $width = $this->calculateWidthToAddSand(self::SAND_POURING_X);
+        $width = $this->calculateWidthToAddSand();
         $this->map->cropOnRight($width, self::AIR);
-        $width = $this->calculateWidthToAddSand(self::SAND_POURING_X);
         $this->map->cropOnLeft($width, self::AIR);
 
         $this->placeFloor();
@@ -128,7 +122,7 @@ class Cave
         return $this->sandInCave;
     }
 
-    private function calculateWidthToAddSand(int $x): int
+    private function calculateWidthToAddSand(): int
     {
         return $this->highestY - self::SAND_POURING_Y;
     }

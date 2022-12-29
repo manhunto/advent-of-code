@@ -213,6 +213,9 @@ class Location implements \Stringable
     }
 
     /**
+     * Example if North is given then N, NE and NW is returned.
+     * Always three adjacent locations for every direction.
+     *
      * @return self[]
      */
     public function getAllAdjacentLocationsInDirection(Direction $direction): array

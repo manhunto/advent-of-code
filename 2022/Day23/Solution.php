@@ -25,7 +25,10 @@ final class Solution implements Solver
         $elfMoves->moveNTimes(10);
 
         $emptyGround = $elfMoves->countEmptyGround();
+
+        $elfMoves = ElfMoves::fromInput($input);
+        $numberOfRound = $elfMoves->getNumberOfRoundWhereNoElfMoves();
     
-        return new Result($emptyGround);
+        return new Result($emptyGround, $numberOfRound);
     }
 }
