@@ -59,7 +59,6 @@ final class SolveCommand extends Command
 
         $inputType = $this->prepareInputType($input);
 
-        $style->block($inputType->name, 'Input type');
 
         try {
             $solution = $this->factory->create($date);
@@ -69,6 +68,8 @@ final class SolveCommand extends Command
 
             return Command::FAILURE;
         }
+        $style->block($inputType->name, 'Input type');
+        $style->block($resultPair->getExecutionTimeInMiliSeconds(), 'Benchmark', style: 'info');
 
         if (!$resultPair->isResolvedCorrectly()) {
             $style->error('Unexpected result.');

@@ -260,4 +260,14 @@ final class Collection
 
         return self::create($items)->values();
     }
+
+    public function contains(mixed $item): bool
+    {
+        return in_array($item, $this->items, true);
+    }
+
+    public function eachToString(): self
+    {
+        return $this->forEach(static fn (mixed $item): string => (string) $item);
+    }
 }

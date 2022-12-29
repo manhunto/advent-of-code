@@ -50,20 +50,24 @@ class ElfMoves
 
     public function move(): bool
     {
-        $map = $this->generateMap();
-
         $proposedMoves = [];
 
         $anyElfMoves = false;
 
-        foreach ($this->elvesLocations as $elfLocation) {
-            if ($this->hasAdjacentElf($elfLocation, $map)) {
+        $elvesAsString = Collection::create($this->elvesLocations)
+            ->eachToString();
+
+        foreach ($this->elvesLocations as $index => $elfLocation) {
+            $otherElves = $elvesAsString
+                ->unsetKeys([$index]);
+
+            if ($this->hasAdjacentElf($elfLocation, $otherElves)) {
                 $proposedMoves[] = [$elfLocation, $elfLocation];
 
                 continue;
             }
 
-            $newLocation = $this->moveElfToNewLocation($elfLocation, $map);
+            $newLocation = $this->moveElfToNewLocation($elfLocation, $otherElves);
             if ($newLocation === null ){
                 $proposedMoves[] = [$elfLocation, $elfLocation];
             } else {
@@ -87,10 +91,10 @@ class ElfMoves
         return Map::generateForLocations($this->elvesLocations, self::ELF_POSITION, self::GROUND_POSITION);
     }
 
-    private function hasAdjacentElf(Location $loc, Map $map): bool
+    private function hasAdjacentElf(Location $loc, Collection $otherElves): bool
     {
         foreach ($loc->getAllAdjacentLocations() as $adjacent) {
-            if ($map->hasElementOnPoint($adjacent, self::ELF_POSITION)) {
+            if ($otherElves->contains((string) $adjacent)) {
                 return false;
             }
         }
@@ -98,10 +102,10 @@ class ElfMoves
         return true;
     }
 
-    private function moveElfToNewLocation(Location $loc, Map $map): ?Location
+    private function moveElfToNewLocation(Location $loc, Collection $otherElves): ?Location
     {
         foreach ($this->directions as $direction) {
-            if ($this->hasAnyElfInDirection($loc, $direction, $map) === false) {
+            if ($this->hasAnyElfInDirection($loc, $direction, $otherElves) === false) {
                 return $loc->moveInDirection($direction);
             }
         }
@@ -109,10 +113,10 @@ class ElfMoves
         return null;
     }
 
-    private function hasAnyElfInDirection(Location $loc, Direction $direction, Map $map): bool
+    private function hasAnyElfInDirection(Location $loc, Direction $direction, Collection $otherElves): bool
     {
         foreach ($loc->getAllAdjacentLocationsInDirection($direction) as $adjacent) {
-            if ($map->hasElementOnPoint($adjacent, self::ELF_POSITION)) {
+            if ($otherElves->contains((string) $adjacent)) {
                 return true;
             }
         }
@@ -120,25 +124,27 @@ class ElfMoves
         return false;
     }
 
+    /**
+     * @param array<string, array{0: Location, 1: Location}> $newLocations
+     * @return Location[]
+     */
     private function moveOnlyPossible(array $newLocations): array
     {
         $newElvesLocations = [];
 
+        $newLocationsAsStrings = Collection::create($newLocations)
+            ->forEach(static fn (array $row): string => (string) $row[1]);
+
         foreach ($newLocations as $index => $newLocation) {
-            /**
-             * @var Location $old
-             * @var Location $new
-             */
             [$old, $new] = $newLocation;
 
             if ($new === null) {
                 $newElvesLocations[] = $old;
             } else {
-                $newLocationsWithoutCurrent = Collection::create($newLocations)
-                    ->unsetKeys([$index])
-                    ->forEach(static fn (array $row): Location => $row[1]);
+                $newLocationsWithoutCurrent = $newLocationsAsStrings
+                    ->unsetKeys([$index]);
 
-                if ($newLocationsWithoutCurrent->searchKey(static fn (Location $search): bool => $search->equals($new))) {
+                if ($newLocationsWithoutCurrent->contains((string) $new)) {
                     $newElvesLocations[] = $old;
                 } else {
                     $newElvesLocations[] = $new;
@@ -173,8 +179,6 @@ class ElfMoves
 
         while ($this->move()) {
             $roundNumber++;
-
-            Console::writeln($roundNumber);
         }
 
         return $roundNumber;
