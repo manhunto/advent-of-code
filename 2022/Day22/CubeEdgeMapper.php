@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace AdventOfCode2022\Day22;
 
 use App\Utils\Collection;
-use App\Utils\Direction;
+use App\Utils\DirectionalLocation;
+use App\Utils\Location;
 use App\Utils\Map;
-use App\Utils\Point;
 
 class CubeEdgeMapper
 {
-    use CubeTrait;
-
     private readonly int $lengthOfEdge;
 
     public function __construct(
@@ -23,13 +21,13 @@ class CubeEdgeMapper
     }
 
     /**
-     * @return Point[]
+     * @return Location[]
      */
     public function getEdgeInnerPoints(): array
     {
         $innerEdgePoint = [];
 
-        /** @var Point $point */
+        /** @var Location $point */
         foreach ($this->map->getPointsWithElements($this->mapElements) as $point) {
             if ($this->isPointOnEdge($point) === false) {
                 continue;
@@ -57,13 +55,13 @@ class CubeEdgeMapper
     }
 
     /**
-     * @return Point[]
+     * @return Location[]
      */
     public function getOutsideEdgePoints(): array
     {
         $outsideEdgePoints = [];
 
-        /** @var Point $point */
+        /** @var Location $point */
         foreach ($this->map->getPointsWithElements($this->mapElements) as $point) {
             if ($this->isOutsideEdge($point)) {
                 $outsideEdgePoints = [...$outsideEdgePoints, ...$this->getDirectionsWithAbyss($point)];
@@ -73,7 +71,14 @@ class CubeEdgeMapper
         return $outsideEdgePoints;
     }
 
-    private function isPointOnEdge(Point $position)
+    private function calculateLengthOfEdge(): int
+    {
+        $area = $this->map->calculateAreaForElements($this->mapElements);
+
+        return (int) sqrt($area / 6);
+    }
+
+    private function isPointOnEdge(Location $position): bool
     {
         return $position->y % $this->lengthOfEdge === 0
             || $position->y % $this->lengthOfEdge + 1 === 0
@@ -81,7 +86,7 @@ class CubeEdgeMapper
             || $position->x % $this->lengthOfEdge + 1 === 0;
     }
 
-    private function isOutsideEdge(Point $point): bool
+    private function isOutsideEdge(Location $point): bool
     {
         foreach ($point->getAllAdjacentPoints() as $adjacentPoint) {
             if ($this->map->isPointInsideMap($adjacentPoint) === false) {
@@ -145,31 +150,34 @@ class CubeEdgeMapper
         }
 
         if (empty($outsidePoints) === false) {
-            throw new \LogicException('This shape of cube is not handled yet');
+            $pointsWithoutMapping = count($outsidePoints);
+            $edgeWithoutMapping = ceil($pointsWithoutMapping / $this->lengthOfEdge);
+
+            throw new \LogicException(sprintf('This shape of cube is not handled yet. Points without mapping %s. Missing edges %s', $pointsWithoutMapping, $edgeWithoutMapping));
         }
 
         return $edgeMap;
     }
 
     /**
-     * @param DirectionFromPoint[] $outsideEdgePoints
-     * @return DirectionFromPoint[]
+     * @param DirectionalLocation[] $outsideEdgePoints
+     * @return DirectionalLocation[]
      */
-    private function getAdjacentForPoints(Point $point, array $outsideEdgePoints): array
+    private function getAdjacentForPoints(Location $point, array $outsideEdgePoints): array
     {
         return Collection::create($outsideEdgePoints)
-            ->filter(static fn (DirectionFromPoint $outside): bool => $point->isAdjacent($outside->point))
+            ->filter(static fn (DirectionalLocation $outside): bool => $point->isAdjacent($outside->location))
             ->values()
             ->toArray();
     }
 
     /**
-     * @param DirectionFromPoint[] $outsideEdgePoints
+     * @param DirectionalLocation[] $outsideEdgePoints
      */
-    private function getNextPoint(DirectionFromPoint $directionFromPoint, array $outsideEdgePoints): ?DirectionFromPoint
+    private function getNextPoint(DirectionalLocation $directionFromPoint, array $outsideEdgePoints): ?DirectionalLocation
     {
         $theSame = Collection::create($outsideEdgePoints)
-            ->filter(static fn(DirectionFromPoint $outside): bool => $directionFromPoint->hasTheSamePoint($outside))
+            ->filter(static fn(DirectionalLocation $outside): bool => $directionFromPoint->hasTheSamePoint($outside))
             ->values();
 
         if ($theSame->isEmpty() === false) {
@@ -177,7 +185,7 @@ class CubeEdgeMapper
         }
 
         $adjacent = Collection::create($outsideEdgePoints)
-            ->filter(static fn(DirectionFromPoint $outside): bool => $directionFromPoint->isAdjacent($outside))
+            ->filter(static fn(DirectionalLocation $outside): bool => $directionFromPoint->isAdjacent($outside))
             ->values();
 
         if ($adjacent->count() === 1) {
@@ -185,29 +193,29 @@ class CubeEdgeMapper
         }
 
         return $adjacent
-            ->filter(static fn (DirectionFromPoint $dirFromPoint): bool => $directionFromPoint->hasTheSameDirection($dirFromPoint))
+            ->filter(static fn (DirectionalLocation $dirFromPoint): bool => $directionFromPoint->hasTheSameDirection($dirFromPoint))
             ->first();
     }
 
     /**
-     * @return DirectionFromPoint[]
+     * @return DirectionalLocation[]
      */
-    private function getDirectionsWithAbyss(Point $point): array
+    private function getDirectionsWithAbyss(Location $point): array
     {
         return Collection::create(iterator_to_array($point->getStraightAdjacent()))
-            ->filter(fn (Point $adjacent): bool =>
+            ->filter(fn (Location $adjacent): bool =>
                 $this->map->isPointInsideMap($adjacent) === false
                 || in_array($this->map->getElementForPoint($adjacent), $this->mapElements, true) === false
             )
-            ->forEach(static fn (Point $adjacent): DirectionFromPoint => DirectionFromPoint::fromPointToPoint($point, $adjacent))
+            ->forEach(static fn (Location $adjacent): DirectionalLocation => DirectionalLocation::fromLocationToLocation($point, $adjacent))
             ->values()
             ->toArray();
     }
 
-    private function addMapping(DirectionFromPoint $toA, DirectionFromPoint $toB, array $edgeMap): array
+    private function addMapping(DirectionalLocation $toA, DirectionalLocation $toB, array $edgeMap): array
     {
-        $edgeMap[] = [$toA, $toB->reversed()];
-        $edgeMap[] = [$toB, $toA->reversed()];
+        $edgeMap[] = [$toA, $toB->reversedDirection()];
+        $edgeMap[] = [$toB, $toA->reversedDirection()];
 
         return $edgeMap;
     }

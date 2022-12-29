@@ -23,11 +23,11 @@ class Map
     public static function generateForRowsAndFilledNonExisting(array $mapRow, string $missingElement): self
     {
         $rows = Collection::create($mapRow)
-            ->forEach(static fn (array $row) => count($mapRow))
+            ->forEach(static fn (array $row) => max(array_keys($row)))
             ->max();
         $columns = count($mapRow);
 
-        $map = self::generateFilled($columns, $rows - 1, $missingElement);
+        $map = self::generateFilled($columns, $rows, $missingElement);
 
         foreach ($mapRow as $y => $item) {
             foreach ($item as $x => $char) {
@@ -97,7 +97,7 @@ class Map
         return $item === $element;
     }
 
-    public function hasElementOnPoint(Point $point, string $element): bool
+    public function hasElementOnPoint(Location $point, string $element): bool
     {
         return $this->hasElement($point->y, $point->x, $element);
     }
@@ -197,12 +197,12 @@ class Map
         $this->grid = $new;
     }
 
-    public function findFirst(string $element): ?Point
+    public function findFirst(string $element): ?Location
     {
         foreach ($this->grid as $y => $row) {
             foreach ($row as $x => $item) {
                 if ($item === $element) {
-                    return new Point($x, $y);
+                    return new Location($x, $y);
                 }
             }
         }
@@ -210,49 +210,49 @@ class Map
         return null;
     }
 
-    public function drawPoint(Point $point, string $element): void
+    public function drawPoint(Location $point, string $element): void
     {
         $this->grid[$point->y][$point->x] = $element;
     }
 
-    public function findFirstInRow(int $y, string $element): ?Point
+    public function findFirstInRow(int $y, string $element): ?Location
     {
         foreach ($this->grid[$y] as $x => $item) {
             if ($element === $item) {
-                return new Point($x, $y);
+                return new Location($x, $y);
             }
         }
 
         return null;
     }
 
-    public function findLastInRow(int $y, string $element): ?Point
+    public function findLastInRow(int $y, string $element): ?Location
     {
         foreach (array_reverse($this->grid[$y], true) as $x => $item) {
             if ($element === $item) {
-                return new Point($x, $y);
+                return new Location($x, $y);
             }
         }
 
         return null;
     }
 
-    public function findFirstInColumn(int $x, string $element): ?Point
+    public function findFirstInColumn(int $x, string $element): ?Location
     {
         foreach (array_column($this->grid, $x) as $y => $item) {
             if ($element === $item) {
-                return new Point($x, $y);
+                return new Location($x, $y);
             }
         }
 
         return null;
     }
 
-    public function findLastInColumn(int $x, string $element): ?Point
+    public function findLastInColumn(int $x, string $element): ?Location
     {
         foreach (array_reverse(array_column($this->grid, $x), true) as $y => $item) {
             if ($element === $item) {
-                return new Point($x, $y);
+                return new Location($x, $y);
             }
         }
 
@@ -264,7 +264,7 @@ class Map
         return isset($this->grid[$y][$x]);
     }
 
-    public function isPointInsideMap(Point $point): bool
+    public function isPointInsideMap(Location $point): bool
     {
         return $this->isInsideMap($point->y, $point->x);
     }
@@ -285,21 +285,21 @@ class Map
     }
 
     /**
-     * @return iterable<Point>
+     * @return iterable<Location>
      */
     public function getPointsWithElements(array $elements): iterable
     {
         foreach ($this->grid as $y => $row) {
             foreach ($row as $x => $element) {
                 if (in_array($element, $elements, true)) {
-                    yield new Point($x, $y);
+                    yield new Location($x, $y);
                 }
             }
         }
 
     }
 
-    public function getElementForPoint(Point $point): ?string
+    public function getElementForPoint(Location $point): ?string
     {
         return $this->grid[$point->y][$point->x] ?? null;
     }

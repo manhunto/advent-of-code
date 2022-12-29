@@ -5,48 +5,50 @@ declare(strict_types=1);
 namespace AdventOfCode2022\Day22;
 
 use App\Utils\Direction;
+use App\Utils\DirectionalLocation;
+use App\Utils\Location;
 use App\Utils\Map;
-use App\Utils\Point;
 
 /**
  * @todo https://www.youtube.com/watch?v=qWgLdNFYDDo
  */
 class WalkableCube
 {
-    use CubeTrait;
-
     private readonly int $lengthOfEdge;
 
     public function __construct(
         private readonly array $walkableElements,
         private readonly Map $map,
-        private readonly array $mapElements
+        private readonly array $mapElements,
+        private readonly EdgeMapping $edgeMapping,
     ) {
-        $this->lengthOfEdge = $this->calculateLengthOfEdge();
     }
 
-    public function getNextPosition(Point $position, Direction $direction): Point
+    public function getNextPosition(DirectionalLocation $directionalPoint): DirectionalLocation
     {
+        $position = $directionalPoint->location;
+        $direction = $directionalPoint->direction;
+
         $this->validateCurrentPosition($position);
 
         $nextPosition = $position->moveInDirection($direction);
 
-        if ($this->canMoveThroughMap($nextPosition)) {
-            return $nextPosition;
-        }
+        if ($this->isMapElement($nextPosition)) {
+            if ($this->isPointWalkable($nextPosition)) {
+                return new DirectionalLocation($nextPosition, $direction);
+            }
 
-        if ($this->isPointOnEdge($position) === false) {
-            return $position->moveInDirection($direction);
+            return $directionalPoint;
         }
 
         return $this->handleEdgeMove($position, $direction);
     }
 
-    private function validateCurrentPosition(Point $position): void
+    private function validateCurrentPosition(Location $position): void
     {
         foreach ($this->walkableElements as $walkableElement) {
             if ($this->map->hasElement($position->y, $position->x, $walkableElement) === false) {
-                throw new \LogicException('Current position is no walkable');
+                throw new \LogicException('Current position is no walkable ' . $position);
             }
         }
 
@@ -55,22 +57,21 @@ class WalkableCube
         }
     }
 
-    private function isPointOnEdge(Point $position): bool
+    private function handleEdgeMove(Location $position, Direction $direction): DirectionalLocation
     {
-        return $position->y % $this->lengthOfEdge === 0
-            || $position->y % $this->lengthOfEdge + 1 === 0
-            || $position->x % $this->lengthOfEdge === 0
-            || $position->x % $this->lengthOfEdge + 1 === 0;
-    }
+        $next = $this->edgeMapping->getFor($position, $direction);
 
-    private function canMoveThroughMap(Point $nextPosition): bool
-    {
-        if ($this->map->isPointInsideMap($nextPosition) === false) {
-            return false;
+        if ($this->isPointWalkable($next->location)) {
+            return $next;
         }
 
+        return new DirectionalLocation($position, $direction);
+    }
+
+    private function isPointWalkable(Location $point): bool
+    {
         foreach ($this->walkableElements as $walkableElement) {
-            if ($this->map->hasElementOnPoint($nextPosition, $walkableElement) === false) {
+            if ($this->map->hasElementOnPoint($point, $walkableElement) === false) {
                 return false;
             }
         }
@@ -78,17 +79,10 @@ class WalkableCube
         return true;
     }
 
-    private function handleEdgeMove(Point $position, Direction $direction): Point
+    private function isMapElement(Location $position): bool
     {
-        $innerPoints = $this->getInnerPoints(); // todo extract to edge mapper
+        $item = $this->map->getElementForPoint($position);
 
-        // todo walk on edges and create map point1 to point2 and dir with rotation
-        // todo walk each po
-
-        var_dump($innerPoints); die;
-
-
-
-        throw new \LogicException('Unhandled move');
+        return in_array($item, $this->mapElements, true);
     }
 }

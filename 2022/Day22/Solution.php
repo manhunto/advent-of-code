@@ -9,7 +9,7 @@ use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
 use App\Utils\Map;
-use App\Utils\Output\Console as C;
+use App\Utils\Location;
 use App\Utils\Rotation;
 
 #[SolutionAttribute(
@@ -24,30 +24,12 @@ final class Solution implements Solver
         /** @var Map $map */
         [$map, $instructions] = $this->parseInput($input);
 
+        /** @var Location $myPosition */
         $myPosition = $map->findFirst('.');
+        $finalPasswordFirstPart = $this->solveFirstPart($myPosition, $instructions, $map);
+        $finalPasswordSecondPart = $this->solveSecondPart($myPosition, $instructions, $map);
 
-        $player = new Player($myPosition);
-
-        foreach ($instructions as $instruction) {
-            if (is_numeric($instruction)) {
-                $player->moveForward((int) $instruction, $map);
-            } else {
-                $rotation = $this->getRotation($instruction);
-
-                $player->rotate($rotation);
-            }
-        }
-
-        $printer = $map->printer()
-            ->naturalHorizontally();
-
-        foreach ($player->history as $history) {
-            $printer->drawTemporaryPoint($history[0], $history[1]);
-        }
-
-        $printer->print();
-
-        return new Result($player->getFinalPassword());
+        return new Result($finalPasswordFirstPart, $finalPasswordSecondPart);
     }
 
     private function parseInput(Input $input): array
@@ -78,4 +60,44 @@ final class Solution implements Solver
             default => throw new \LogicException('Unexpected instruction for rotation')
         };
     }
+
+    private function solveFirstPart(Location $myPosition, array $instructions, Map $map): int
+    {
+        $player = new Player($myPosition);
+
+        foreach ($instructions as $instruction) {
+            if (is_numeric($instruction)) {
+                $player->moveForward((int)$instruction, $map);
+            } else {
+                $rotation = $this->getRotation($instruction);
+
+                $player->rotate($rotation);
+            }
+        }
+
+        return $player->getFinalPassword();
+    }
+
+    private function solveSecondPart(Location $myPosition, array $instructions, Map $map): int
+    {
+        $mapElements = ['.', '#'];
+        $walkableElements = ['.'];
+
+        $mapper = new CubeEdgeMapper($map, $mapElements);
+        $walkableCube = new WalkableCube($walkableElements, $map, $mapElements, $mapper->getEdgeMap());
+        $player = new Player($myPosition);
+
+        foreach ($instructions as $instruction) {
+            if (is_numeric($instruction)) {
+                $player->moveForwardOnCube((int)$instruction, $walkableCube);
+            } else {
+                $rotation = $this->getRotation($instruction);
+
+                $player->rotate($rotation);
+            }
+        }
+
+        return $player->getFinalPassword();
+    }
+
 }

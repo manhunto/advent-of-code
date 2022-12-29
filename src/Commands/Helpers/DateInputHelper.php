@@ -24,16 +24,27 @@ final class DateInputHelper
      */
     public function prepareDate(InputInterface $input): Date
     {
-        $date = $this->dateFactory->createForToday();
+        $dayInput = $input->getOption(self::OPTION_DAY);
+        $yearInput = $input->getOption(self::OPTION_YEAR);
 
-        if ($dayInput = $input->getOption(self::OPTION_DAY)) {
-            $date = $date->withDay($dayInput);
+        if (!$dayInput && !$yearInput) {
+            return $this->dateFactory->createForToday();
         }
 
-        if ($yearInput = $input->getOption(self::OPTION_YEAR)) {
-            $date = $date->withYear($yearInput);
+        $dateTime = new \DateTimeImmutable();
+
+        if ($dayInput) {
+            [, $month, $year] = explode('/', $dateTime->format('j/n/Y'));
+
+            $dateTime = $dateTime->setDate((int) $year, (int) $month, (int) $dayInput);
         }
 
-        return $date;
+        if ($yearInput) {
+            [$day, $month] = explode('/', $dateTime->format('j/n/Y'));
+
+            $dateTime = $dateTime->setDate((int) $yearInput, (int) $month, (int) $day);
+        }
+
+        return Date::fromDateTime($dateTime);
     }
 }

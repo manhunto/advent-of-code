@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace AdventOfCode2022\Day15;
 
-use App\Utils\Point;
+use App\Utils\Location;
 use App\Utils\Range;
 
 class Sensor
 {
     public function __construct(
-        private readonly Point $sensorLocation,
-        public readonly Point $beaconLocation,
+        private readonly Location $sensorLocation,
+        public readonly Location  $beaconLocation,
     ) {
     }
 

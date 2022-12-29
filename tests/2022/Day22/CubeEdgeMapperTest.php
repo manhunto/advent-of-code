@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tests\AdventOfCode2022\Day22;
 
 use AdventOfCode2022\Day22\CubeEdgeMapper;
-use AdventOfCode2022\Day22\DirectionFromPoint as FromPoint;
+use App\Utils\DirectionalLocation as FromPoint;
+use App\Utils\Location;
 use App\Utils\Map;
-use App\Utils\Point;
 use PHPUnit\Framework\TestCase;
 
 class CubeEdgeMapperTest extends TestCase
@@ -38,9 +38,9 @@ class CubeEdgeMapperTest extends TestCase
         $points = $this->mapper->getEdgeInnerPoints();
 
         self::assertEquals([
-            new Point(6, 3),
-            new Point(6, 5),
-            new Point(8, 6),
+            new Location(6, 3),
+            new Location(6, 5),
+            new Location(8, 6),
         ], $points);
     }
 

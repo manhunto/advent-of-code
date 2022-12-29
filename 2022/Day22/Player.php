@@ -5,17 +5,18 @@ declare(strict_types=1);
 namespace AdventOfCode2022\Day22;
 
 use App\Utils\Direction;
+use App\Utils\DirectionalLocation;
+use App\Utils\Location;
 use App\Utils\Map;
-use App\Utils\Point;
 use App\Utils\Rotation;
 
 class Player
 {
-    private Point $position;
+    private Location $position;
     private Direction $direction;
     public array $history = [];
 
-    public function __construct(Point $startingPosition)
+    public function __construct(Location $startingPosition)
     {
         $this->position = $startingPosition;
         $this->direction = Direction::EAST;
@@ -56,7 +57,26 @@ class Player
         } while ($step <= $maxSteps);
     }
 
-    private function canMoveHere(Map $map, Point $newPosition): bool
+    public function moveForwardOnCube(int $maxSteps, WalkableCube $walkableCube): void
+    {
+        $step = 1;
+        do {
+            $oldPosition = new DirectionalLocation($this->position, $this->direction);
+            $newPosition = $walkableCube->getNextPosition($oldPosition);
+
+            if ($oldPosition->equals($newPosition)) {
+                break;
+            }
+
+            $this->position = $newPosition->location;
+            $this->direction = $newPosition->direction;
+
+            $this->addToHistory();
+            $step++;
+        } while ($step <= $maxSteps);
+    }
+
+    private function canMoveHere(Map $map, Location $newPosition): bool
     {
         return $map->hasElementOnPoint($newPosition, '#') === false
             && $map->hasElementOnPoint($newPosition, ' ') === false
@@ -68,12 +88,12 @@ class Player
         return ($this->position->y + 1) * 1_000 + ($this->position->x + 1) * 4 + $this->direction->value;
     }
 
-    private function moveOneStepInCurrentDirection(): Point
+    private function moveOneStepInCurrentDirection(): Location
     {
         return $this->position->moveInDirection($this->direction);
     }
 
-    private function wrapAroundMap(Map $map): ?Point
+    private function wrapAroundMap(Map $map): ?Location
     {
         if ($this->direction === Direction::EAST) {
             $block = $map->findFirstInRow($this->position->y, '#');

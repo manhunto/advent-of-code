@@ -9,7 +9,7 @@ use App\Result;
 use App\SolutionAttribute;
 use App\Solver;
 use App\Utils\Collection;
-use App\Utils\Point;
+use App\Utils\Location;
 use App\Utils\Range;
 use App\Utils\RangeCollection;
 
@@ -29,7 +29,7 @@ final class Solution implements Solver
             if (preg_match('/^Sensor at x=(-?\d+), y=(-?\d+): closest beacon is at x=(-?\d+), y=(-?\d+)$/', $row, $matches)) {
                 [, $sx, $sy, $bx, $by] = $matches;
 
-                $sensors[] = new Sensor(new Point((int) $sx, (int) $sy), new Point((int) $bx, (int) $by));
+                $sensors[] = new Sensor(new Location((int) $sx, (int) $sy), new Location((int) $bx, (int) $by));
             }
         }
 

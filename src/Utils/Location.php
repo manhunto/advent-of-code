@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Utils;
 
-class Point implements \Stringable
+class Location implements \Stringable
 {
     public function __construct(
         public readonly int $x,
@@ -27,22 +27,22 @@ class Point implements \Stringable
         return $this->x === $other->x && $this->y === $other->y;
     }
 
-    public function moveRight(): self
+    public function moveEast(): self
     {
         return $this->move(x: 1);
     }
 
-    public function moveDown(): self
+    public function moveSouth(): self
     {
         return $this->move(y: 1);
     }
 
-    public function moveLeft(): self
+    public function moveWest(): self
     {
         return $this->move(x: -1);
     }
 
-    public function moveUp(): self
+    public function moveNorth(): self
     {
         return $this->move(y: -1);
     }
@@ -102,10 +102,10 @@ class Point implements \Stringable
     public function moveInDirection(Direction $direction): self
     {
         return match ($direction) {
-            Direction::EAST => $this->moveRight(),
-            Direction::SOUTH => $this->moveDown(),
-            Direction::WEST => $this->moveLeft(),
-            Direction::NORTH => $this->moveUp(),
+            Direction::EAST => $this->moveEast(),
+            Direction::SOUTH => $this->moveSouth(),
+            Direction::WEST => $this->moveWest(),
+            Direction::NORTH => $this->moveNorth(),
         };
     }
 

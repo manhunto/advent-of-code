@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AdventOfCode2022\Day15;
 
-use App\Utils\Point;
+use App\Utils\Location;
 use App\Utils\Range;
 use PHPUnit\Framework\TestCase;
 
@@ -15,7 +15,7 @@ class SensorTest extends TestCase
      */
     public function testGetRangeOnLine(int $y, ?Range $expected): void
     {
-        $sensor = new Sensor(new Point(0, 0), new Point(1, 3));
+        $sensor = new Sensor(new Location(0, 0), new Location(1, 3));
 
         self::assertEquals($expected, $sensor->getRangeOnLine($y));
     }

@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace AdventOfCode2022\Day22;
 
 use App\Utils\Direction;
-use App\Utils\Point;
-use SebastianBergmann\Diff\Diff;
+use App\Utils\DirectionalLocation;
+use App\Utils\Location;
 
 class EdgeMapping
 {
-    /** @var array{0: DirectionFromPoint, 1: DirectionFromPoint} */
+    /** @var array{0: DirectionalLocation, 1: DirectionalLocation} */
     private array $mappings;
 
-    public function add(DirectionFromPoint $A, DirectionFromPoint $B): void
+    public function add(DirectionalLocation $A, DirectionalLocation $B): void
     {
-        $this->mappings[] = [$A, $B->reversed()];
-        $this->mappings[] = [$B, $A->reversed()];
+        $this->mappings[] = [$A, $B->reversedDirection()];
+        $this->mappings[] = [$B, $A->reversedDirection()];
     }
 
     public function getAll(): array
@@ -24,12 +24,12 @@ class EdgeMapping
         return $this->mappings;
     }
 
-    public function getFor(Point $point, Direction $direction): DirectionFromPoint
+    public function getFor(Location $point, Direction $direction): DirectionalLocation
     {
         foreach ($this->mappings as $item) {
             /**
-             * @var DirectionFromPoint $from
-             * @var DirectionFromPoint $to
+             * @var DirectionalLocation $from
+             * @var DirectionalLocation $to
              */
             [$from, $to] = $item;
 
@@ -38,6 +38,6 @@ class EdgeMapping
             }
         }
 
-        throw new \LogicException('There is no mapping form ' . $point . ' in direction' . $direction->name);
+        throw new \LogicException('There is no mapping form ' . $point . ' in direction ' . $direction->name);
     }
 }
