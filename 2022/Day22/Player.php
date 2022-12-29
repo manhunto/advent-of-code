@@ -99,7 +99,7 @@ class Player
             $block = $map->findFirstInRow($this->position->y, '#');
             $freeSpace = $map->findFirstInRow($this->position->y, '.');
 
-            if ($block !== null && $block->isBeforeInRow($freeSpace)) {
+            if ($block !== null && $block->isOnWestTo($freeSpace)) {
                 return null;
             }
 
@@ -110,7 +110,7 @@ class Player
             $block = $map->findLastInRow($this->position->y, '#');
             $freeSpace = $map->findLastInRow($this->position->y, '.');
 
-            if ($block !== null && $block->isAfterInRow($freeSpace)) {
+            if ($block !== null && $block->isOnEastTo($freeSpace)) {
                 return null;
             }
 
@@ -121,7 +121,7 @@ class Player
             $block = $map->findFirstInColumn($this->position->x, '#');
             $freeSpace = $map->findFirstInColumn($this->position->x, '.');
 
-            if ($block !== null && $block->isBeforeInColumn($freeSpace)) {
+            if ($block !== null && $block->isOnNorthTo($freeSpace)) {
                 return null;
             }
 
@@ -132,7 +132,7 @@ class Player
             $block = $map->findLastInColumn($this->position->x, '#');
             $freeSpace = $map->findLastInColumn($this->position->x, '.');
 
-            if ($block !== null && $block->isAfterInColumn($freeSpace)) {
+            if ($block !== null && $block->isOnSouthTo($freeSpace)) {
                 return null;
             }
 

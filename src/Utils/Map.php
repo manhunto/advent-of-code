@@ -299,7 +299,7 @@ class Map
 
     }
 
-    public function getElementForPoint(Location $point): ?string
+    public function getElementForLocation(Location $point): ?string
     {
         return $this->grid[$point->y][$point->x] ?? null;
     }

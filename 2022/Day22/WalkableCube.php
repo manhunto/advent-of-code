@@ -81,7 +81,7 @@ class WalkableCube
 
     private function isMapElement(Location $position): bool
     {
-        $item = $this->map->getElementForPoint($position);
+        $item = $this->map->getElementForLocation($position);
 
         return in_array($item, $this->mapElements, true);
     }

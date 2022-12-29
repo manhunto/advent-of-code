@@ -29,25 +29,20 @@ class CubeEdgeMapper
 
         /** @var Location $point */
         foreach ($this->map->getPointsWithElements($this->mapElements) as $point) {
-            if ($this->isPointOnEdge($point) === false) {
-                continue;
-            }
+            $adjacent = iterator_to_array($point->getAllAdjacentLocations());
 
-            foreach ($point->getStraightAdjacent() as $adjacentPoint) {
-                $element = $this->map->getElementForPoint($adjacentPoint);
+            $countEmptyAdjacentLocations = Collection::create($adjacent)
+                ->filter(function (Location $loc): bool {
+                    $element = $this->map->getElementForLocation($loc);
 
-                if (in_array($element, $this->mapElements, true) === false) {
-                    continue 2;
-                }
-            }
+                    $isNotMapElement = in_array($element, $this->mapElements, true) === false;
 
-            foreach ($point->getAdjacentOnDiagonals() as $adjacentOnDiagonal) {
-                $element = $this->map->getElementForPoint($adjacentOnDiagonal);
+                    return $isNotMapElement && $this->map->isPointInsideMap($loc);
+                })
+            ->count();
 
-                if (in_array($element, $this->mapElements, true) === false) {
-                    $innerEdgePoint[] = $point;
-                    break;
-                }
+            if ($countEmptyAdjacentLocations === 1) {
+                $innerEdgePoint[] = $point;
             }
         }
 
@@ -78,22 +73,14 @@ class CubeEdgeMapper
         return (int) sqrt($area / 6);
     }
 
-    private function isPointOnEdge(Location $position): bool
-    {
-        return $position->y % $this->lengthOfEdge === 0
-            || $position->y % $this->lengthOfEdge + 1 === 0
-            || $position->x % $this->lengthOfEdge === 0
-            || $position->x % $this->lengthOfEdge + 1 === 0;
-    }
-
     private function isOutsideEdge(Location $point): bool
     {
-        foreach ($point->getAllAdjacentPoints() as $adjacentPoint) {
+        foreach ($point->getAllAdjacentLocations() as $adjacentPoint) {
             if ($this->map->isPointInsideMap($adjacentPoint) === false) {
                 return true;
             }
 
-            $element = $this->map->getElementForPoint($adjacentPoint);
+            $element = $this->map->getElementForLocation($adjacentPoint);
 
             if (in_array($element, $this->mapElements, true) === false) {
                 return true;
@@ -205,18 +192,10 @@ class CubeEdgeMapper
         return Collection::create(iterator_to_array($point->getStraightAdjacent()))
             ->filter(fn (Location $adjacent): bool =>
                 $this->map->isPointInsideMap($adjacent) === false
-                || in_array($this->map->getElementForPoint($adjacent), $this->mapElements, true) === false
+                || in_array($this->map->getElementForLocation($adjacent), $this->mapElements, true) === false
             )
             ->forEach(static fn (Location $adjacent): DirectionalLocation => DirectionalLocation::fromLocationToLocation($point, $adjacent))
             ->values()
             ->toArray();
-    }
-
-    private function addMapping(DirectionalLocation $toA, DirectionalLocation $toB, array $edgeMap): array
-    {
-        $edgeMap[] = [$toA, $toB->reversedDirection()];
-        $edgeMap[] = [$toB, $toA->reversedDirection()];
-
-        return $edgeMap;
     }
 }

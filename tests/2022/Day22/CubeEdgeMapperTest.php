@@ -12,30 +12,11 @@ use PHPUnit\Framework\TestCase;
 
 class CubeEdgeMapperTest extends TestCase
 {
-    private CubeEdgeMapper $mapper;
-    private Map $map;
-
-    protected function setUp(): void
+    public function testExampleGetInnerPoints(): void
     {
-        $this->map = new Map([
-            [' ', ' ', ' ', ' ', ' ', ' ', 'o', 'o', 'o', ' ', ' ', ' '],
-            [' ', ' ', ' ', ' ', ' ', ' ', 'o', 'o', 'o', ' ', ' ', ' '],
-            [' ', ' ', ' ', ' ', ' ', ' ', 'o', 'o', 'o', ' ', ' ', ' '],
-            ['o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', ' ', ' ', ' '],
-            ['o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', ' ', ' ', ' '],
-            ['o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', ' ', ' ', ' '],
-            [' ', ' ', ' ', ' ', ' ', ' ', 'o', 'o', 'o', 'o', 'o', 'o'],
-            [' ', ' ', ' ', ' ', ' ', ' ', 'o', 'o', 'o', 'o', 'o', 'o'],
-            [' ', ' ', ' ', ' ', ' ', ' ', 'o', 'o', 'o', 'o', 'o', 'o'],
-        ]);
+        $mapper = $this->buildForExampleInput();
 
-        $this->mapper = new CubeEdgeMapper($this->map, ['o']);
-    }
-
-
-    public function testGetInnerPoints(): void
-    {
-        $points = $this->mapper->getEdgeInnerPoints();
+        $points = $mapper->getEdgeInnerPoints();
 
         self::assertEquals([
             new Location(6, 3),
@@ -44,14 +25,16 @@ class CubeEdgeMapperTest extends TestCase
         ], $points);
     }
 
-    public function testGetOutsideEdgePoints(): void
+    public function testExampleGetOutsideEdgePoints(): void
     {
-        $points = $this->mapper->getOutsideEdgePoints();
+        $mapper = $this->buildForExampleInput();
+
+        $points = $mapper->getOutsideEdgePoints();
 
         self::assertCount(42, $points);
     }
 
-    public function testGetEdgeMap(): void
+    public function testExampleGetEdgeMap(): void
     {
         $expected = [
             // 1
@@ -125,9 +108,60 @@ class CubeEdgeMapperTest extends TestCase
             [FromPoint::east(11, 8), FromPoint::west(8, 0)],
         ];
 
-        $edgeMap = $this->mapper->getEdgeMap()->getAll();
+        $mapper = $this->buildForExampleInput();
+
+        $edgeMap = $mapper->getEdgeMap()->getAll();
 
         self::assertEquals($expected, $edgeMap);
     }
 
+    private function buildForExampleInput(): CubeEdgeMapper
+    {
+        $map = new Map([
+            [' ', ' ', ' ', ' ', ' ', ' ', 'o', 'o', 'o', ' ', ' ', ' '],
+            [' ', ' ', ' ', ' ', ' ', ' ', 'o', 'o', 'o', ' ', ' ', ' '],
+            [' ', ' ', ' ', ' ', ' ', ' ', 'o', 'o', 'o', ' ', ' ', ' '],
+            ['o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', ' ', ' ', ' '],
+            ['o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', ' ', ' ', ' '],
+            ['o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', ' ', ' ', ' '],
+            [' ', ' ', ' ', ' ', ' ', ' ', 'o', 'o', 'o', 'o', 'o', 'o'],
+            [' ', ' ', ' ', ' ', ' ', ' ', 'o', 'o', 'o', 'o', 'o', 'o'],
+            [' ', ' ', ' ', ' ', ' ', ' ', 'o', 'o', 'o', 'o', 'o', 'o'],
+        ]);
+
+        return new CubeEdgeMapper($map, ['o']);
+    }
+
+    public function testPuzzleGetInnerPoints(): void
+    {
+        $mapper = $this->buildForPuzzleInput();
+
+        $points = $mapper->getEdgeInnerPoints();
+
+        self::assertEquals([
+            new Location(5, 2),
+            new Location(3, 6),
+            new Location(2, 8),
+        ], $points);
+    }
+
+    private function buildForPuzzleInput(): CubeEdgeMapper
+    {
+        $map = new Map([
+            [' ', ' ', ' ', 'o', 'o', 'o', 'o', 'o', 'o'],
+            [' ', ' ', ' ', 'o', 'o', 'o', 'o', 'o', 'o'],
+            [' ', ' ', ' ', 'o', 'o', 'o', 'o', 'o', 'o'],
+            [' ', ' ', ' ', 'o', 'o', 'o', ' ', ' ', ' '],
+            [' ', ' ', ' ', 'o', 'o', 'o', ' ', ' ', ' '],
+            [' ', ' ', ' ', 'o', 'o', 'o', ' ', ' ', ' '],
+            ['o', 'o', 'o', 'o', 'o', 'o', ' ', ' ', ' '],
+            ['o', 'o', 'o', 'o', 'o', 'o', ' ', ' ', ' '],
+            ['o', 'o', 'o', 'o', 'o', 'o', ' ', ' ', ' '],
+            ['o', 'o', 'o', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['o', 'o', 'o', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['o', 'o', 'o', ' ', ' ', ' ', ' ', ' ', ' '],
+        ]);
+
+        return new CubeEdgeMapper($map, ['o']);
+    }
 }

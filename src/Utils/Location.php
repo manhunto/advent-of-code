@@ -47,28 +47,28 @@ class Location implements \Stringable
         return $this->move(y: -1);
     }
 
-    public function isBeforeInColumn(self $than): bool
+    public function isOnNorthTo(self $than): bool
     {
         $this->validateTheSameColumn($than);
 
         return $this->y < $than->y;
     }
 
-    public function isAfterInColumn(self $than): bool
+    public function isOnSouthTo(self $than): bool
     {
         $this->validateTheSameColumn($than);
 
         return $this->y > $than->y;
     }
 
-    public function isBeforeInRow(self $than): bool
+    public function isOnWestTo(self $than): bool
     {
         $this->validateTheSameRow($than);
 
         return $this->x < $than->x;
     }
 
-    public function isAfterInRow(self $than): bool
+    public function isOnEastTo(self $than): bool
     {
         $this->validateTheSameRow($than);
 
@@ -139,10 +139,12 @@ class Location implements \Stringable
     /**
      * @return iterable<self>
      */
-    public function getAllAdjacentPoints(): iterable
+    public function getAllAdjacentLocations(): iterable
     {
-        yield from $this->getStraightAdjacent();
-        yield from $this->getAdjacentOnDiagonals();
+        yield from [
+            ...$this->getStraightAdjacent(),
+            ...$this->getAdjacentOnDiagonals()
+        ];
     }
 
     private function move(int $x = 0, int $y = 0): self
@@ -167,7 +169,7 @@ class Location implements \Stringable
     public function getDirection(self $other): Direction
     {
         if ($this->isTheSameRow($other)) {
-            if ($this->isBeforeInRow($other)) {
+            if ($this->isOnWestTo($other)) {
                 return Direction::EAST;
             }
 
@@ -175,7 +177,7 @@ class Location implements \Stringable
         }
 
         if ($this->isTheSameColumn($other)) {
-            if ($this->isBeforeInColumn($other)) {
+            if ($this->isOnNorthTo($other)) {
                 return Direction::SOUTH;
             }
 
