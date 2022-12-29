@@ -23,4 +23,11 @@ class Console
     {
         echo $msg . PHP_EOL;
     }
+
+    public static function arrayToString(array $array): void
+    {
+        foreach ($array as $item) {
+            self::writeln($item);
+        }
+    }
 }

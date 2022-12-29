@@ -28,4 +28,12 @@ class CollectionTest extends TestCase
         yield [3, ['D']];
         yield [4, []];
     }
+
+    public function testMoveFirstToEnd(): void
+    {
+        $c = new Collection(['A', 'B', 'C', 'D']);
+        $r = $c->moveFirstToEnd();
+
+        self::assertEquals(['B', 'C', 'D', 'A'], $r->toArray());
+    }
 }

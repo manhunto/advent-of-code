@@ -250,4 +250,14 @@ final class Collection
 
         return $first !== false ? $first : null;
     }
+
+    public function moveFirstToEnd(): self
+    {
+        $items = $this->items;
+        $firstItem = array_shift($items);
+
+        $items[] = $firstItem;
+
+        return self::create($items)->values();
+    }
 }

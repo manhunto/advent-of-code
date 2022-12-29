@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Utils;
 
+use App\Utils\Output\Console;
+
 class Map
 {
     public function __construct(
@@ -13,11 +15,15 @@ class Map
 
     public static function generateFilled(int $maxY, int $maxX, string $element, int $minX = 0, int $minY = 0): self
     {
-        return new self(array_fill(
-            $minY,
-            $maxY,
-            array_fill($minX, $maxX - $minX + 1, $element)
-        ));
+        $grid = [];
+
+        for ($y = $minY; $y < $maxY + 1; $y++) {
+            for ($x = $minX; $x < $maxX + 1; $x++) {
+                $grid[$y][$x] = $element;
+            }
+        }
+
+        return new self($grid);
     }
 
     public static function generateForRowsAndFilledNonExisting(array $mapRow, string $missingElement): self
@@ -36,6 +42,36 @@ class Map
         }
 
         return $map;
+    }
+
+    /**
+     * @param Location[] $locations
+     */
+    public static function generateForLocations(array $locations, string $locationElement, string $emptyElement): self
+    {
+        $tmpLocations = $locations;
+        $firstPoint = array_shift($tmpLocations);
+
+        $xRange = Range::createForPoint($firstPoint->x);
+        $yRange = Range::createForPoint($firstPoint->y);
+
+        foreach ($tmpLocations as $location) {
+            $xRange = $xRange->expandTo($location->x);
+            $yRange = $yRange->expandTo($location->y);
+        }
+
+        $map = self::generateFilledForRanges($xRange, $yRange, $emptyElement);
+
+        foreach ($locations as $location) {
+            $map->drawPoint($location, $locationElement);
+        }
+
+        return $map;
+    }
+
+    public static function generateFilledForRanges(Range $xRange, Range $yRange, string $element): self
+    {
+        return self::generateFilled($yRange->to, $xRange->to, $element, $xRange->from, $yRange->from);
     }
 
     public function asString(): string

@@ -47,6 +47,26 @@ class Location implements \Stringable
         return $this->move(y: -1);
     }
 
+    private function moveNorthEast(): self
+    {
+        return $this->move(x: 1, y: -1);
+    }
+
+    private function moveNorthWest(): self
+    {
+        return $this->move(x: -1, y: -1);
+    }
+
+    private function moveSouthEast(): self
+    {
+        return $this->move(x: 1, y: 1);
+    }
+
+    private function moveSouthWest(): self
+    {
+        return $this->move(x: -1, y: 1);
+    }
+
     public function isOnNorthTo(self $than): bool
     {
         $this->validateTheSameColumn($than);
@@ -190,5 +210,27 @@ class Location implements \Stringable
     public function __toString(): string
     {
         return sprintf('%d,%d', $this->x, $this->y);
+    }
+
+    /**
+     * @return self[]
+     */
+    public function getAllAdjacentLocationsInDirection(Direction $direction): array
+    {
+        return match ($direction) {
+            Direction::NORTH => [
+                $this->moveNorth(), $this->moveNorthEast(), $this->moveNorthWest(),
+            ],
+            Direction::SOUTH => [
+                $this->moveSouth(), $this->moveSouthEast(), $this->moveSouthWest(),
+            ],
+            Direction::EAST => [
+                $this->moveEast(), $this->moveNorthEast(), $this->moveSouthEast(),
+            ],
+            Direction::WEST => [
+                $this->moveWest(), $this->moveNorthWest(), $this->moveSouthWest(),
+            ],
+            default => throw new \LogicException('Direction unhandled')
+        };
     }
 }
