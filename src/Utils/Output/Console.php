@@ -30,4 +30,9 @@ class Console
             self::writeln($item);
         }
     }
+
+    public static function print_r(array $array): void
+    {
+        print_r($array);
+    }
 }
