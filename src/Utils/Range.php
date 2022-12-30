@@ -147,4 +147,14 @@ final class Range implements \Stringable
     {
         return $this->from <= $number && $this->to >= $number;
     }
+
+    public function isBefore(int $number): bool
+    {
+        return $number < $this->from;
+    }
+
+    public function isAfter(int $number): bool
+    {
+        return $number > $this->to;
+    }
 }
