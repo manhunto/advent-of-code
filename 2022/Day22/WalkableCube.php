@@ -9,9 +9,6 @@ use App\Utils\DirectionalLocation;
 use App\Utils\Location;
 use App\Utils\Map;
 
-/**
- * @todo https://www.youtube.com/watch?v=qWgLdNFYDDo
- */
 class WalkableCube
 {
     private readonly int $lengthOfEdge;
