@@ -11,28 +11,25 @@ use App\Solver;
 use App\Utils\Collection;
 use App\Utils\Output\Console as C;
 
+/**
+ * @todo optimize me
+ */
 #[SolutionAttribute(
     name: 'Not Enough Minerals',
 )]
 final class Solution implements Solver
 {
+    private const SECOND_PART_MINUTES = 32;
+    private const FIRST_PART_MINUTES = 24;
+
     public function solve(Input $input): Result
     {
-        $maxMinutes = 24;
         $bluePrints = $this->getBluePrints($input);
 
-        $checker = new FactoryChecker();
+        $firstPart = $this->solveFirstPart($bluePrints);
+        $secondPart = $this->solveSecondPart($bluePrints);
 
-        $result = 0;
-        foreach ($bluePrints as $no => $bluePrint) {
-            C::writeln($no);
-            $factory = new Factory($bluePrint);
-            $geocodes = $checker->howMuchGeocodeCanProduce($factory, $maxMinutes);
-
-            $result += $no * $geocodes;
-        }
-
-        return new Result($result);
+        return new Result($firstPart, $secondPart);
     }
 
     /**
@@ -67,7 +64,7 @@ final class Solution implements Solver
 
         for ($i = 1; $i <= $c->get(0); $i++) {
             $bluePrint = $blueprintAsArrays
-                ->forEach(static fn(array $row) => (int)$row[$i - 1])
+                ->forEach(static fn(array $row) => (int) $row[$i - 1])
                 ->toArray();
 
             $bluePrints[$i] = [
@@ -79,5 +76,34 @@ final class Solution implements Solver
         }
 
         return $bluePrints;
+    }
+
+    private function solveFirstPart(array $bluePrints): int
+    {
+        $checker = new FactoryChecker();
+
+        $result = 0;
+        foreach ($bluePrints as $no => $bluePrint) {
+            $geocodes = $checker->howMuchGeocodeCanProduce(new Factory($bluePrint), self::FIRST_PART_MINUTES);
+
+            $result += $no * $geocodes;
+        }
+
+        return $result;
+    }
+
+    private function solveSecondPart(array $blueprints): int
+    {
+        $checker = new FactoryChecker();
+        $firstThreeBlueprints = array_slice($blueprints, 0, 3);
+
+        $geocodes = [];
+        foreach ($firstThreeBlueprints as $bluePrint) {
+            $geocodes[] = $checker->howMuchGeocodeCanProduce(new Factory($bluePrint), self::SECOND_PART_MINUTES);
+        }
+
+        return Collection::create($geocodes)
+            ->sort()
+            ->multiply();
     }
 }

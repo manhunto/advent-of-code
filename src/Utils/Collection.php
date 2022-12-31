@@ -275,4 +275,13 @@ final class Collection
     {
         return $this->isEmpty() === false;
     }
+
+    public function sort(): self
+    {
+        $items = $this->items;
+
+        sort($items);
+
+        return self::create($items);
+    }
 }

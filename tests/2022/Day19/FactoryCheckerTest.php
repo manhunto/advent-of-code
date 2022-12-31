@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 class FactoryCheckerTest extends TestCase
 {
-    public function testName()
+    public function testFirstBlueprintFromExample(): void
     {
         $sut = new FactoryChecker();
 
@@ -21,20 +21,8 @@ class FactoryCheckerTest extends TestCase
             'geode' => ['ore' => 2, 'obsidian' => 7]
         ];
 
-//        $costs = [
-//            'ore' => ['ore' => 1],
-//            'clay' => ['ore' => 1],
-//            'obsidian' => ['ore' => 1, 'clay' => 1],
-//            'geode' => ['ore' => 1, 'obsidian' => 1]
-//        ];
+        $result = $sut->howMuchGeocodeCanProduce(new Factory($costs), 24);
 
-
-        $factory = new Factory($costs);
-
-        $test = $sut->howMuchGeocodeCanProduce($factory, 24);
-
-        self::assertSame(9, $test);
-
+        self::assertSame(9, $result);
     }
-
 }

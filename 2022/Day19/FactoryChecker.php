@@ -19,7 +19,7 @@ class FactoryChecker
             $maxGeode = 0;
             $theSameRobots = [];
             foreach ($factories as $otherFactory) {
-                foreach ($otherFactory->clone($minute) as $newFactory) {
+                foreach ($otherFactory->clone() as $newFactory) {
                     $newFactories[] = $newFactory;
                     $theSameRobots[$newFactory->getRobotsHash()][] = $newFactory;
                     $maxGeode = max($maxGeode, $newFactory->getGeode());
@@ -38,12 +38,11 @@ class FactoryChecker
                 }
             }
 
-
             $factories = array_unique($newFactories);
-//            C::writeln();
-//            C::writeln('Minute: '. $minute);
-//            C::writeln('Factories: '. count($factories));
-//            C::writeln('Max geode: '. $maxGeode);
+            C::writeln();
+            C::writeln('Minute: '. $minute);
+            C::writeln('Factories: '. count($factories));
+            C::writeln('Max geode: '. $maxGeode);
             $minute++;
         }
 

@@ -6,85 +6,56 @@ namespace AdventOfCode2022\Day19;
 
 class Factory implements \Stringable
 {
-    const ORE = 'ore';
-    const CLAY = 'clay';
-    const OBSIDIAN = 'obsidian';
-    const GEODE = 'geode';
-
     public array $robots;
     public array $inventory;
     private array $costs;
     private array $maxCosts;
-    private array $history = [];
     private string $id;
 
-    public function __construct(array $costs, array $inventory = null, array $robots = null, array $history = null)
+    public function __construct(array $costs, array $inventory = null, array $robots = null)
     {
         $this->id = uniqid();
         $this->robots = $robots ?: ['ore' => 1, 'clay' => 0, 'obsidian' => 0, 'geode' => 0];
         $this->inventory = $inventory ?: ['ore' => 0, 'clay' => 0, 'obsidian' => 0, 'geode' => 0];
-        $this->maxCosts = [
-            'ore' => 0,
-            'clay' => 0,
-            'obsidian' => 0,
-        ];
-
         $this->costs = $costs;
+        $this->maxCosts = ['ore' => 0, 'clay' => 0, 'obsidian' => 0];
 
         foreach ($this->costs as $cost) {
-            if (isset($cost['ore'])) {
-                $this->maxCosts['ore'] = max($this->maxCosts['ore'], $cost['ore']);
-            }
-
-            if (isset($cost['clay'])) {
-                $this->maxCosts['clay'] = max($this->maxCosts['clay'], $cost['clay']);
-            }
-
-            if (isset($cost['obsidian'])) {
-                $this->maxCosts['obsidian'] = max($this->maxCosts['obsidian'], $cost['obsidian']);
-            }
+            $this->maxCosts['ore'] = max($this->maxCosts['ore'], $cost['ore'] ?? 0);
+            $this->maxCosts['clay'] = max($this->maxCosts['clay'], $cost['clay'] ?? 0);
+            $this->maxCosts['obsidian'] = max($this->maxCosts['obsidian'], $cost['obsidian'] ?? 0);
         }
-        $this->history = $history ?: [];
     }
 
-    public function clone(int $minute): \Generator
+    public function clone(): \Generator
     {
         $hasEnoughOre = $this->maxCosts['ore'] <= $this->robots['ore'];
         $hasEnoughClay = $this->maxCosts['clay'] <= $this->robots['clay'];
 
-        $geodeCosts = $this->costs['geode'];
-        $canBuildGeode = $this->inventory['ore'] >= $geodeCosts['ore'] && $this->inventory['obsidian'] >= $geodeCosts['obsidian'];
-
-        $obsidianCosts = $this->costs['obsidian'];
-        $canBuildObsidian = $this->inventory['ore'] >= $obsidianCosts['ore'] && $this->inventory['clay'] >= $obsidianCosts['clay'];
-
-        $clayCosts = $this->costs['clay'];
-        $canBuildClay = $this->inventory['ore'] >= $clayCosts['ore'];
-
-        $oreCosts = $this->costs['ore'];
-        $canBuildOre = $this->inventory['ore'] >= $oreCosts['ore'];
+        $canBuildGeode = $this->canBuildGeodeRobot();
+        $canBuildObsidian = $this->canBuildObsidianRobot();
+        $canBuildClay = $this->canBuildClayRobot();
+        $canBuildOre = $this->canBuildOreRobot();
 
         $this->collect();
-        $this->addHistory($minute, (string) $this);
 
         if ($canBuildGeode) {
-            yield $this->withGeodeRobot($minute);
-        } if ($canBuildObsidian) {
-            yield $this->withObsidianRobot($minute);
-        } if ($hasEnoughClay === false && $canBuildClay) {
-            yield $this->withClayRobot($minute);
-        } if ($hasEnoughOre === false && $canBuildOre) {
-            yield $this->withOreRobot($minute);
+            yield $this->withGeodeRobot();
         }
-
-//        if ($hasEnoughOre || $hasEnoughClay) {
-//            return;
-//        }
+        if ($canBuildObsidian) {
+            yield $this->withObsidianRobot();
+        }
+        if ($hasEnoughClay === false && $canBuildClay) {
+            yield $this->withClayRobot();
+        }
+        if ($hasEnoughOre === false && $canBuildOre) {
+            yield $this->withOreRobot();
+        }
 
         yield $this;
     }
 
-    private function withOreRobot(int $minute): self
+    private function withOreRobot(): self
     {
         $inventory = $this->inventory;
         $inventory['ore'] -= $this->costs['ore']['ore'];
@@ -92,13 +63,10 @@ class Factory implements \Stringable
         $robots = $this->robots;
         ++$robots['ore'];
 
-//        $history = $this->history;
-//        $history[$minute][] = 'Ore';
-
         return new self($this->costs, $inventory, $robots);
     }
 
-    private function withClayRobot(int $minute): self
+    private function withClayRobot(): self
     {
         $inventory = $this->inventory;
         $inventory['ore'] -= $this->costs['clay']['ore'];
@@ -106,13 +74,10 @@ class Factory implements \Stringable
         $robots = $this->robots;
         ++$robots['clay'];
 
-//        $history = $this->history;
-//        $history[$minute][] = 'Clay';
-
         return new self($this->costs, $inventory, $robots);
     }
 
-    private function withObsidianRobot(int $minute): self
+    private function withObsidianRobot(): self
     {
         $inventory = $this->inventory;
         $inventory['ore'] -= $this->costs['obsidian']['ore'];
@@ -121,13 +86,10 @@ class Factory implements \Stringable
         $robots = $this->robots;
         ++$robots['obsidian'];
 
-//        $history = $this->history;
-//        $history[$minute][] = 'Obsidian';
-
         return new self($this->costs, $inventory, $robots);
     }
 
-    private function withGeodeRobot(int $minute): self
+    private function withGeodeRobot(): self
     {
         $inventory = $this->inventory;
         $inventory['ore'] -= $this->costs['geode']['ore'];
@@ -135,9 +97,6 @@ class Factory implements \Stringable
 
         $robots = $this->robots;
         ++$robots['geode'];
-
-//        $history = $this->history;
-//        $history[$minute][] = 'Geode';
 
         return new self($this->costs, $inventory, $robots);
     }
@@ -163,11 +122,6 @@ class Factory implements \Stringable
         ]);
     }
 
-    private function addHistory(int $minute, string $param)
-    {
-        $this->history[$minute][] = $param;
-    }
-
     public function getRobotsHash(): string
     {
         $r = $this->robots;
@@ -190,5 +144,35 @@ class Factory implements \Stringable
     public function isTheSame(self $other): bool
     {
         return $this->id === $other->id;
+    }
+
+    private function canBuildOreRobot(): bool
+    {
+        $oreCosts = $this->costs['ore'];
+
+        return $this->inventory['ore'] >= $oreCosts['ore'];
+    }
+
+    private function canBuildClayRobot(): bool
+    {
+        $clayCosts = $this->costs['clay'];
+
+        return $this->inventory['ore'] >= $clayCosts['ore'];
+    }
+
+    private function canBuildObsidianRobot(): bool
+    {
+        $obsidianCosts = $this->costs['obsidian'];
+
+        return $this->inventory['ore'] >= $obsidianCosts['ore']
+            && $this->inventory['clay'] >= $obsidianCosts['clay'];
+    }
+
+    private function canBuildGeodeRobot(): bool
+    {
+        $geodeCosts = $this->costs['geode'];
+
+        return $this->inventory['ore'] >= $geodeCosts['ore']
+            && $this->inventory['obsidian'] >= $geodeCosts['obsidian'];
     }
 }
