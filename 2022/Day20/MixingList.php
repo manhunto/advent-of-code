@@ -19,10 +19,8 @@ class MixingList
         int $encryptionKey = 1,
         int $currentMove = 1,
     ) {
-        $this->initialOrder = Collection::create(array_map(
-            static fn ($value): Number => new Number((int) $value * $encryptionKey),
-            $numbers
-        ));
+        $this->initialOrder = Collection::create($numbers)
+            ->forEach(static fn ($value): Number => new Number((int) $value * $encryptionKey));
 
         $this->currentOrder = $this->initialOrder->clone();
         $this->currentMove = $currentMove;
