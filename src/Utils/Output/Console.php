@@ -19,7 +19,7 @@ class Console
         readline();
     }
 
-    public static function writeln($msg): void
+    public static function writeln($msg =  null): void
     {
         echo $msg . PHP_EOL;
     }

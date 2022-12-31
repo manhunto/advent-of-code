@@ -4,26 +4,27 @@ declare(strict_types=1);
 
 namespace AdventOfCode2022\Day19;
 
-class Factory
+class Factory implements \Stringable
 {
     const ORE = 'ore';
     const CLAY = 'clay';
     const OBSIDIAN = 'obsidian';
     const GEODE = 'geode';
 
-    private array $robots;
-    private array $inventory;
+    public array $robots;
+    public array $inventory;
     private array $costs;
     private array $maxCosts;
+    private array $history = [];
 
-    public function __construct(array $costs, array $inventory = null, array $robots = null)
+    public function __construct(array $costs, array $inventory = null, array $robots = null, array $history = null)
     {
         $this->robots = $robots ?: ['ore' => 1, 'clay' => 0, 'obsidian' => 0, 'geode' => 0];
         $this->inventory = $inventory ?: ['ore' => 0, 'clay' => 0, 'obsidian' => 0, 'geode' => 0];
         $this->maxCosts = [
-            'ore' => PHP_INT_MIN,
-            'clay' => PHP_INT_MIN,
-            'obsidian' => PHP_INT_MIN,
+            'ore' => 0,
+            'clay' => 0,
+            'obsidian' => 0,
         ];
 
         $this->costs = $costs;
@@ -41,11 +42,13 @@ class Factory
                 $this->maxCosts['obsidian'] = max($this->maxCosts['obsidian'], $cost['obsidian']);
             }
         }
+        $this->history = $history ?: [];
     }
 
-    public function clone(): \Generator
+    public function clone(int $minute): \Generator
     {
-        $this->collect();
+
+        $hasEnoughOre = $this->maxCosts['ore'] <= $this->robots['ore'] || $this->maxCosts['ore'] <= $this->inventory['ore'];
 
         $geodeCosts = $this->costs['geode'];
         $canBuildGeode = $this->inventory['ore'] >= $geodeCosts['ore'] && $this->inventory['obsidian'] >= $geodeCosts['obsidian'];
@@ -59,40 +62,23 @@ class Factory
         $oreCosts = $this->costs['ore'];
         $canBuildOre = $this->inventory['ore'] >= $oreCosts['ore'];
 
-//        $hasEnoughObsidian = false;
-//        $hasEnoughClay = false;
-//        $hasEnoughOre = false;
-        $hasEnoughObsidian = $this->maxCosts['obsidian'] < $this->robots['obsidian'] || $this->maxCosts['obsidian'] < $this->inventory['obsidian'];
-        $hasEnoughClay = $this->maxCosts['clay'] < $this->robots['clay'] || $this->maxCosts['clay'] < $this->inventory['clay'];
-        $hasEnoughOre = $this->maxCosts['ore'] < $this->robots['ore'] || $this->maxCosts['ore'] < $this->inventory['ore'];
-
+        $this->collect();
+        $this->addHistory($minute, (string) $this);
 
         if ($canBuildGeode) {
-            yield $this->withGeodeRobot();
-        } if ($hasEnoughObsidian === false && $canBuildObsidian) {
-            yield $this->withObsidianRobot();
-        } if ($hasEnoughClay === false && $canBuildClay) {
-            yield $this->withClayRobot();
+            yield $this->withGeodeRobot($minute);
+        } if ($canBuildObsidian) {
+            yield $this->withObsidianRobot($minute);
+        } if ($canBuildClay) {
+            yield $this->withClayRobot($minute);
         } if ($hasEnoughOre === false && $canBuildOre) {
-            yield $this->withOreRobot();
-        }
-
-        if ($hasEnoughClay) {
-            return;
-        }
-
-        if ($hasEnoughOre) {
-            return;
-        }
-
-        if ($hasEnoughObsidian) {
-            return;
+            yield $this->withOreRobot($minute);
         }
 
         yield $this;
     }
 
-    private function withOreRobot(): self
+    private function withOreRobot(int $minute): self
     {
         $inventory = $this->inventory;
         $inventory['ore'] -= $this->costs['ore']['ore'];
@@ -100,10 +86,13 @@ class Factory
         $robots = $this->robots;
         ++$robots['ore'];
 
-        return new self($this->costs, $inventory, $robots);
+        $history = $this->history;
+//        $history[$minute][] = 'Ore';
+
+        return new self($this->costs, $inventory, $robots, $history);
     }
 
-    private function withClayRobot(): self
+    private function withClayRobot(int $minute): self
     {
         $inventory = $this->inventory;
         $inventory['ore'] -= $this->costs['clay']['ore'];
@@ -111,10 +100,13 @@ class Factory
         $robots = $this->robots;
         ++$robots['clay'];
 
-        return new self($this->costs, $inventory, $robots);
+        $history = $this->history;
+//        $history[$minute][] = 'Clay';
+
+        return new self($this->costs, $inventory, $robots, $history);
     }
 
-    private function withObsidianRobot(): self
+    private function withObsidianRobot(int $minute): self
     {
         $inventory = $this->inventory;
         $inventory['ore'] -= $this->costs['obsidian']['ore'];
@@ -123,10 +115,13 @@ class Factory
         $robots = $this->robots;
         ++$robots['obsidian'];
 
-        return new self($this->costs, $inventory, $robots);
+        $history = $this->history;
+//        $history[$minute][] = 'Obsidian';
+
+        return new self($this->costs, $inventory, $robots, $history);
     }
 
-    private function withGeodeRobot(): self
+    private function withGeodeRobot(int $minute): self
     {
         $inventory = $this->inventory;
         $inventory['ore'] -= $this->costs['geode']['ore'];
@@ -135,7 +130,10 @@ class Factory
         $robots = $this->robots;
         ++$robots['geode'];
 
-        return new self($this->costs, $inventory, $robots);
+        $history = $this->history;
+//        $history[$minute][] = 'Geode';
+
+        return new self($this->costs, $inventory, $robots, $history);
     }
 
     private function collect(): void
@@ -148,6 +146,19 @@ class Factory
 
     public function getGeode(): int
     {
-        return $this->inventory['ore'];
+        return $this->inventory['geode'];
+    }
+
+    public function __toString(): string
+    {
+        return json_encode([
+            'r' => $this->robots,
+            'i' => $this->inventory,
+        ]);
+    }
+
+    private function addHistory(int $minute, string $param)
+    {
+        $this->history[$minute][] = $param;
     }
 }

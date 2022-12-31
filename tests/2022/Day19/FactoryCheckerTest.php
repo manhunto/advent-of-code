@@ -21,9 +21,17 @@ class FactoryCheckerTest extends TestCase
             'geode' => ['ore' => 2, 'obsidian' => 7]
         ];
 
+//        $costs = [
+//            'ore' => ['ore' => 1],
+//            'clay' => ['ore' => 1],
+//            'obsidian' => ['ore' => 1, 'clay' => 1],
+//            'geode' => ['ore' => 1, 'obsidian' => 1]
+//        ];
+
+
         $factory = new Factory($costs);
 
-        $test = $sut->howMuchGeocodeCanProduce($factory, 15);
+        $test = $sut->howMuchGeocodeCanProduce($factory, 24);
 
         self::assertSame(10, $test);
 

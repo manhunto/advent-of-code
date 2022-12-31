@@ -20,7 +20,7 @@ final class Solution implements Solver
     {
         $maxMinutes = 24;
         $bluePrints = $this->getBluePrints($input);
-        $bluePrint = $bluePrints[0];
+        $bluePrint = $bluePrints[1];
         $costs = [
             'ore' => ['ore' => $bluePrint[0]],
             'clay' => ['ore' => $bluePrint[1]],
@@ -30,19 +30,8 @@ final class Solution implements Solver
         $factory = new Factory($costs);
 
         $checker = new FactoryChecker();
-        $result = $checker->howMuchGeocodeCanProduce($factory, 23);
+        $result = $checker->howMuchGeocodeCanProduce($factory, $maxMinutes);
 
-//        var_dump($bluePrints);
-
-//        var_dump($oreRobotCosts[1]);
-
-        // possible
-        // 1. just collect
-        // 2. build ore robot
-        // 3. build clay robot
-        // 4. build obsidian robot
-        // 5. build geode robot
-    
         return new Result($result);
     }
 
