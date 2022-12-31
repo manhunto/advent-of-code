@@ -16,9 +16,11 @@ class Factory implements \Stringable
     private array $costs;
     private array $maxCosts;
     private array $history = [];
+    private string $id;
 
     public function __construct(array $costs, array $inventory = null, array $robots = null, array $history = null)
     {
+        $this->id = uniqid();
         $this->robots = $robots ?: ['ore' => 1, 'clay' => 0, 'obsidian' => 0, 'geode' => 0];
         $this->inventory = $inventory ?: ['ore' => 0, 'clay' => 0, 'obsidian' => 0, 'geode' => 0];
         $this->maxCosts = [
@@ -47,8 +49,8 @@ class Factory implements \Stringable
 
     public function clone(int $minute): \Generator
     {
-
-        $hasEnoughOre = $this->maxCosts['ore'] <= $this->robots['ore'] || $this->maxCosts['ore'] <= $this->inventory['ore'];
+        $hasEnoughOre = $this->maxCosts['ore'] <= $this->robots['ore'];
+        $hasEnoughClay = $this->maxCosts['clay'] <= $this->robots['clay'];
 
         $geodeCosts = $this->costs['geode'];
         $canBuildGeode = $this->inventory['ore'] >= $geodeCosts['ore'] && $this->inventory['obsidian'] >= $geodeCosts['obsidian'];
@@ -69,11 +71,15 @@ class Factory implements \Stringable
             yield $this->withGeodeRobot($minute);
         } if ($canBuildObsidian) {
             yield $this->withObsidianRobot($minute);
-        } if ($canBuildClay) {
+        } if ($hasEnoughClay === false && $canBuildClay) {
             yield $this->withClayRobot($minute);
         } if ($hasEnoughOre === false && $canBuildOre) {
             yield $this->withOreRobot($minute);
         }
+
+//        if ($hasEnoughOre || $hasEnoughClay) {
+//            return;
+//        }
 
         yield $this;
     }
@@ -86,10 +92,10 @@ class Factory implements \Stringable
         $robots = $this->robots;
         ++$robots['ore'];
 
-        $history = $this->history;
+//        $history = $this->history;
 //        $history[$minute][] = 'Ore';
 
-        return new self($this->costs, $inventory, $robots, $history);
+        return new self($this->costs, $inventory, $robots);
     }
 
     private function withClayRobot(int $minute): self
@@ -100,10 +106,10 @@ class Factory implements \Stringable
         $robots = $this->robots;
         ++$robots['clay'];
 
-        $history = $this->history;
+//        $history = $this->history;
 //        $history[$minute][] = 'Clay';
 
-        return new self($this->costs, $inventory, $robots, $history);
+        return new self($this->costs, $inventory, $robots);
     }
 
     private function withObsidianRobot(int $minute): self
@@ -115,10 +121,10 @@ class Factory implements \Stringable
         $robots = $this->robots;
         ++$robots['obsidian'];
 
-        $history = $this->history;
+//        $history = $this->history;
 //        $history[$minute][] = 'Obsidian';
 
-        return new self($this->costs, $inventory, $robots, $history);
+        return new self($this->costs, $inventory, $robots);
     }
 
     private function withGeodeRobot(int $minute): self
@@ -130,10 +136,10 @@ class Factory implements \Stringable
         $robots = $this->robots;
         ++$robots['geode'];
 
-        $history = $this->history;
+//        $history = $this->history;
 //        $history[$minute][] = 'Geode';
 
-        return new self($this->costs, $inventory, $robots, $history);
+        return new self($this->costs, $inventory, $robots);
     }
 
     private function collect(): void
@@ -160,5 +166,29 @@ class Factory implements \Stringable
     private function addHistory(int $minute, string $param)
     {
         $this->history[$minute][] = $param;
+    }
+
+    public function getRobotsHash(): string
+    {
+        $r = $this->robots;
+        return sprintf('G:%d,O:%d,C:%d,OR:%d', $r['geode'], $r['obsidian'], $r['clay'], $r['ore']);
+    }
+
+    public function hasTheSameRobots(self $other): bool
+    {
+        return $this->getRobotsHash() === $other->getRobotsHash();
+    }
+
+    public function hasBetterInventory(self $other): bool
+    {
+        return $this->inventory['geode'] >= $other->inventory['geode']
+            && $this->inventory['obsidian'] >= $other->inventory['obsidian']
+            && $this->inventory['clay'] >= $other->inventory['clay']
+            && $this->inventory['ore'] >= $other->inventory['ore'];
+    }
+
+    public function isTheSame(self $other): bool
+    {
+        return $this->id === $other->id;
     }
 }

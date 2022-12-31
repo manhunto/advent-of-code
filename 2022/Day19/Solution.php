@@ -20,17 +20,17 @@ final class Solution implements Solver
     {
         $maxMinutes = 24;
         $bluePrints = $this->getBluePrints($input);
-        $bluePrint = $bluePrints[1];
-        $costs = [
-            'ore' => ['ore' => $bluePrint[0]],
-            'clay' => ['ore' => $bluePrint[1]],
-            'obsidian' => ['ore' => $bluePrint[2], 'clay' => $bluePrint[3]],
-            'geode' => ['ore' => $bluePrint[4], 'obsidian' => $bluePrint[5]]
-        ];
-        $factory = new Factory($costs);
 
         $checker = new FactoryChecker();
-        $result = $checker->howMuchGeocodeCanProduce($factory, $maxMinutes);
+
+        $result = 0;
+        foreach ($bluePrints as $no => $bluePrint) {
+            C::writeln($no);
+            $factory = new Factory($bluePrint);
+            $geocodes = $checker->howMuchGeocodeCanProduce($factory, $maxMinutes);
+
+            $result += $no * $geocodes;
+        }
 
         return new Result($result);
     }
@@ -66,12 +66,18 @@ final class Solution implements Solver
         $bluePrints = [];
 
         for ($i = 1; $i <= $c->get(0); $i++) {
-            $costs = $blueprintAsArrays
+            $bluePrint = $blueprintAsArrays
                 ->forEach(static fn(array $row) => (int)$row[$i - 1])
                 ->toArray();
 
-            $bluePrints[] = $costs;
+            $bluePrints[$i] = [
+                'ore' => ['ore' => $bluePrint[0]],
+                'clay' => ['ore' => $bluePrint[1]],
+                'obsidian' => ['ore' => $bluePrint[2], 'clay' => $bluePrint[3]],
+                'geode' => ['ore' => $bluePrint[4], 'obsidian' => $bluePrint[5]]
+            ];
         }
+
         return $bluePrints;
     }
 }

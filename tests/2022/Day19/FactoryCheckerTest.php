@@ -33,7 +33,7 @@ class FactoryCheckerTest extends TestCase
 
         $test = $sut->howMuchGeocodeCanProduce($factory, 24);
 
-        self::assertSame(10, $test);
+        self::assertSame(9, $test);
 
     }
 

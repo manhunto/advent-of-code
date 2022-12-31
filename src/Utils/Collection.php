@@ -270,4 +270,9 @@ final class Collection
     {
         return $this->forEach(static fn (mixed $item): string => (string) $item);
     }
+
+    public function hasItems(): bool
+    {
+        return $this->isEmpty() === false;
+    }
 }
