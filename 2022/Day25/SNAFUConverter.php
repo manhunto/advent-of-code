@@ -30,14 +30,9 @@ class SNAFUConverter
             if ($number > 2) {
                 $fromRightToLeft[$position + 1] ??= 0;
                 ++$fromRightToLeft[$position + 1];
-
-                $fromRightToLeft[$position] = match ($number) {
-                    3 => self::DOUBLE_MINUS,
-                    4 => self::MINUS,
-                    5 => 0,
-                    default => throw new \LogicException('Wrong number: ' . $number)
-                };
             }
+
+            $fromRightToLeft[$position] = $this->numberToSNAFU($number);
 
             $position++;
         } while ($position < count($fromRightToLeft));
@@ -63,10 +58,25 @@ class SNAFUConverter
 
     private function SNAFUCharToNumber(string $item): int
     {
+        if (preg_match('/^[0-2=-]$/', $item) === false) {
+            throw new \LogicException('Invalid SNAFU character: ' . $item);
+        }
+
         return match ($item) {
             self::DOUBLE_MINUS => -2,
             self::MINUS => -1,
             default => (int) $item
+        };
+    }
+
+    private function numberToSNAFU(int $number): string
+    {
+        return match ($number) {
+            0, 1, 2 => (string) $number,
+            3 => self::DOUBLE_MINUS,
+            4 => self::MINUS,
+            5 => '0',
+            default => throw new \LogicException('Wrong number: ' . $number)
         };
     }
 }
