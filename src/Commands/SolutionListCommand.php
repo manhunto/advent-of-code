@@ -64,6 +64,8 @@ final class SolutionListCommand extends Command
         foreach ($this->factory->iterateForYear($year) as $solution) {
             $description = $this->descriptor->getDescription($solution);
 
+            $output->writeln((string) $description->date);
+
             $exampleResult = $this->runner->run($solution, InputType::Example);
             $puzzleResult = $this->runner->run($solution, InputType::Puzzle);
 

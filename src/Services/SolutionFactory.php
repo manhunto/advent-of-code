@@ -55,6 +55,24 @@ final class SolutionFactory
     }
 
     /**
+     * @return Date[]
+     */
+    public function getAllDatesForSolverInYear(Year $year): array
+    {
+        $dates = [];
+
+        foreach ($this->iterate() as $solver) {
+            $date = SolverFullyQualifiedClassname::fromObject($solver)->getDate();
+
+            if ($date->isYearEquals($year)) {
+                $dates[] = $date;
+            }
+        }
+
+        return $dates;
+    }
+
+    /**
      * @return Year[]
      */
     public function getAvailableYears(): array

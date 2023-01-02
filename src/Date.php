@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App;
 
-final class Date
+final class Date implements \Stringable
 {
     public readonly string $day;
     public readonly Year $year;
@@ -58,5 +58,10 @@ final class Date
     public function isYearEquals(Year $other): bool
     {
         return $this->year->equals($other);
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('%s/%s', $this->day, $this->year);
     }
 }

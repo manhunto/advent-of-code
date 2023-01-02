@@ -69,3 +69,12 @@ It displays a table with all puzzles for a given year. The default year is the c
 php app.php app:list [--year=2022]
 ```
 ![list-command.png](resources/list-command.png)
+
+### Fetch puzzle inputs and outputs
+
+It fetches all puzzle inputs and outputs for existing solvers for given year.
+
+```bash
+php app.php app:fetch-puzzle-input-and-output [year]
+```
+
