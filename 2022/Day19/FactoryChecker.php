@@ -26,7 +26,18 @@ class FactoryChecker
                 }
             }
 
+            $newFactories = array_unique($newFactories);
+
+            /**
+             * @var int $i
+             * @var Factory $newFactory
+             */
             foreach ($newFactories as $i => $newFactory) {
+                if ($newFactory->getGeode() < $maxGeode - 3) {
+                    unset($newFactories[$i]);
+                    continue;
+                }
+
                 $withTheSameRobots = array_filter(
                     $theSameRobots[$newFactory->getRobotsHash()],
                     static fn(Factory $A) => $A->isTheSame($newFactory) === false
@@ -38,11 +49,12 @@ class FactoryChecker
                 }
             }
 
-            $factories = array_unique($newFactories);
-            C::writeln();
-            C::writeln('Minute: '. $minute);
+            $factories = $newFactories;
+
+//            C::writeln();
+//            C::writeln('Minute: '. $minute);
             C::writeln('Factories: '. count($factories));
-            C::writeln('Max geode: '. $maxGeode);
+//            C::writeln('Max geode: '. $maxGeode);
             $minute++;
         }
 
