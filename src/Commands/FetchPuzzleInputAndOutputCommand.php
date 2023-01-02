@@ -8,11 +8,13 @@ use App\Services\AnswersService;
 use App\Services\FileSystem;
 use App\Services\PuzzleMetadataFetcher;
 use App\Services\SolutionFactory;
+use App\SolutionFile;
 use App\Year;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -23,6 +25,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class FetchPuzzleInputAndOutputCommand extends Command
 {
     private const YEAR = 'year';
+    private const FORCE = 'force';
 
     public function __construct(
         private readonly AnswersService $answersService,
@@ -35,10 +38,11 @@ final class FetchPuzzleInputAndOutputCommand extends Command
 
     protected function configure(): void
     {
-        $this->addArgument(self::YEAR,  InputArgument::REQUIRED);
+        $this->addArgument(self::YEAR,  InputArgument::REQUIRED)
+            ->addOption(self::FORCE, 'f', InputOption::VALUE_NONE, 'Force update files');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $year = Year::fromString($input->getArgument(self::YEAR));
@@ -50,22 +54,33 @@ final class FetchPuzzleInputAndOutputCommand extends Command
 
             return Command::SUCCESS;
         }
+
         $pb = $io->createProgressBar(count($dates));
+        $force = $input->getOption(self::FORCE);
+
+        $updated = 0;
 
         foreach ($dates as $date) {
-            $pb->advance(1);
+            $pb->advance();
 
             // Input
-            $metadata = $this->puzzleMetadataFetcher->fetch($date);
-            $this->fileSystem->createFile($date, 'puzzle.in', $metadata->puzzleInput);
+            if ($force || $this->fileSystem->hasPuzzleInput($date) === false) {
+                $metadata = $this->puzzleMetadataFetcher->fetch($date);
+                $this->fileSystem->createFile($date, SolutionFile::puzzleIn(), $metadata->puzzleInput);
+                $updated++;
+            }
 
             //  Result
-            $aocResult = $this->answersService->fetchAnswers($date);
-            $this->fileSystem->savePuzzleAnswers($date, $aocResult);
+            if ($force || $this->fileSystem->hasPuzzleOutput($date) === false) {
+                $aocResult = $this->answersService->fetchAnswers($date);
+                $this->fileSystem->savePuzzleAnswers($date, $aocResult);
+                $updated++;
+            }
         }
 
         $pb->finish();
-        $io->success('All puzzle inputs and outputs were fetched.');
+        $io->newLine();
+        $io->success($updated . ' files was updated.');
 
         return Command::SUCCESS;
     }

@@ -11,6 +11,7 @@ use App\Exceptions\DateCannotBeGeneratedForToday;
 use App\PuzzleMetadata;
 use App\Services\FileSystem;
 use App\Services\PuzzleMetadataFetcher;
+use App\SolutionFile;
 use App\SolverFullyQualifiedClassname;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -68,10 +69,10 @@ final class GenerateTemplateCommand extends Command
 
         $this->fileSystem->createSolutionDir($date);
         $this->fileSystem->createFile($date, 'Solution.php', $this->getSolutionClassContent($date, $puzzleMetadata));
-        $this->fileSystem->createFile($date, 'example.in', $puzzleMetadata?->exampleInput);
-        $this->fileSystem->createFile($date, 'example.out');
-        $this->fileSystem->createFile($date, 'puzzle.in', $puzzleMetadata?->puzzleInput);
-        $this->fileSystem->createFile($date, 'puzzle.out');
+        $this->fileSystem->createFile($date, SolutionFile::exampleIn(), $puzzleMetadata?->exampleInput);
+        $this->fileSystem->createFile($date, SolutionFile::exampleOut());
+        $this->fileSystem->createFile($date, SolutionFile::puzzleIn(), $puzzleMetadata?->puzzleInput);
+        $this->fileSystem->createFile($date, SolutionFile::puzzleOut());
 
         $style = new SymfonyStyle($input, $output);
         $style->success('Files exists or has been generated');
@@ -111,7 +112,7 @@ final class Solution implements Solver
         
         }
     
-        return new Result(123);
+        return new Result(PHP_INT_MAX);
     }
 }
 TXT;
