@@ -271,6 +271,11 @@ final class Collection
         return $this->forEach(static fn (mixed $item): string => (string) $item);
     }
 
+    public function eachToInt(): self
+    {
+        return $this->forEach(static fn (mixed $item): int => (int) $item);
+    }
+
     public function hasItems(): bool
     {
         return $this->isEmpty() === false;
@@ -288,5 +293,10 @@ final class Collection
     public function reverse(bool $preserveKeys = false): self
     {
         return self::create(array_reverse($this->items, $preserveKeys));
+    }
+
+    public function implode(string $separator): Strings
+    {
+        return Strings::create(implode($separator, $this->items));
     }
 }

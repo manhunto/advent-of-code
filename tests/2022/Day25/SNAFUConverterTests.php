@@ -9,14 +9,19 @@ use PHPUnit\Framework\TestCase;
 
 class SNAFUConverterTests extends TestCase
 {
+    private SNAFUConverter $sut;
+
+    protected function setUp(): void
+    {
+        $this->sut = new SNAFUConverter();
+    }
+
     /**
      * @dataProvider toSNAFUData
      */
     public function testToSNAFU(string $decimal, string $snafu): void
     {
-        $sut = new SNAFUConverter();
-
-        self::assertSame($snafu, $sut->toSNAFU($decimal));
+        self::assertSame($snafu, $this->sut->toSNAFU($decimal));
     }
 
     public function toSNAFUData(): iterable
@@ -43,9 +48,7 @@ class SNAFUConverterTests extends TestCase
      */
     public function testToDecimal(string $snafu, string $decimal): void
     {
-        $sut = new SNAFUConverter();
-
-        self::assertSame($decimal, $sut->toDecimal($snafu));
+        self::assertSame($decimal, $this->sut->toDecimal($snafu));
     }
 
     public function toDecimalData(): \Generator

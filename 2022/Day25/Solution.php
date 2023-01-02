@@ -24,6 +24,6 @@ final class Solution implements Solver
             ->forEach(static fn (string $snafu): string => $converter->toDecimal($snafu))
             ->sum();
 
-        return new Result($converter->toSNAFU((string) $decimalSum)); // todo convert to snafu
+        return new Result($converter->toSNAFU((string) $decimalSum));
     }
 }
