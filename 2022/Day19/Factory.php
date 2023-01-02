@@ -20,7 +20,7 @@ class Factory implements \Stringable
         $this->costs = $costs;
         $this->maxCosts = ['ore' => 0, 'clay' => 0, 'obsidian' => 0];
 
-        foreach ($this->costs as $cost) {
+        foreach ($this->costs as $robot => $cost) {
             $this->maxCosts['ore'] = max($this->maxCosts['ore'], $cost['ore'] ?? 0);
             $this->maxCosts['clay'] = max($this->maxCosts['clay'], $cost['clay'] ?? 0);
             $this->maxCosts['obsidian'] = max($this->maxCosts['obsidian'], $cost['obsidian'] ?? 0);
@@ -39,6 +39,8 @@ class Factory implements \Stringable
 
         $this->collect();
 
+
+        $relevantRoboBuiltCount = 0;
         if ($canBuildGeode) {
             yield $this->withGeodeRobot();
         }
@@ -46,13 +48,17 @@ class Factory implements \Stringable
             yield $this->withObsidianRobot();
         }
         if ($hasEnoughClay === false && $canBuildClay) {
+            $relevantRoboBuiltCount++;
             yield $this->withClayRobot();
         }
         if ($hasEnoughOre === false && $canBuildOre) {
+            $relevantRoboBuiltCount++;
             yield $this->withOreRobot();
         }
 
-        yield $this;
+        if ($relevantRoboBuiltCount < 2){
+            yield $this;
+        }
     }
 
     private function withOreRobot(): self
@@ -116,10 +122,7 @@ class Factory implements \Stringable
 
     public function __toString(): string
     {
-        return json_encode([
-            'r' => $this->robots,
-            'i' => $this->inventory,
-        ]);
+        return sprintf('[r] %s|[i] %s', $this->getRobotsHash(), $this->getInventoryHash());
     }
 
     public function getRobotsHash(): string
@@ -174,5 +177,11 @@ class Factory implements \Stringable
 
         return $this->inventory['ore'] >= $geodeCosts['ore']
             && $this->inventory['obsidian'] >= $geodeCosts['obsidian'];
+    }
+
+    private function getInventoryHash(): string
+    {
+        $i = $this->inventory;
+        return sprintf('G:%d,O:%d,C:%d,OR:%d', $i['geode'], $i['obsidian'], $i['clay'], $i['ore']);
     }
 }
