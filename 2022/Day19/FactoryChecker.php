@@ -19,6 +19,7 @@ class FactoryChecker
             $newFactories = [];
             $maxGeode = 0;
             $theSameRobots = [];
+
             /** @var Factory $otherFactory */
             foreach ($factories as $otherFactory) {
                 foreach ($otherFactory->clone($timeLeft) as $newFactory) {

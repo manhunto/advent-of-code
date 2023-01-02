@@ -26,8 +26,11 @@ class Factory implements \Stringable
         return new self($bluePrint);
     }
 
-    public function clone(): \Generator
+    public function clone(int $timeLeft): \Generator
     {
+        $isNotOneMinuteLeft = $timeLeft >= 1;
+        $isNotTwoMinutesLeft = $timeLeft >= 2;
+
         $hasEnoughOre = $this->maxCosts['ore'] <= $this->robots['ore'];
         $hasEnoughClay = $this->maxCosts['clay'] <= $this->robots['clay'];
 
@@ -39,17 +42,17 @@ class Factory implements \Stringable
         $this->collect();
 
         $relevantRoboBuiltCount = 0;
-        if ($canBuildGeode) {
+        if ($canBuildGeode && $isNotOneMinuteLeft) {
             yield $this->withGeodeRobot();
         }
-        if ($canBuildObsidian) {
+        if ($canBuildObsidian && $isNotOneMinuteLeft) {
             yield $this->withObsidianRobot();
         }
-        if ($hasEnoughClay === false && $canBuildClay) {
+        if ($hasEnoughClay === false && $canBuildClay && $isNotOneMinuteLeft) {
             $relevantRoboBuiltCount++;
             yield $this->withClayRobot();
         }
-        if ($hasEnoughOre === false && $canBuildOre) {
+        if ($hasEnoughOre === false && $canBuildOre && $isNotTwoMinutesLeft) {
             $relevantRoboBuiltCount++;
             yield $this->withOreRobot();
         }
