@@ -51,11 +51,11 @@ class Factory implements \Stringable
         if ($canBuildObsidian && $isNotOneMinuteLeft) {
             yield $this->withObsidianRobot();
         }
-        if (!$hasGeodeRobot && $hasEnoughClayRobots === false && $canBuildClay && $isNotOneMinuteLeft) {
+        if (!$hasGeodeRobot && !$hasEnoughClayRobots && $canBuildClay && $isNotOneMinuteLeft) {
             $relevantRoboBuiltCount++;
             yield $this->withClayRobot();
         }
-        if (!$hasObsidian && $hasEnoughOreRobots === false && $canBuildOre && $isNotTwoMinutesLeft) {
+        if (!$hasObsidian && !$hasEnoughOreRobots && $canBuildOre && $isNotTwoMinutesLeft) {
             $relevantRoboBuiltCount++;
             yield $this->withOreRobot();
         }
@@ -126,13 +126,12 @@ class Factory implements \Stringable
 
     public function __toString(): string
     {
-        return sprintf('[r] %s|[i] %s', $this->getRobotsHash(), $this->getInventoryHash());
+        return sprintf('[r] %s|[i] %s', $this->getRobotsHash(), $this->getHash($this->inventory));
     }
 
     public function getRobotsHash(): string
     {
-        $r = $this->robots;
-        return sprintf('G:%d,O:%d,C:%d,OR:%d', $r['geode'], $r['obsidian'], $r['clay'], $r['ore']);
+        return $this->getHash($this->robots);
     }
 
     public function hasBetterInventory(self $other): bool
@@ -178,12 +177,6 @@ class Factory implements \Stringable
             && $this->inventory['obsidian'] >= $geodeCosts['obsidian'];
     }
 
-    private function getInventoryHash(): string
-    {
-        $i = $this->inventory;
-        return sprintf('G:%d,O:%d,C:%d,OR:%d', $i['geode'], $i['obsidian'], $i['clay'], $i['ore']);
-    }
-
     private function calculateMaxCosts(array $costs): array
     {
         $maxCosts = ['ore' => 0, 'clay' => 0, 'obsidian' => 0];
@@ -208,5 +201,10 @@ class Factory implements \Stringable
     private function withRobotsAndResources(array $robots, array $inventory): self
     {
         return new self($this->costs, $inventory, $robots, $this->maxCosts);
+    }
+
+    private function getHash(array $arr): string
+    {
+        return sprintf('G:%d,O:%d,C:%d,OR:%d', $arr['geode'], $arr['obsidian'], $arr['clay'], $arr['ore']);
     }
 }
