@@ -284,4 +284,9 @@ final class Collection
 
         return self::create($items);
     }
+
+    public function reverse(bool $preserveKeys = false): self
+    {
+        return self::create(array_reverse($this->items, $preserveKeys));
+    }
 }
