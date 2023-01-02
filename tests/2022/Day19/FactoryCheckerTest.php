@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\AdventOfCode2022\Day19;
 
-use AdventOfCode2022\Day19\Factory;
 use AdventOfCode2022\Day19\FactoryChecker;
 use PHPUnit\Framework\TestCase;
 
@@ -21,7 +20,7 @@ class FactoryCheckerTest extends TestCase
             'geode' => ['ore' => 2, 'obsidian' => 7]
         ];
 
-        $result = $sut->howMuchGeocodeCanProduce(new Factory($costs), 24);
+        $result = $sut->howMuchGeocodeCanProduce($costs, 24);
 
         self::assertSame(9, $result);
     }

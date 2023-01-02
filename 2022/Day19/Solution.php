@@ -84,7 +84,7 @@ final class Solution implements Solver
 
         $result = 0;
         foreach ($bluePrints as $no => $bluePrint) {
-            $geocodes = $checker->howMuchGeocodeCanProduce(new Factory($bluePrint), self::FIRST_PART_MINUTES);
+            $geocodes = $checker->howMuchGeocodeCanProduce($bluePrint, self::FIRST_PART_MINUTES);
 
             $result += $no * $geocodes;
         }
@@ -99,7 +99,7 @@ final class Solution implements Solver
 
         $geocodes = [];
         foreach ($firstThreeBlueprints as $bluePrint) {
-            $geocodes[] = $checker->howMuchGeocodeCanProduce(new Factory($bluePrint), self::SECOND_PART_MINUTES);
+            $geocodes[] = $checker->howMuchGeocodeCanProduce($bluePrint, self::SECOND_PART_MINUTES);
         }
 
         return Collection::create($geocodes)

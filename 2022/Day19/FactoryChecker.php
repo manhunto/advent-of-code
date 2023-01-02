@@ -9,17 +9,19 @@ use App\Utils\Output\Console as C;
 
 class FactoryChecker
 {
-    public function howMuchGeocodeCanProduce(Factory $factory, int $maxMinutes): int
+    public function howMuchGeocodeCanProduce(array $bluePrint, int $maxMinutes): int
     {
         $minute = 1;
-        $factories = [$factory];
+        $factories = [Factory::init($bluePrint)];
 
         while ($minute <= $maxMinutes) {
+            $timeLeft = $maxMinutes - $minute;
             $newFactories = [];
             $maxGeode = 0;
             $theSameRobots = [];
+            /** @var Factory $otherFactory */
             foreach ($factories as $otherFactory) {
-                foreach ($otherFactory->clone() as $newFactory) {
+                foreach ($otherFactory->clone($timeLeft) as $newFactory) {
                     $newFactories[] = $newFactory;
                     $theSameRobots[$newFactory->getRobotsHash()][] = $newFactory;
                     $maxGeode = max($maxGeode, $newFactory->getGeode());
@@ -51,10 +53,7 @@ class FactoryChecker
 
             $factories = $newFactories;
 
-//            C::writeln();
-//            C::writeln('Minute: '. $minute);
             C::writeln('Factories: '. count($factories));
-//            C::writeln('Max geode: '. $maxGeode);
             $minute++;
         }
 

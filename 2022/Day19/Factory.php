@@ -12,27 +12,18 @@ class Factory implements \Stringable
     private array $maxCosts;
     private string $id;
 
-    public function __construct(array $costs, array $inventory = null, array $robots = null)
+    private function __construct(array $costs, array $inventory = null, array $robots = null, array $maxCosts = null)
     {
         $this->id = uniqid();
         $this->robots = $robots ?: ['ore' => 1, 'clay' => 0, 'obsidian' => 0, 'geode' => 0];
         $this->inventory = $inventory ?: ['ore' => 0, 'clay' => 0, 'obsidian' => 0, 'geode' => 0];
         $this->costs = $costs;
-        $this->maxCosts = ['ore' => 0, 'clay' => 0, 'obsidian' => 0];
+        $this->maxCosts = $maxCosts ?: $this->calculateMaxCosts($costs);
+    }
 
-        foreach ($this->costs as $robot => $cost) {
-            if ($robot !== 'ore') {
-                $this->maxCosts['ore'] = max($this->maxCosts['ore'], $cost['ore'] ?? 0);
-            }
-
-            if ($robot !== 'clay') {
-                $this->maxCosts['clay'] = max($this->maxCosts['clay'], $cost['clay'] ?? 0);
-            }
-
-            if ($robot !== 'obsidian') {
-                $this->maxCosts['obsidian'] = max($this->maxCosts['obsidian'], $cost['obsidian'] ?? 0);
-            }
-        }
+    public static function init(array $bluePrint): self
+    {
+        return new self($bluePrint);
     }
 
     public function clone(): \Generator
@@ -76,7 +67,7 @@ class Factory implements \Stringable
         $robots = $this->robots;
         ++$robots['ore'];
 
-        return new self($this->costs, $inventory, $robots);
+        return $this->withRobotsAndResources($robots, $inventory);
     }
 
     private function withClayRobot(): self
@@ -87,7 +78,7 @@ class Factory implements \Stringable
         $robots = $this->robots;
         ++$robots['clay'];
 
-        return new self($this->costs, $inventory, $robots);
+        return $this->withRobotsAndResources($robots, $inventory);
     }
 
     private function withObsidianRobot(): self
@@ -99,7 +90,7 @@ class Factory implements \Stringable
         $robots = $this->robots;
         ++$robots['obsidian'];
 
-        return new self($this->costs, $inventory, $robots);
+        return $this->withRobotsAndResources($robots, $inventory);
     }
 
     private function withGeodeRobot(): self
@@ -111,7 +102,7 @@ class Factory implements \Stringable
         $robots = $this->robots;
         ++$robots['geode'];
 
-        return new self($this->costs, $inventory, $robots);
+        return $this->withRobotsAndResources($robots, $inventory);
     }
 
     private function collect(): void
@@ -136,11 +127,6 @@ class Factory implements \Stringable
     {
         $r = $this->robots;
         return sprintf('G:%d,O:%d,C:%d,OR:%d', $r['geode'], $r['obsidian'], $r['clay'], $r['ore']);
-    }
-
-    public function hasTheSameRobots(self $other): bool
-    {
-        return $this->getRobotsHash() === $other->getRobotsHash();
     }
 
     public function hasBetterInventory(self $other): bool
@@ -190,5 +176,31 @@ class Factory implements \Stringable
     {
         $i = $this->inventory;
         return sprintf('G:%d,O:%d,C:%d,OR:%d', $i['geode'], $i['obsidian'], $i['clay'], $i['ore']);
+    }
+
+    private function calculateMaxCosts(array $costs): array
+    {
+        $maxCosts = ['ore' => 0, 'clay' => 0, 'obsidian' => 0];
+
+        foreach ($costs as $robot => $cost) {
+            if ($robot !== 'ore') {
+                $maxCosts['ore'] = max($maxCosts['ore'], $cost['ore'] ?? 0);
+            }
+
+            if ($robot !== 'clay') {
+                $maxCosts['clay'] = max($maxCosts['clay'], $cost['clay'] ?? 0);
+            }
+
+            if ($robot !== 'obsidian') {
+                $maxCosts['obsidian'] = max($maxCosts['obsidian'], $cost['obsidian'] ?? 0);
+            }
+        }
+
+        return $maxCosts;
+    }
+
+    private function withRobotsAndResources(array $robots, array $inventory): self
+    {
+        return new self($this->costs, $inventory, $robots, $this->maxCosts);
     }
 }
