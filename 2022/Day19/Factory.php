@@ -21,9 +21,17 @@ class Factory implements \Stringable
         $this->maxCosts = ['ore' => 0, 'clay' => 0, 'obsidian' => 0];
 
         foreach ($this->costs as $robot => $cost) {
-            $this->maxCosts['ore'] = max($this->maxCosts['ore'], $cost['ore'] ?? 0);
-            $this->maxCosts['clay'] = max($this->maxCosts['clay'], $cost['clay'] ?? 0);
-            $this->maxCosts['obsidian'] = max($this->maxCosts['obsidian'], $cost['obsidian'] ?? 0);
+            if ($robot !== 'ore') {
+                $this->maxCosts['ore'] = max($this->maxCosts['ore'], $cost['ore'] ?? 0);
+            }
+
+            if ($robot !== 'clay') {
+                $this->maxCosts['clay'] = max($this->maxCosts['clay'], $cost['clay'] ?? 0);
+            }
+
+            if ($robot !== 'obsidian') {
+                $this->maxCosts['obsidian'] = max($this->maxCosts['obsidian'], $cost['obsidian'] ?? 0);
+            }
         }
     }
 
@@ -38,7 +46,6 @@ class Factory implements \Stringable
         $canBuildOre = $this->canBuildOreRobot();
 
         $this->collect();
-
 
         $relevantRoboBuiltCount = 0;
         if ($canBuildGeode) {
