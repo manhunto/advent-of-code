@@ -22,7 +22,7 @@ class FactoryChecker
 
             /** @var Factory $otherFactory */
             foreach ($factories as $otherFactory) {
-                foreach ($otherFactory->clone($timeLeft) as $newFactory) {
+                foreach ($otherFactory->generateSubFactories($timeLeft) as $newFactory) {
                     $newFactories[] = $newFactory;
                     $theSameRobots[$newFactory->getRobotsHash()][] = $newFactory;
                     $maxGeode = max($maxGeode, $newFactory->getGeode());
@@ -53,8 +53,6 @@ class FactoryChecker
             }
 
             $factories = $newFactories;
-
-            C::writeln('Factories: '. count($factories));
             $minute++;
         }
 

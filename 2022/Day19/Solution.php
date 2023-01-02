@@ -11,9 +11,6 @@ use App\Solver;
 use App\Utils\Collection;
 use App\Utils\Output\Console as C;
 
-/**
- * @todo optimize me
- */
 #[SolutionAttribute(
     name: 'Not Enough Minerals',
 )]
@@ -103,7 +100,6 @@ final class Solution implements Solver
         }
 
         return Collection::create($geocodes)
-            ->sort()
             ->multiply();
     }
 }

@@ -26,18 +26,21 @@ class Factory implements \Stringable
         return new self($bluePrint);
     }
 
-    public function clone(int $timeLeft): \Generator
+    public function generateSubFactories(int $timeLeft): \Generator
     {
         $isNotOneMinuteLeft = $timeLeft >= 1;
         $isNotTwoMinutesLeft = $timeLeft >= 2;
 
-        $hasEnoughOre = $this->maxCosts['ore'] <= $this->robots['ore'];
-        $hasEnoughClay = $this->maxCosts['clay'] <= $this->robots['clay'];
+        $hasEnoughOreRobots = $this->maxCosts['ore'] <= $this->robots['ore'];
+        $hasEnoughClayRobots = $this->maxCosts['clay'] <= $this->robots['clay'];
 
         $canBuildGeode = $this->canBuildGeodeRobot();
         $canBuildObsidian = $this->canBuildObsidianRobot();
         $canBuildClay = $this->canBuildClayRobot();
         $canBuildOre = $this->canBuildOreRobot();
+
+        $hasGeodeRobot = $this->robots['geode'] > 0;
+        $hasObsidian = $this->robots['obsidian'] > 0;
 
         $this->collect();
 
@@ -48,11 +51,11 @@ class Factory implements \Stringable
         if ($canBuildObsidian && $isNotOneMinuteLeft) {
             yield $this->withObsidianRobot();
         }
-        if ($hasEnoughClay === false && $canBuildClay && $isNotOneMinuteLeft) {
+        if (!$hasGeodeRobot && $hasEnoughClayRobots === false && $canBuildClay && $isNotOneMinuteLeft) {
             $relevantRoboBuiltCount++;
             yield $this->withClayRobot();
         }
-        if ($hasEnoughOre === false && $canBuildOre && $isNotTwoMinutesLeft) {
+        if (!$hasObsidian && $hasEnoughOreRobots === false && $canBuildOre && $isNotTwoMinutesLeft) {
             $relevantRoboBuiltCount++;
             yield $this->withOreRobot();
         }
