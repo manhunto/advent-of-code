@@ -25,6 +25,11 @@ class Space2DBoundary
         return self::fromPrimitives($from->x, $to->x, $from->y, $to->x);
     }
 
+    public static function fromRanges(Range $rangeX, Range $rangeY): self
+    {
+        return new self($rangeX, $rangeY);
+    }
+
     /**
      * If location is outside boundaries then move to beginning or end of range
      * Example: if location exceed X boundary on end, then it is moved to beginning of X

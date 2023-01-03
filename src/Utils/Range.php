@@ -21,7 +21,7 @@ final class Range implements \Stringable
     }
 
     /**
-     * All numbers are in A, inb or in both A and B
+     * All numbers are in A, in B or in both A and B
      *
      * @throws \LogicException
      */

@@ -60,22 +60,15 @@ final class Solution implements Solver
     private function solveSecondPart(array $sensors, int $max): int
     {
         $searchRange = new Range(0, $max);
-
-        foreach ($searchRange->getItems() as $line) {
-            $rc = $this->getSensorRangesInLine($sensors, $line);
-            $rc->intersect($searchRange);
-            $gaps = $rc->getGaps();
-
-            if (empty($gaps) === false) {
-                $gap = $gaps[0];
-
-                if ($gap->isPoint() === false) {
-                    throw new \LogicException('Something went wrong');
+        foreach ($sensors as $sensor) {
+            foreach ($sensor->getPointsOnBorderPlusOne($searchRange) as $location) {
+                if ($this->isNotInRangeOfAnySensor($sensors, $location)) {
+                    return $this->calculateTuningSignal($location->x, $location->y);
                 }
-
-                return $this->calculateTuningSignal($gap->from, $line);
             }
         }
+
+        throw new \LogicException('Something went wrong');
     }
 
     /**
@@ -110,5 +103,19 @@ final class Solution implements Solver
     private function calculateTuningSignal(int $x, int $y): int
     {
         return $x * 4_000_000 + $y;
+    }
+
+    /**
+     * @param Sensor[] $sensors
+     */
+    private function isNotInRangeOfAnySensor(array $sensors, Location $location): bool
+    {
+        foreach ($sensors as $sensor) {
+            if ($sensor->canBeReachedBySensor($location)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
